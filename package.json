@@ -1,0 +1,32 @@
+{
+  "name": "cygnus",
+  "version": "0.0.1",
+  "description": "Cross-platform crossword application",
+  "main": "src/App.js",
+  "scripts": {
+    "test": "npm test",
+    "start": "electron src/App.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/avp/cygnus.git"
+  },
+  "keywords": [
+    "crossword",
+    "electron",
+    "cygnus"
+  ],
+  "author": "Aakash Patel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/avp/cygnus/issues"
+  },
+  "homepage": "https://github.com/avp/cygnus#readme",
+  "devDependencies": {
+    "typings": "^2.1.0"
+  },
+  "dependencies": {
+    "electron": "^1.6.2",
+    "fs": "0.0.1-security"
+  }
+}
