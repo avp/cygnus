@@ -1,11 +1,11 @@
-/// <reference path="../typings/index.d.ts" />
-
 import {
   BrowserWindow,
   Menu,
   dialog,
 } from 'electron';
-import {readFile} from 'fs';
+import { readFile } from 'fs';
+
+import Puzzle from './Puzzle';
 
 export default class Main {
   static mainWindow: Electron.BrowserWindow;
@@ -33,7 +33,7 @@ export default class Main {
         if (err) {
           return console.error(err);
         }
-        console.log(data);
+        Puzzle.loadFromFile(data);
       });
     });
   }
@@ -46,7 +46,7 @@ export default class Main {
           {
             label: 'Open',
             accelerator: 'CommandOrControl+O',
-            click:  Main.openFile
+            click: Main.openFile
           }
         ],
       },
@@ -56,7 +56,7 @@ export default class Main {
   }
 
   private static onReady() {
-    Main.mainWindow = new Main.BrowserWindow({width: 800, height: 600})
+    Main.mainWindow = new Main.BrowserWindow({ width: 800, height: 600 })
     Main.mainWindow.maximize();
     Main.mainWindow.loadURL('file://' + __dirname + '/index.html');
     Main.mainWindow.isFullScreen();
@@ -66,7 +66,7 @@ export default class Main {
 
   static main(
     app: Electron.App,
-    browserWindow: typeof BrowserWindow){
+    browserWindow: typeof BrowserWindow) {
     // we pass the Electron.App object and the
     // Electron.BrowserWindow into this function
     // so this class1 has no dependencies.  This
