@@ -10,12 +10,11 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true
   },
-  "include": [
-    "typings/index.d.ts"
-  ],
   "files": [
+    "typings/index.d.ts",
     "src/App.ts",
-    "src/Main.ts"
+    "src/Main.ts",
+    "src/Puzzle.ts"
   ],
   "exclude": [
     "node_modules"
