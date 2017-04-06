@@ -81,6 +81,7 @@ export default class Puzzle {
       let numRow: number[] = [];
       for (let c = 0; c < width; ++c) {
         if (grid[r][c] === null) {
+          numRow.push(null);
           continue;
         }
         let a: boolean = c === 0 || grid[r][c - 1] === null;
@@ -108,8 +109,9 @@ export default class Puzzle {
             offset += clue.clue.length + 1;
             down.push(clue);
           }
+        } else {
+          numRow.push(null);
         }
-        numRow.push(null);
       }
       nums.push(numRow);
     }
