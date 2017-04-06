@@ -9,15 +9,15 @@ interface Clue {
 }
 
 export default class Puzzle {
-  private width: number;
-  private height: number;
+  public width: number;
+  public height: number;
 
-  private solution: string[][];
-  private grid: string[][];
-  private nums: number[][];
+  public solution: string[][];
+  public grid: string[][];
+  public nums: number[][];
 
-  private across: Clue[];
-  private down: Clue[];
+  public across: Clue[];
+  public down: Clue[];
 
   private static readGrid(buf: Buffer, width: number,
                           height: number): string[][] {
@@ -64,7 +64,6 @@ export default class Puzzle {
     let grid = Puzzle.readGrid(
         buf.slice(0x34 + width * height, 0x34 + 2 * width * height), width,
         height);
-    console.log(grid);
 
     let offset = 0x34 + 2 * width * height;
     let title = Puzzle.readString(buf, offset);

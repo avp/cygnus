@@ -12,6 +12,7 @@
   },
   "files": [
     "typings/index.d.ts",
+    "src/renderer.ts",
     "src/App.ts",
     "src/Main.ts",
     "src/Puzzle.ts"

@@ -1,0 +1,31 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #d0d0d0;
+  font-family: sans-serif;
+}
+
+.puzzle {
+  width: 75vw;
+  height: 75vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.puzzle table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.puzzle .puzzle-cell {
+  padding: 0;
+  text-align: center;
+  border: 1px solid #000;
+}
+
+.puzzle .puzzle-cell-black {
+  background: #000;
+}

@@ -12,6 +12,8 @@ export default class Main {
   static application: Electron.App;
   static BrowserWindow;
 
+  static puzzle: Puzzle;
+
   private static onWindowAllClosed() {
     if (process.platform !== 'darwin') {
       Main.application.quit();
@@ -33,7 +35,8 @@ export default class Main {
         if (err) {
           return console.error(err);
         }
-        Puzzle.loadFromFile(data);
+        Main.puzzle = Puzzle.loadFromFile(data);
+        Main.mainWindow.webContents.send('loadFile', Main.puzzle);
       });
     });
   }
@@ -61,6 +64,7 @@ export default class Main {
     Main.mainWindow.loadURL('file://' + __dirname + '/index.html');
     Main.mainWindow.isFullScreen();
     Main.mainWindow.on('closed', Main.onClose);
+    Main.mainWindow.webContents.openDevTools();
     Main.makeAppMenu();
   }
 
