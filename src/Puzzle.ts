@@ -18,6 +18,7 @@ export default class Puzzle {
 
   public across: Clue[];
   public down: Clue[];
+  public clues: { across: Clue[], down: Clue[] };
 
   private static readGrid(buf: Buffer, width: number,
                           height: number): string[][] {
@@ -121,7 +122,11 @@ export default class Puzzle {
       height: height,
       solution: solution,
       grid: grid,
-      nums: nums
+      nums: nums,
+      clues: {
+        across: across,
+        down: down,
+      },
     });
   }
 
@@ -131,5 +136,6 @@ export default class Puzzle {
     this.solution = opts.solution;
     this.grid = opts.grid;
     this.nums = opts.nums;
+    this.clues = opts.clues;
   }
 }

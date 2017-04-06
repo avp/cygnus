@@ -23,13 +23,14 @@ export default class Renderer {
           if (puzzle.nums[r][c] !== null) {
             let num = document.createElement('span');
             num.className = 'puzzle-cell-num';
-            console.log(r, c, puzzle.nums[r][c]);
             num.innerHTML = String(puzzle.nums[r][c]);
             cell.appendChild(num);
           }
         }
-        cell.style.height = String(puzzleDiv.clientHeight / puzzle.height) + 'px';
-        cell.style.width = String(puzzleDiv.clientWidth / puzzle.width) + 'px';
+        cell.style.height =
+          String(puzzleDiv.clientHeight / puzzle.height) + 'px';
+        cell.style.width =
+          String(puzzleDiv.clientWidth / puzzle.width) + 'px';
         row.appendChild(cell);
       }
       tableBody.appendChild(row);
@@ -38,8 +39,30 @@ export default class Renderer {
     table.appendChild(tableBody);
     puzzleDiv.appendChild(table);
   }
+
+  public static renderClues(puzzle: Puzzle) {
+    let acrossDiv = document.getElementById('clues-across');
+    let downDiv = document.getElementById('clues-down');
+
+    for (let i = 0; i < puzzle.clues.across.length; ++i) {
+      let span = document.createElement('span');
+      span.innerHTML =
+        puzzle.clues.across[i].num + '. ' + puzzle.clues.across[i].clue;
+      span.className = 'clue';
+      acrossDiv.appendChild(span);
+    }
+
+    for (let i = 0; i < puzzle.clues.down.length; ++i) {
+      let span = document.createElement('span');
+      span.innerHTML =
+        puzzle.clues.down[i].num + '. ' + puzzle.clues.down[i].clue;
+      span.className = 'clue';
+      downDiv.appendChild(span);
+    }
+  }
 }
 
 ipcRenderer.on('loadFile', (e, puzzle: Puzzle) => {
   Renderer.renderPuzzle(puzzle);
+  Renderer.renderClues(puzzle);
 });

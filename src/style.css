@@ -4,17 +4,25 @@ html {
 }
 
 body {
-  background: #d0d0d0;
   font-family: sans-serif;
+  height: 100%;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  background: #d0d0d0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .puzzle {
+  flex-grow: 1;
   margin: 0 auto;
-  width: 75vmin;
-  height: 75vmin;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 85vmin;
+  height: 85vmin;
+  padding: 10px;
 }
 
 .puzzle table {
@@ -42,4 +50,13 @@ body {
 
 .puzzle .puzzle-cell-white {
   background: #fff;
+}
+
+.clues {
+  width: 300px;
+  background: #fff;
+}
+
+.clues .clue {
+  display: block;
 }
