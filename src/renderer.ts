@@ -1,4 +1,5 @@
 import { ipcRenderer } from 'electron';
+import * as _ from 'lodash';
 import Main from './Main';
 import Puzzle from './Puzzle';
 
@@ -113,10 +114,21 @@ export default class Renderer {
   }
 
   public static refresh() {
+    _(document.getElementsByClassName('puzzle-cell-current')).eachRight(
+      (e) => {
+        e.classList.remove('puzzle-cell-current');
+      }
+    );
+    _(document.getElementsByClassName('puzzle-cell-current-clue')).eachRight(
+      (e) => {
+        e.classList.remove('puzzle-cell-current-clue');
+      }
+    );
+
     let r = Renderer.cursor.row;
     let c = Renderer.cursor.col;
     Renderer.cells[r][c].classList.add('puzzle-cell-current');
-    if (Renderer.cursor.row === Direction.ACROSS) {
+    if (Renderer.cursor.dir === Direction.ACROSS) {
       for (let i = 1; i < Renderer.puzzle.width; ++i) {
         if (c - i < 0 || Renderer.puzzle.grid[r][c-i] === null) {
           break;
@@ -154,17 +166,96 @@ export default class Renderer {
       }
     }
   }
+
+  public static upKey() {
+    let cursor = Renderer.cursor;
+    const puzzle = Renderer.puzzle;
+    if (cursor.dir === Direction.ACROSS) {
+      cursor.dir = Direction.DOWN;
+    } else {
+      do {
+        if (cursor.row > 0) {
+          --cursor.row;
+        } else {
+          break;
+        }
+      } while (puzzle.grid[cursor.row][cursor.col] === null);
+    }
+    Renderer.refresh();
+  }
+
+  public static downKey() {
+    let cursor = Renderer.cursor;
+    const puzzle = Renderer.puzzle;
+    if (cursor.dir === Direction.ACROSS) {
+      cursor.dir = Direction.DOWN;
+    } else {
+      do {
+        if (cursor.row < puzzle.height - 1) {
+          ++cursor.row;
+        } else {
+          break;
+        }
+      } while (puzzle.grid[cursor.row][cursor.col] === null);
+    }
+    Renderer.refresh();
+  }
+
+  public static rightKey() {
+    let cursor = Renderer.cursor;
+    const puzzle = Renderer.puzzle;
+    if (cursor.dir === Direction.DOWN) {
+      cursor.dir = Direction.ACROSS;
+    } else {
+      do {
+        if (cursor.col < puzzle.width - 1) {
+          ++cursor.col;
+        } else {
+          break;
+        }
+      } while (puzzle.grid[cursor.row][cursor.col] === null);
+    }
+    Renderer.refresh();
+  }
+
+  public static leftKey() {
+    let cursor = Renderer.cursor;
+    const puzzle = Renderer.puzzle;
+    if (cursor.dir === Direction.DOWN) {
+      cursor.dir = Direction.ACROSS;
+    } else {
+      do {
+        if (cursor.col > 0) {
+          --cursor.col;
+        } else {
+          break;
+        }
+      } while (puzzle.grid[cursor.row][cursor.col] === null);
+    }
+    Renderer.refresh();
+  }
+
+
 }
 
 ipcRenderer.on('loadFile', (e, puzzle: Puzzle) => {
   Renderer.renderPuzzle(puzzle);
 });
 
-window.onkeyup = (e) => {
+window.onkeydown = (e) => {
+  console.log(e);
   switch (e.keyCode) {
+    case 37: // left
+      Renderer.leftKey();
+      break;
     case 38: // up
+      Renderer.upKey();
+      break;
     case 39: // right
+      Renderer.rightKey();
+      break;
     case 40: // down
-    case 41: // left
+      Renderer.downKey();
+      break;
   }
 };

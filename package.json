@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "electron": "^1.6.2",
-    "fs": "0.0.1-security"
+    "fs": "0.0.1-security",
+    "lodash": "^4.17.4"
   }
 }
