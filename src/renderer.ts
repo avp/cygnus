@@ -42,23 +42,30 @@ export default class Renderer {
 
   public static renderClues(puzzle: Puzzle) {
     let acrossDiv = document.getElementById('clues-across');
+    acrossDiv.innerHTML = '';
+
     let downDiv = document.getElementById('clues-down');
+    downDiv.innerHTML = '';
 
+    let acrossList = document.createElement('ol');
     for (let i = 0; i < puzzle.clues.across.length; ++i) {
-      let span = document.createElement('span');
-      span.innerHTML =
-        puzzle.clues.across[i].num + '. ' + puzzle.clues.across[i].clue;
-      span.className = 'clue';
-      acrossDiv.appendChild(span);
+      let li = document.createElement('li');
+      li.setAttribute('value', String(puzzle.clues.across[i].num));
+      li.innerHTML = puzzle.clues.across[i].clue;
+      li.classList.add('clue');
+      acrossList.appendChild(li);
     }
+    acrossDiv.appendChild(acrossList);
 
+    let downList = document.createElement('ol');
     for (let i = 0; i < puzzle.clues.down.length; ++i) {
-      let span = document.createElement('span');
-      span.innerHTML =
-        puzzle.clues.down[i].num + '. ' + puzzle.clues.down[i].clue;
-      span.className = 'clue';
-      downDiv.appendChild(span);
+      let li = document.createElement('li');
+      li.setAttribute('value', String(puzzle.clues.down[i].num));
+      li.innerHTML = puzzle.clues.down[i].clue;
+      li.classList.add('clue');
+      downList.appendChild(li);
     }
+    downDiv.appendChild(downList);
   }
 }
 

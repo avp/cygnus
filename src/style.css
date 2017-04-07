@@ -7,6 +7,7 @@ body {
   font-family: sans-serif;
   height: 100%;
   margin: 0;
+  overflow: hidden;
 }
 
 .container {
@@ -52,11 +53,38 @@ body {
   background: #fff;
 }
 
-.clues {
+.clues-container {
   width: 300px;
   background: #fff;
+  border: 1px solid black;
 }
 
-.clues .clue {
-  display: block;
+.clues-container .clues-heading {
+  background: #d0d0d0;
+  padding: 5px;
+  border-bottom: 1px solid black;
+  text-align: center;
+  font-variant: small-caps;
+}
+
+.clues-container .clues-scroll-container {
+  position: relative;
+  height: 100%;
+}
+
+.clues-container .clues {
+  overflow: scroll;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.clues-container .clues ol {
+  margin: 10px 0 20px 0;
+}
+
+.clues-container .clues li {
+  margin: 2px 0;
 }

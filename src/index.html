@@ -6,9 +6,19 @@
   </head>
   <body>
     <div class="container">
-      <div class="clues" id="clues-across"></div>
+      <div class="clues-container">
+        <div class="clues-heading">Across</div>
+        <div class="clues-scroll-container">
+          <div id="clues-across" class="clues"></div>
+        </div>
+      </div>
       <div class="puzzle" id="puzzle"></div>
-      <div class="clues" id="clues-down"></div>
+      <div class="clues-container">
+        <div class="clues-heading">Down</div>
+        <div class="clues-scroll-container">
+          <div id="clues-down" class="clues"></div>
+        </div>
+      </div>
     </div>
 
     <script type="text/javascript">require('./renderer.js');</script>
