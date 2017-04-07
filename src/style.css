@@ -53,6 +53,14 @@ body {
   background: #fff;
 }
 
+.puzzle .puzzle-cell-current {
+  background: #0099dd;
+}
+
+.puzzle .puzzle-cell-current-clue {
+  background: #e0e0e0;
+}
+
 .clues-container {
   width: 300px;
   background: #fff;
