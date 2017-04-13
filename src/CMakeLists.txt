@@ -11,10 +11,15 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Gui REQUIRED)
 
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE
+add_compile_options(-std=c++11)
+
+set(SOURCES
   main.cpp
   MainWindow.cpp
+  Puzzle.cpp
 )
+
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
   Qt5::Core
