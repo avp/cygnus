@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <QString>
+#include <vector>
 
 struct Clue {
   QString clue;
@@ -10,6 +11,8 @@ struct Clue {
   uint32_t col;
   uint32_t num;
 };
+
+template <typename T> using Grid = std::vector<std::vector<T>>;
 
 class Puzzle {
 public:

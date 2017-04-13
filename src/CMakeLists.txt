@@ -11,7 +11,7 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Gui REQUIRED)
 
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 set(SOURCES
   main.cpp
