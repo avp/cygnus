@@ -19,10 +19,21 @@ set(SOURCES
   Puzzle.cpp
 )
 
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES})
+if (APPLE)
+  set(BUNDLE_TYPE MACOSX_BUNDLE)
+endif()
 
+add_executable(${PROJECT_NAME} ${BUNDLE_TYPE} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
   Qt5::Core
   Qt5::Widgets
   Qt5::Gui
 )
+
+if (APPLE)
+add_custom_target(run
+  COMMAND ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
+  DEPENDS ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
+  WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+)
+endif()
