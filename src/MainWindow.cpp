@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
 
 #include <QDebug>
 #include <QDir>
@@ -9,8 +8,7 @@
 /// Currently loaded puzzle.
 std::unique_ptr<Puzzle> MainWindow::puzzle;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   QHBoxLayout *layout = new QHBoxLayout{};
 
   createActions();
@@ -35,8 +33,6 @@ MainWindow::MainWindow(QWidget *parent)
   layout->addWidget(downWidget);
   window->setLayout(layout);
 }
-
-MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::reloadPuzzle() {
   acrossWidget->clear();
