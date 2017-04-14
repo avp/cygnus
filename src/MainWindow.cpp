@@ -56,6 +56,7 @@ QListWidget *MainWindow::createClueWidget() {
   result->setFrameStyle(QFrame::NoFrame);
   result->setSizePolicy(cluesSize);
   result->setWordWrap(true);
+  result->setFocusPolicy(Qt::NoFocus);
   return result;
 }
 
