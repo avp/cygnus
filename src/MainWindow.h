@@ -35,6 +35,8 @@ private:
   void createActions();
   void createMenus();
 
+  QListWidget *createClueWidget();
+
   void reloadPuzzle();
 };
 

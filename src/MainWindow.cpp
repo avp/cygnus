@@ -20,12 +20,14 @@ MainWindow::MainWindow(QWidget *parent)
   QWidget *window = new QWidget();
   setCentralWidget(window);
 
-  acrossWidget = new QListWidget{};
-  acrossWidget->setFrameStyle(QFrame::NoFrame);
-  downWidget = new QListWidget{};
-  downWidget->setFrameStyle(QFrame::NoFrame);
+  QSizePolicy puzzleSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
+  puzzleSize.setHorizontalStretch(2);
+
+  acrossWidget = createClueWidget();
+  downWidget = createClueWidget();
 
   puzzleWidget = new QWidget{};
+  puzzleWidget->setSizePolicy(puzzleSize);
 
   // Set QWidget as the central layout of the main window
   layout->addWidget(acrossWidget);
@@ -39,12 +41,22 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::reloadPuzzle() {
   acrossWidget->clear();
   for (const auto &clue : puzzle->getAcross()) {
-    acrossWidget->addItem(clue.clue);
+    acrossWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
   downWidget->clear();
   for (const auto &clue : puzzle->getDown()) {
-    downWidget->addItem(clue.clue);
+    downWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
+}
+
+QListWidget *MainWindow::createClueWidget() {
+  auto result = new QListWidget{};
+  QSizePolicy cluesSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
+  cluesSize.setHorizontalStretch(1);
+  result->setFrameStyle(QFrame::NoFrame);
+  result->setSizePolicy(cluesSize);
+  result->setWordWrap(true);
+  return result;
 }
 
 void MainWindow::createActions() {
