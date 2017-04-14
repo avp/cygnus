@@ -31,9 +31,13 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 if (APPLE)
-add_custom_target(run
-  COMMAND ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
-  DEPENDS ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
-  WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
-)
+  set_target_properties(
+    ${PROJECT_NAME} PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/Info.plist.in
+  )
+
+  add_custom_target(run
+    COMMAND ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
+    DEPENDS ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
+  )
 endif()
