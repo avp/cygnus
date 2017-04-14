@@ -15,8 +15,8 @@ static inline QString readString(const QByteArray &puzFile,
 }
 
 static inline Grid<char> readGrid(const QByteArray &puzFile,
-                                  const uint32_t offset, const uint8_t width,
-                                  const uint8_t height) {
+                                  const uint32_t offset, const uint8_t height,
+                                  const uint8_t width) {
   Grid<char> grid;
   grid.reserve(height);
 
@@ -52,10 +52,10 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   uint8_t width = puzFile[0x2c];
   uint8_t height = puzFile[0x2d];
-  uint8_t numClues = readUInt16LE(puzFile, 0x2e);
+  uint16_t numClues = readUInt16LE(puzFile, 0x2e);
 
-  Grid<char> solution = readGrid(puzFile, 0x34, width, height);
-  Grid<char> grid = readGrid(puzFile, 0x34 + (width * height), width, height);
+  Grid<char> solution = readGrid(puzFile, 0x34, height, width);
+  Grid<char> grid = readGrid(puzFile, 0x34 + (width * height), height, width);
 
   uint32_t offset = 0x34 + (2 * width * height);
   QString title = readString(puzFile, offset);
@@ -82,7 +82,6 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       bool d = r == 0 || grid[r - 1][c] == '\0';
       if (a || d) {
         numRow.push_back(num);
-        ++num;
         if (a) {
           Clue clue{readString(puzFile, offset), r, c, num};
           offset += clue.clue.size() + 1;
@@ -93,6 +92,7 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
           offset += clue.clue.size() + 1;
           down.push_back(clue);
         }
+        ++num;
       } else {
         numRow.push_back(0);
       }
@@ -100,7 +100,11 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
     nums.push_back(numRow);
   }
 
-  return nullptr;
+  return new Puzzle(height, width, across, down, solution, grid, nums);
 }
 
-Puzzle::Puzzle() {}
+Puzzle::Puzzle(uint8_t height, uint8_t width, std::vector<Clue> across,
+               std::vector<Clue> down, Grid<char> solution, Grid<char> grid,
+               Grid<uint32_t> nums)
+    : height_(height), width_(width), across_(across), down_(down),
+      solution_(solution), grid_(grid), nums_(nums) {}

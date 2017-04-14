@@ -3,7 +3,7 @@
 
 #include "Puzzle.h"
 
-#include <QMainWindow>
+#include <QtWidgets>
 
 namespace Ui {
 class MainWindow;
@@ -24,11 +24,18 @@ private:
 
   static std::unique_ptr<Puzzle> puzzle;
 
+  QMenu *fileMenu;
+  QAction *openAct;
+
+  QListWidget *acrossWidget;
+  QListWidget *downWidget;
+
+  QWidget *puzzleWidget;
+
   void createActions();
   void createMenus();
 
-  QMenu *fileMenu;
-  QAction *openAct;
+  void reloadPuzzle();
 };
 
 #endif // MAINWINDOW_H
