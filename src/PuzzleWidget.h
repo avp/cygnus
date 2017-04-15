@@ -5,13 +5,15 @@
 
 #include <QtWidgets>
 
+namespace cygnus {
+
 class CellWidget : public QFrame {
   Q_OBJECT
 public:
   explicit CellWidget(bool isBlack, uint32_t num, QWidget *parent = nullptr);
 };
 
-class PuzzleWidget : public QWidget {
+class PuzzleWidget : public QFrame {
   Q_OBJECT
 public:
   explicit PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
@@ -21,5 +23,7 @@ private:
   QGridLayout *gridLayout_;
   Grid<CellWidget *> cells_;
 };
+
+} // namespace cygnus
 
 #endif

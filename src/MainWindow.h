@@ -6,6 +6,8 @@
 
 #include <QtWidgets>
 
+namespace cygnus {
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
@@ -35,5 +37,7 @@ private:
 
   void reloadPuzzle();
 };
+
+} // namespace cygnus
 
 #endif // MAINWINDOW_H

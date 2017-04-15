@@ -1,5 +1,7 @@
 #include "PuzzleWidget.h"
 
+namespace cygnus {
+
 CellWidget::CellWidget(bool isBlack, uint32_t num, QWidget *parent)
     : QFrame(parent) {
   QGridLayout *layout = new QGridLayout{};
@@ -8,15 +10,15 @@ CellWidget::CellWidget(bool isBlack, uint32_t num, QWidget *parent)
   pal.setColor(QPalette::Background, isBlack ? Qt::black : Qt::white);
   setAutoFillBackground(true);
   setPalette(pal);
-  setFrameStyle(QFrame::Box | QFrame::Plain);
+  setFrameStyle(QFrame::Box);
 
   QLabel *numLabel = new QLabel{};
   numLabel->setText(num == 0 ? "" : QString("%1").arg(num));
-  numLabel->setContentsMargins(0, 0, 0, 0);
+  numLabel->setContentsMargins(1, 1, 1, 1);
   numLabel->setMargin(0);
   numLabel->setAlignment(Qt::AlignCenter);
   auto numFont = numLabel->font();
-  numFont.setPointSize(numFont.pointSize() - 2);
+  numFont.setPointSize(numFont.pointSize() - 3);
   numLabel->setFont(numFont);
 
   QLabel *entryLabel = new QLabel{};
@@ -37,7 +39,8 @@ CellWidget::CellWidget(bool isBlack, uint32_t num, QWidget *parent)
 
 PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                            QWidget *parent)
-    : QWidget(parent) {
+    : QFrame(parent) {
+  setFrameStyle(QFrame::Box);
 
   gridLayout_ = new QGridLayout{};
 
@@ -59,5 +62,9 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   }
 
   gridLayout_->setSpacing(0);
+  gridLayout_->setContentsMargins(0, 0, 0, 0);
+
   setLayout(gridLayout_);
 }
+
+} // namespace cygnus

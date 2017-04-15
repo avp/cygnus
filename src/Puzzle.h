@@ -5,6 +5,8 @@
 #include <QString>
 #include <vector>
 
+namespace cygnus {
+
 struct Clue {
   QString clue;
   uint32_t row;
@@ -39,5 +41,7 @@ public:
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<uint32_t> &getNums() const { return nums_; }
 };
+
+} // namespace cygnus
 
 #endif

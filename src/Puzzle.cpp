@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+namespace cygnus {
+
 const static char *MAGIC{"\x41\x43\x52\x4f\x53\x53\x26\x44\x4f\x57\x4e"};
 
 static inline uint16_t readUInt16LE(const QByteArray &puzFile,
@@ -108,3 +110,5 @@ Puzzle::Puzzle(uint8_t height, uint8_t width, std::vector<Clue> across,
                Grid<uint32_t> nums)
     : height_(height), width_(width), across_(across), down_(down),
       solution_(solution), grid_(grid), nums_(nums) {}
+
+} // namespace cygnus

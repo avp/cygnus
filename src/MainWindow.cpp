@@ -5,6 +5,8 @@
 #include <QFileDialog>
 #include <QtWidgets>
 
+namespace cygnus {
+
 /// Currently loaded puzzle.
 std::unique_ptr<Puzzle> MainWindow::puzzle;
 
@@ -94,3 +96,5 @@ void MainWindow::createMenus() {
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(openAct);
 }
+
+} // namespace cygnus
