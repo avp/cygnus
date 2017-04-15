@@ -9,13 +9,14 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Gui REQUIRED)
 
 add_compile_options(-std=c++14)
 
 set(SOURCES
   main.cpp
   MainWindow.cpp
+  PuzzleWidget.cpp
+
   Puzzle.cpp
 )
 
@@ -27,7 +28,6 @@ add_executable(${PROJECT_NAME} ${BUNDLE_TYPE} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
   Qt5::Core
   Qt5::Widgets
-  Qt5::Gui
 )
 
 if (APPLE)
@@ -38,6 +38,6 @@ if (APPLE)
 
   add_custom_target(run
     COMMAND ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
-    DEPENDS ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
+    DEPENDS ${PROJECT_NAME}
   )
 endif()

@@ -15,21 +15,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   createMenus();
 
   // Set layout in QWidget
-  QWidget *window = new QWidget();
+  QWidget *window = new QWidget(this);
   setCentralWidget(window);
 
-  QSizePolicy puzzleSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
-  puzzleSize.setHorizontalStretch(2);
+  QSizePolicy puzzleContainerSize{QSizePolicy::Preferred,
+                                  QSizePolicy::Preferred};
+  puzzleContainerSize.setHorizontalStretch(2);
 
   acrossWidget = createClueWidget();
   downWidget = createClueWidget();
 
-  puzzleWidget = new QWidget{};
-  puzzleWidget->setSizePolicy(puzzleSize);
+  puzzleContainer = new QWidget{};
+  puzzleContainerLayout = new QHBoxLayout{};
+  puzzleContainer->setSizePolicy(puzzleContainerSize);
+  puzzleContainer->setLayout(puzzleContainerLayout);
 
   // Set QWidget as the central layout of the main window
   layout->addWidget(acrossWidget);
-  layout->addWidget(puzzleWidget);
+  layout->addWidget(puzzleContainer);
   layout->addWidget(downWidget);
   window->setLayout(layout);
 }
@@ -43,6 +46,13 @@ void MainWindow::reloadPuzzle() {
   for (const auto &clue : puzzle->getDown()) {
     downWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
+
+  if (puzzleWidget) {
+    delete puzzleWidget;
+  }
+  puzzleWidget = new PuzzleWidget(puzzleContainer, puzzle);
+  puzzleContainerLayout->addWidget(puzzleWidget);
+  puzzleContainerLayout->setAlignment(puzzleWidget, Qt::AlignCenter);
 }
 
 QListWidget *MainWindow::createClueWidget() {

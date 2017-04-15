@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "Puzzle.h"
+#include "PuzzleWidget.h"
 
 #include <QtWidgets>
 
@@ -23,7 +24,9 @@ private:
   QListWidget *acrossWidget;
   QListWidget *downWidget;
 
-  QWidget *puzzleWidget;
+  QWidget *puzzleContainer;
+  QHBoxLayout *puzzleContainerLayout;
+  PuzzleWidget *puzzleWidget;
 
   void createActions();
   void createMenus();
