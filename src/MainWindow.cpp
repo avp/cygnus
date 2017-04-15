@@ -10,6 +10,9 @@ namespace cygnus {
 /// Currently loaded puzzle.
 std::unique_ptr<Puzzle> MainWindow::puzzle;
 
+/// Cursor on current puzzle. Meaningless if puzzle is null.
+Cursor MainWindow::cursor;
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   QHBoxLayout *layout = new QHBoxLayout{};
 
@@ -55,6 +58,18 @@ void MainWindow::reloadPuzzle() {
   puzzleWidget = new PuzzleWidget{puzzle};
   puzzleContainerLayout->addWidget(puzzleWidget);
   puzzleContainerLayout->setAlignment(puzzleWidget, Qt::AlignCenter);
+
+  // Set cursor to first non-blank square.
+  const auto &across = puzzle->getAcross();
+  if (across.size() > 0) {
+    cursor.dir = Direction::ACROSS;
+    cursor.row = across[0].row;
+    cursor.col = across[0].col;
+    qDebug() << "Cursor:" << cursor.row << cursor.col;
+  } else {
+    qCritical() << "No across clues in puzzle";
+    return;
+  }
 }
 
 QListWidget *MainWindow::createClueWidget() {

@@ -8,6 +8,17 @@
 
 namespace cygnus {
 
+enum class Direction {
+  ACROSS,
+  DOWN,
+};
+
+struct Cursor {
+  uint8_t row;
+  uint8_t col;
+  Direction dir;
+};
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
@@ -19,6 +30,7 @@ private slots:
 
 private:
   static std::unique_ptr<Puzzle> puzzle;
+  static Cursor cursor;
 
   QMenu *fileMenu;
   QAction *openAct;
