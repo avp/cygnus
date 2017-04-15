@@ -2,13 +2,38 @@
 
 CellWidget::CellWidget(QWidget *parent, bool isBlack, uint32_t num)
     : QFrame(parent) {
-  QHBoxLayout *layout = new QHBoxLayout{};
+  QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
   auto pal = palette();
   pal.setColor(QPalette::Background, isBlack ? Qt::black : Qt::white);
   setAutoFillBackground(true);
   setPalette(pal);
   setFrameStyle(QFrame::Box | QFrame::Plain);
+
+  QLabel *numLabel = new QLabel{};
+  numLabel->setText(num == 0 ? "" : QString("%1").arg(num));
+  numLabel->setContentsMargins(0, 0, 0, 0);
+  numLabel->setMargin(0);
+  numLabel->setAlignment(Qt::AlignCenter);
+  auto numFont = numLabel->font();
+  numFont.setPointSize(numFont.pointSize() - 2);
+  numLabel->setFont(numFont);
+
+  QLabel *entryLabel = new QLabel{};
+  entryLabel->setContentsMargins(0, 0, 0, 0);
+  entryLabel->setMargin(0);
+  entryLabel->setAlignment(Qt::AlignCenter);
+  auto entryFont = entryLabel->font();
+  entryFont.setPointSize(entryFont.pointSize() + 2);
+  entryFont.setBold(true);
+  entryLabel->setFont(entryFont);
+
+  layout->addWidget(numLabel, 0, 0, 1, 1);
+  layout->addWidget(entryLabel, 1, 0, 3, 4);
+  layout->setContentsMargins(0, 0, 0, 0);
+
+  layout->setSpacing(0);
+
   show();
 }
 
@@ -27,7 +52,7 @@ PuzzleWidget::PuzzleWidget(QWidget *parent,
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
       auto cell = new CellWidget(this, puzzle->getGrid()[r][c] == '\0',
                                  puzzle->getNums()[r][c]);
-      cell->setGeometry(0, 0, 30, 30);
+      cell->setFixedSize(40, 40);
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);
