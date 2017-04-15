@@ -48,7 +48,7 @@ void MainWindow::reloadPuzzle() {
   }
 
   if (puzzleWidget) {
-    delete puzzleWidget;
+    puzzleWidget->deleteLater();
   }
   puzzleWidget = new PuzzleWidget{puzzle};
   puzzleContainerLayout->addWidget(puzzleWidget);
