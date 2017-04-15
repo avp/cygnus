@@ -78,17 +78,17 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
       puzzleWidget->deselectPosition(cursor.row, cursor.col + i);
     }
     for (uint8_t i = 0;
-         cursor.col - i >= 0 && grid[cursor.row][cursor.col - i] != '\0'; --i) {
+         cursor.col - i >= 0 && grid[cursor.row][cursor.col - i] != '\0'; ++i) {
       puzzleWidget->deselectPosition(cursor.row, cursor.col - i);
     }
   } else {
     for (uint8_t i = 0; cursor.row + i < puzzle->getHeight() &&
                         grid[cursor.row + i][cursor.col] != '\0';
          ++i) {
-      puzzleWidget->deselectPosition(row, cursor.col + i);
+      puzzleWidget->deselectPosition(cursor.row + i, cursor.col);
     }
     for (uint8_t i = 0;
-         cursor.row - i >= 0 && grid[cursor.row - i][cursor.col] != '\0'; --i) {
+         cursor.row - i >= 0 && grid[cursor.row - i][cursor.col] != '\0'; ++i) {
       puzzleWidget->deselectPosition(cursor.row - i, cursor.col);
     }
   }
@@ -99,15 +99,15 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
          col + i < puzzle->getWidth() && grid[row][col + i] != '\0'; ++i) {
       puzzleWidget->selectPosition(row, col + i);
     }
-    for (uint8_t i = 0; col - i >= 0 && grid[row][col - i] != '\0'; --i) {
+    for (uint8_t i = 0; col - i >= 0 && grid[row][col - i] != '\0'; ++i) {
       puzzleWidget->selectPosition(row, col - i);
     }
   } else {
     for (uint8_t i = 0;
          row + i < puzzle->getHeight() && grid[row + i][col] != '\0'; ++i) {
-      puzzleWidget->selectPosition(row, col + i);
+      puzzleWidget->selectPosition(row + i, col);
     }
-    for (uint8_t i = 0; row - i >= 0 && grid[row - i][col] != '\0'; --i) {
+    for (uint8_t i = 0; row - i >= 0 && grid[row - i][col] != '\0'; ++i) {
       puzzleWidget->selectPosition(row - i, col);
     }
   }
@@ -142,7 +142,7 @@ void MainWindow::open() {
                                    tr("Across Lite File (*.puz)"));
 
   if (!fileName.isEmpty()) {
-    qDebug() << fileName;
+    qDebug() << "Opening file:" << fileName;
     QFile file{fileName};
     if (!file.open(QIODevice::ReadOnly)) {
       return;
@@ -156,6 +156,91 @@ void MainWindow::open() {
 void MainWindow::createMenus() {
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(openAct);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+  switch (event->key()) {
+  case Qt::Key_Up:
+    keyUp();
+    break;
+  case Qt::Key_Down:
+    keyDown();
+    break;
+  case Qt::Key_Left:
+    keyLeft();
+    break;
+  case Qt::Key_Right:
+    keyRight();
+    break;
+  }
+}
+
+void MainWindow::keyUp() {
+  const auto &grid = puzzle->getGrid();
+  if (cursor.dir == Direction::ACROSS) {
+    setCursor(cursor.row, cursor.col, Direction::DOWN);
+    return;
+  }
+  uint8_t row = cursor.row;
+  do {
+    if (row > 0) {
+      --row;
+    } else {
+      return;
+    }
+  } while (grid[row][cursor.col] == '\0');
+  setCursor(row, cursor.col, Direction::DOWN);
+}
+
+void MainWindow::keyDown() {
+  const auto &grid = puzzle->getGrid();
+  if (cursor.dir == Direction::ACROSS) {
+    setCursor(cursor.row, cursor.col, Direction::DOWN);
+    return;
+  }
+  uint8_t row = cursor.row;
+  do {
+    if (row < puzzle->getHeight() - 1) {
+      ++row;
+    } else {
+      return;
+    }
+  } while (grid[row][cursor.col] == '\0');
+  setCursor(row, cursor.col, Direction::DOWN);
+}
+
+void MainWindow::keyLeft() {
+  const auto &grid = puzzle->getGrid();
+  if (cursor.dir == Direction::DOWN) {
+    setCursor(cursor.row, cursor.col, Direction::ACROSS);
+    return;
+  }
+  uint8_t col = cursor.col;
+  do {
+    if (col > 0) {
+      --col;
+    } else {
+      return;
+    }
+  } while (grid[cursor.row][col] == '\0');
+  setCursor(cursor.row, col, Direction::ACROSS);
+}
+
+void MainWindow::keyRight() {
+  const auto &grid = puzzle->getGrid();
+  if (cursor.dir == Direction::DOWN) {
+    setCursor(cursor.row, cursor.col, Direction::ACROSS);
+    return;
+  }
+  uint8_t col = cursor.col;
+  do {
+    if (col < puzzle->getWidth() - 1) {
+      ++col;
+    } else {
+      return;
+    }
+  } while (grid[cursor.row][col] == '\0');
+  setCursor(cursor.row, col, Direction::ACROSS);
 }
 
 } // namespace cygnus

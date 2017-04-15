@@ -33,6 +33,8 @@ private:
   std::unique_ptr<Puzzle> puzzle;
   Cursor cursor;
 
+  void reloadPuzzle();
+
   QMenu *fileMenu;
   QAction *openAct;
 
@@ -48,7 +50,11 @@ private:
 
   QListWidget *createClueWidget();
 
-  void reloadPuzzle();
+  void keyPressEvent(QKeyEvent *event);
+  void keyUp();
+  void keyDown();
+  void keyLeft();
+  void keyRight();
 };
 
 } // namespace cygnus
