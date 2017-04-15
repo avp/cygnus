@@ -8,13 +8,14 @@
 class CellWidget : public QFrame {
   Q_OBJECT
 public:
-  explicit CellWidget(QWidget *parent, bool isBlack, uint32_t num);
+  explicit CellWidget(bool isBlack, uint32_t num, QWidget *parent = nullptr);
 };
 
 class PuzzleWidget : public QWidget {
   Q_OBJECT
 public:
-  explicit PuzzleWidget(QWidget *parent, const std::unique_ptr<Puzzle> &puzzle);
+  explicit PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
+                        QWidget *parent = nullptr);
 
 private:
   QGridLayout *gridLayout_;

@@ -50,7 +50,7 @@ void MainWindow::reloadPuzzle() {
   if (puzzleWidget) {
     delete puzzleWidget;
   }
-  puzzleWidget = new PuzzleWidget(puzzleContainer, puzzle);
+  puzzleWidget = new PuzzleWidget{puzzle};
   puzzleContainerLayout->addWidget(puzzleWidget);
   puzzleContainerLayout->setAlignment(puzzleWidget, Qt::AlignCenter);
 }

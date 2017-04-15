@@ -1,6 +1,6 @@
 #include "PuzzleWidget.h"
 
-CellWidget::CellWidget(QWidget *parent, bool isBlack, uint32_t num)
+CellWidget::CellWidget(bool isBlack, uint32_t num, QWidget *parent)
     : QFrame(parent) {
   QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
@@ -33,12 +33,10 @@ CellWidget::CellWidget(QWidget *parent, bool isBlack, uint32_t num)
   layout->setContentsMargins(0, 0, 0, 0);
 
   layout->setSpacing(0);
-
-  show();
 }
 
-PuzzleWidget::PuzzleWidget(QWidget *parent,
-                           const std::unique_ptr<Puzzle> &puzzle)
+PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
+                           QWidget *parent)
     : QWidget(parent) {
 
   gridLayout_ = new QGridLayout{};
@@ -50,7 +48,7 @@ PuzzleWidget::PuzzleWidget(QWidget *parent,
     std::vector<CellWidget *> cellRow{};
     cellRow.reserve(puzzle->getHeight());
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
-      auto cell = new CellWidget(this, puzzle->getGrid()[r][c] == '\0',
+      auto cell = new CellWidget(puzzle->getGrid()[r][c] == '\0',
                                  puzzle->getNums()[r][c]);
       cell->setFixedSize(40, 40);
       cell->setContentsMargins(0, 0, 0, 0);
@@ -62,5 +60,4 @@ PuzzleWidget::PuzzleWidget(QWidget *parent,
 
   gridLayout_->setSpacing(0);
   setLayout(gridLayout_);
-  show();
 }
