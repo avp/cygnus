@@ -27,10 +27,11 @@ public:
 
 private slots:
   void open();
+  void setCursor(uint8_t row, uint8_t col, Direction dir);
 
 private:
-  static std::unique_ptr<Puzzle> puzzle;
-  static Cursor cursor;
+  std::unique_ptr<Puzzle> puzzle;
+  Cursor cursor;
 
   QMenu *fileMenu;
   QAction *openAct;

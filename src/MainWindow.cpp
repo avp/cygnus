@@ -7,12 +7,6 @@
 
 namespace cygnus {
 
-/// Currently loaded puzzle.
-std::unique_ptr<Puzzle> MainWindow::puzzle;
-
-/// Cursor on current puzzle. Meaningless if puzzle is null.
-Cursor MainWindow::cursor;
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   QHBoxLayout *layout = new QHBoxLayout{};
 
@@ -40,6 +34,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   layout->addWidget(puzzleContainer);
   layout->addWidget(downWidget);
   window->setLayout(layout);
+
+  cursor.row = 0;
+  cursor.col = 0;
+  cursor.dir = Direction::ACROSS;
 }
 
 void MainWindow::reloadPuzzle() {
@@ -62,14 +60,62 @@ void MainWindow::reloadPuzzle() {
   // Set cursor to first non-blank square.
   const auto &across = puzzle->getAcross();
   if (across.size() > 0) {
-    cursor.dir = Direction::ACROSS;
-    cursor.row = across[0].row;
-    cursor.col = across[0].col;
-    qDebug() << "Cursor:" << cursor.row << cursor.col;
+    setCursor(across[0].row, across[0].col, Direction::ACROSS);
   } else {
     qCritical() << "No across clues in puzzle";
     return;
   }
+}
+
+void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
+  const auto &grid = puzzle->getGrid();
+
+  // Clear current selection.
+  if (cursor.dir == Direction::ACROSS) {
+    for (uint8_t i = 0; cursor.col + i < puzzle->getWidth() &&
+                        grid[cursor.row][cursor.col + i] != '\0';
+         ++i) {
+      puzzleWidget->deselectPosition(cursor.row, cursor.col + i);
+    }
+    for (uint8_t i = 0;
+         cursor.col - i >= 0 && grid[cursor.row][cursor.col - i] != '\0'; --i) {
+      puzzleWidget->deselectPosition(cursor.row, cursor.col - i);
+    }
+  } else {
+    for (uint8_t i = 0; cursor.row + i < puzzle->getHeight() &&
+                        grid[cursor.row + i][cursor.col] != '\0';
+         ++i) {
+      puzzleWidget->deselectPosition(row, cursor.col + i);
+    }
+    for (uint8_t i = 0;
+         cursor.row - i >= 0 && grid[cursor.row - i][cursor.col] != '\0'; --i) {
+      puzzleWidget->deselectPosition(cursor.row - i, cursor.col);
+    }
+  }
+
+  // Select at new cursor position.
+  if (dir == Direction::ACROSS) {
+    for (uint8_t i = 0;
+         col + i < puzzle->getWidth() && grid[row][col + i] != '\0'; ++i) {
+      puzzleWidget->selectPosition(row, col + i);
+    }
+    for (uint8_t i = 0; col - i >= 0 && grid[row][col - i] != '\0'; --i) {
+      puzzleWidget->selectPosition(row, col - i);
+    }
+  } else {
+    for (uint8_t i = 0;
+         row + i < puzzle->getHeight() && grid[row + i][col] != '\0'; ++i) {
+      puzzleWidget->selectPosition(row, col + i);
+    }
+    for (uint8_t i = 0; row - i >= 0 && grid[row - i][col] != '\0'; --i) {
+      puzzleWidget->selectPosition(row - i, col);
+    }
+  }
+
+  puzzleWidget->selectCursorPosition(row, col);
+  cursor.row = row;
+  cursor.col = col;
+  cursor.dir = dir;
 }
 
 QListWidget *MainWindow::createClueWidget() {

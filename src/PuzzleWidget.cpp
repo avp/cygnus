@@ -3,11 +3,11 @@
 namespace cygnus {
 
 CellWidget::CellWidget(bool isBlack, uint32_t num, QWidget *parent)
-    : QFrame(parent) {
+    : QFrame(parent), isBlack_(isBlack) {
   QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
   auto pal = palette();
-  pal.setColor(QPalette::Background, isBlack ? Qt::black : Qt::white);
+  pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
   setAutoFillBackground(true);
   setPalette(pal);
   setFrameStyle(QFrame::Box);
@@ -35,6 +35,26 @@ CellWidget::CellWidget(bool isBlack, uint32_t num, QWidget *parent)
   layout->setContentsMargins(0, 0, 0, 0);
 
   layout->setSpacing(0);
+}
+
+void CellWidget::selectCursor() {
+  auto pal = palette();
+  pal.setColor(QPalette::Background,
+               isBlack_ ? Qt::black : QColor{0, 153, 221});
+  setPalette(pal);
+}
+
+void CellWidget::select() {
+  auto pal = palette();
+  pal.setColor(QPalette::Background,
+               isBlack_ ? Qt::black : QColor{224, 224, 224});
+  setPalette(pal);
+}
+
+void CellWidget::deselect() {
+  auto pal = palette();
+  pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
+  setPalette(pal);
 }
 
 PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
@@ -65,6 +85,18 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   gridLayout_->setContentsMargins(0, 0, 0, 0);
 
   setLayout(gridLayout_);
+}
+
+void PuzzleWidget::selectCursorPosition(uint8_t row, uint8_t col) {
+  cells_[row][col]->selectCursor();
+}
+
+void PuzzleWidget::selectPosition(uint8_t row, uint8_t col) {
+  cells_[row][col]->select();
+}
+
+void PuzzleWidget::deselectPosition(uint8_t row, uint8_t col) {
+  cells_[row][col]->deselect();
 }
 
 } // namespace cygnus
