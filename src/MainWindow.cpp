@@ -116,6 +116,8 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   cursor.row = row;
   cursor.col = col;
   cursor.dir = dir;
+
+  qDebug() << "New clue:" << puzzle->getNumByPosition(row, col, dir);
 }
 
 QListWidget *MainWindow::createClueWidget() {

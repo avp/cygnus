@@ -7,6 +7,11 @@
 
 namespace cygnus {
 
+enum class Direction {
+  ACROSS,
+  DOWN,
+};
+
 struct Clue {
   QString clue;
   uint32_t row;
@@ -40,6 +45,11 @@ public:
   inline Grid<char> &getGrid() { return grid_; }
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<uint32_t> &getNums() const { return nums_; }
+
+  const int getAcrossClueByNum(uint32_t num) const;
+  const int getDownClueByNum(uint32_t num) const;
+  const uint32_t getNumByPosition(uint8_t row, uint8_t col,
+                                  Direction dir) const;
 };
 
 } // namespace cygnus

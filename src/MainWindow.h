@@ -8,11 +8,6 @@
 
 namespace cygnus {
 
-enum class Direction {
-  ACROSS,
-  DOWN,
-};
-
 struct Cursor {
   uint8_t row;
   uint8_t col;

@@ -111,4 +111,50 @@ Puzzle::Puzzle(uint8_t height, uint8_t width, std::vector<Clue> across,
     : height_(height), width_(width), across_(across), down_(down),
       solution_(solution), grid_(grid), nums_(nums) {}
 
+static bool compareForNum(const Clue &a, const Clue &b) {
+  return a.num < b.num;
+}
+
+const int Puzzle::getAcrossClueByNum(uint32_t num) const {
+  Clue clue{};
+  clue.num = num;
+  auto result =
+      std::lower_bound(across_.begin(), across_.end(), clue, compareForNum);
+  if (result == across_.end()) {
+    return -1;
+  }
+  return result - across_.begin();
+}
+
+const int Puzzle::getDownClueByNum(uint32_t num) const {
+  Clue clue{};
+  clue.num = num;
+  auto result =
+      std::lower_bound(down_.begin(), down_.end(), clue, compareForNum);
+  if (result == down_.end()) {
+    return -1;
+  }
+  return result - down_.begin();
+}
+
+const uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
+                                        Direction dir) const {
+  if (dir == Direction::ACROSS) {
+    do {
+      if (col == 0 || grid_[row][col - 1] == '\0') {
+        return nums_[row][col];
+      }
+      --col;
+    } while (col >= 0);
+  } else {
+    do {
+      if (row == 0 || grid_[row - 1][col] == '\0') {
+        return nums_[row][col];
+      }
+      --row;
+    } while (row >= 0);
+  }
+  return 0;
+}
+
 } // namespace cygnus
