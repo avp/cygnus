@@ -2,8 +2,9 @@
 
 namespace cygnus {
 
-CellWidget::CellWidget(bool isBlack, uint32_t num, QWidget *parent)
-    : QFrame(parent), isBlack_(isBlack) {
+CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
+                       QWidget *parent)
+    : QFrame(parent), row_(row), col_(col), isBlack_(isBlack) {
   QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
   auto pal = palette();
@@ -57,6 +58,17 @@ void CellWidget::deselect() {
   setPalette(pal);
 }
 
+void CellWidget::mousePressEvent(QMouseEvent *event) {
+  switch (event->button()) {
+  case Qt::LeftButton:
+    return clicked(row_, col_);
+  case Qt::RightButton:
+    return rightClicked();
+  default:
+    return;
+  }
+}
+
 PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                            QWidget *parent)
     : QFrame(parent) {
@@ -71,12 +83,16 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
     std::vector<CellWidget *> cellRow{};
     cellRow.reserve(puzzle->getHeight());
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
-      auto cell = new CellWidget(puzzle->getGrid()[r][c] == '\0',
+      auto cell = new CellWidget(puzzle->getGrid()[r][c] == '\0', r, c,
                                  puzzle->getNums()[r][c]);
       cell->setFixedSize(40, 40);
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);
+
+      connect(cell, &CellWidget::clicked, this, &PuzzleWidget::cellClicked);
+      connect(cell, &CellWidget::rightClicked, this,
+              &PuzzleWidget::cellRightClicked);
     }
     cells_.push_back(cellRow);
   }

@@ -10,7 +10,11 @@ namespace cygnus {
 class CellWidget : public QFrame {
   Q_OBJECT
 public:
-  explicit CellWidget(bool isBlack, uint32_t num, QWidget *parent = nullptr);
+  explicit CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
+                      QWidget *parent = nullptr);
+
+  inline uint8_t getRow() const { return row_; }
+  inline uint8_t getCol() const { return col_; }
 
 public slots:
   void selectCursor();
@@ -18,8 +22,17 @@ public slots:
 
   void deselect();
 
+signals:
+  void clicked(uint8_t row, uint8_t col);
+  void rightClicked();
+
 private:
   bool isBlack_;
+
+  uint8_t row_;
+  uint8_t col_;
+
+  void mousePressEvent(QMouseEvent *event) override;
 };
 
 class PuzzleWidget : public QFrame {
@@ -33,6 +46,13 @@ public slots:
   void selectPosition(uint8_t row, uint8_t col);
 
   void deselectPosition(uint8_t row, uint8_t col);
+
+  void cellClicked(uint8_t row, uint8_t col) { return clicked(row, col); }
+  void cellRightClicked() { return rightClicked(); }
+
+signals:
+  void clicked(uint8_t row, uint8_t col);
+  void rightClicked();
 
 private:
   QGridLayout *gridLayout_;

@@ -73,6 +73,12 @@ void MainWindow::reloadPuzzle() {
     qCritical() << "No across clues in puzzle";
     return;
   }
+
+  // Connect the signals from the puzzle.
+  connect(puzzleWidget, &PuzzleWidget::clicked, this,
+          &MainWindow::puzzleClicked);
+  connect(puzzleWidget, &PuzzleWidget::rightClicked, this,
+          &MainWindow::puzzleRightClicked);
 }
 
 void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
@@ -258,6 +264,24 @@ void MainWindow::keyRight() {
     }
   } while (grid[cursor.row][col] == '\0');
   setCursor(cursor.row, col, Direction::ACROSS);
+}
+
+void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
+  const auto &grid = puzzle->getGrid();
+  if ((0 <= row && row < puzzle->getHeight()) &&
+      (0 <= col && col < puzzle->getWidth())) {
+    if (grid[row][col] != '\0') {
+      setCursor(row, col, cursor.dir);
+    }
+  } else {
+    qCritical() << "Click event out of bounds:" << row << col;
+  }
+}
+
+void MainWindow::puzzleRightClicked() {
+  setCursor(cursor.row, cursor.col,
+            cursor.dir == Direction::ACROSS ? Direction::DOWN
+                                            : Direction::ACROSS);
 }
 
 } // namespace cygnus

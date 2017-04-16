@@ -23,6 +23,8 @@ public:
 private slots:
   void open();
   void setCursor(uint8_t row, uint8_t col, Direction dir);
+  void puzzleClicked(uint8_t row, uint8_t col);
+  void puzzleRightClicked();
 
 private:
   std::unique_ptr<Puzzle> puzzle;
@@ -46,7 +48,7 @@ private:
 
   QListWidget *createClueWidget();
 
-  void keyPressEvent(QKeyEvent *event);
+  void keyPressEvent(QKeyEvent *event) override;
   void keyUp();
   void keyDown();
   void keyLeft();
