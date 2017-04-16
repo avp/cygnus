@@ -37,7 +37,8 @@ private:
   QListWidget *downWidget;
 
   QWidget *puzzleContainer;
-  QHBoxLayout *puzzleContainerLayout;
+  QVBoxLayout *puzzleContainerLayout;
+  QLabel *curClueLabel;
   PuzzleWidget *puzzleWidget;
 
   void createActions();

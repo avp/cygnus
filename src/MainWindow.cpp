@@ -25,9 +25,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   downWidget = createClueWidget();
 
   puzzleContainer = new QWidget{};
-  puzzleContainerLayout = new QHBoxLayout{};
+  puzzleContainerLayout = new QVBoxLayout{};
   puzzleContainer->setSizePolicy(puzzleContainerSize);
   puzzleContainer->setLayout(puzzleContainerLayout);
+
+  curClueLabel = new QLabel{};
+  puzzleContainerLayout->addWidget(curClueLabel);
+  puzzleContainerLayout->addStretch();
+  auto clueFont = curClueLabel->font();
+  clueFont.setPointSize(clueFont.pointSize() + 3);
+  curClueLabel->setFont(clueFont);
 
   // Set QWidget as the central layout of the main window
   layout->addWidget(acrossWidget);
@@ -54,8 +61,9 @@ void MainWindow::reloadPuzzle() {
     puzzleWidget->deleteLater();
   }
   puzzleWidget = new PuzzleWidget{puzzle};
-  puzzleContainerLayout->addWidget(puzzleWidget);
-  puzzleContainerLayout->setAlignment(puzzleWidget, Qt::AlignCenter);
+  puzzleContainerLayout->insertWidget(1, puzzleWidget);
+  puzzleContainerLayout->setAlignment(puzzleWidget,
+                                      Qt::AlignHCenter | Qt::AlignTop);
 
   // Set cursor to first non-blank square.
   const auto &across = puzzle->getAcross();
@@ -117,7 +125,14 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   cursor.col = col;
   cursor.dir = dir;
 
-  qDebug() << "New clue:" << puzzle->getNumByPosition(row, col, dir);
+  uint32_t num = puzzle->getNumByPosition(row, col, dir);
+  if (dir == Direction::ACROSS) {
+    const Clue &clue = puzzle->getAcross()[puzzle->getAcrossClueByNum(num)];
+    curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
+  } else {
+    const Clue &clue = puzzle->getDown()[puzzle->getDownClueByNum(num)];
+    curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
+  }
 }
 
 QListWidget *MainWindow::createClueWidget() {
