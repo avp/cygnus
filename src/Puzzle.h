@@ -12,6 +12,10 @@ enum class Direction {
   DOWN,
 };
 
+inline Direction flip(Direction dir) {
+  return (dir == Direction::ACROSS) ? Direction::DOWN : Direction::ACROSS;
+}
+
 struct Clue {
   QString clue;
   uint32_t row;

@@ -1,5 +1,7 @@
 #include "PuzzleWidget.h"
 
+#include "Colors.h"
+
 namespace cygnus {
 
 CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
@@ -41,14 +43,14 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
 void CellWidget::selectCursor() {
   auto pal = palette();
   pal.setColor(QPalette::Background,
-               isBlack_ ? Qt::black : QColor{0, 153, 221});
+               isBlack_ ? Qt::black : Colors::PRIMARY_HIGHLIGHT);
   setPalette(pal);
 }
 
 void CellWidget::select() {
   auto pal = palette();
   pal.setColor(QPalette::Background,
-               isBlack_ ? Qt::black : QColor{224, 224, 224});
+               isBlack_ ? Qt::black : Colors::SECONDARY_HIGHLIGHT);
   setPalette(pal);
 }
 

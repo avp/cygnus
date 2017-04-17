@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 
+#include "Colors.h"
+
 #include <QDebug>
 #include <QDir>
 #include <QFileDialog>
@@ -126,12 +128,42 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
     }
   }
 
+  uint32_t curNum =
+      puzzle->getNumByPosition(cursor.row, cursor.col, cursor.dir);
+  uint32_t flipNum =
+      puzzle->getNumByPosition(cursor.row, cursor.col, flip(cursor.dir));
+  if (cursor.dir == Direction::ACROSS) {
+    acrossWidget->item(puzzle->getAcrossClueByNum(curNum))
+        ->setBackground(Qt::white);
+    downWidget->item(puzzle->getDownClueByNum(flipNum))
+        ->setBackground(Qt::white);
+  } else {
+    downWidget->item(puzzle->getDownClueByNum(curNum))
+        ->setBackground(Qt::white);
+    acrossWidget->item(puzzle->getAcrossClueByNum(flipNum))
+        ->setBackground(Qt::white);
+  }
+
+  curNum = puzzle->getNumByPosition(row, col, dir);
+  flipNum = puzzle->getNumByPosition(row, col, flip(dir));
+  if (dir == Direction::ACROSS) {
+    acrossWidget->item(puzzle->getAcrossClueByNum(curNum))
+        ->setBackground(Colors::PRIMARY_HIGHLIGHT);
+    downWidget->item(puzzle->getDownClueByNum(flipNum))
+        ->setBackground(Colors::SECONDARY_HIGHLIGHT);
+  } else {
+    downWidget->item(puzzle->getDownClueByNum(curNum))
+        ->setBackground(Colors::PRIMARY_HIGHLIGHT);
+    acrossWidget->item(puzzle->getAcrossClueByNum(flipNum))
+        ->setBackground(Colors::SECONDARY_HIGHLIGHT);
+  }
+
   puzzleWidget->selectCursorPosition(row, col);
   cursor.row = row;
   cursor.col = col;
   cursor.dir = dir;
 
-  uint32_t num = puzzle->getNumByPosition(row, col, dir);
+  uint32_t num = curNum;
   if (dir == Direction::ACROSS) {
     const Clue &clue = puzzle->getAcross()[puzzle->getAcrossClueByNum(num)];
     curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
