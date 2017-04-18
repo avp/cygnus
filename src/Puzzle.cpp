@@ -77,12 +77,12 @@ static inline uint16_t headerChecksum(const QByteArray &puzFile) {
   return checksum(puzFile.begin() + 0x2c, puzFile.begin() + 0x34);
 }
 
-static uint16_t textChecksum(const QByteArray &puzFile) {
+static uint16_t textChecksum(const QByteArray &puzFile, uint16_t seed = 0) {
   const uint8_t width = puzFile[0x2c];
   const uint8_t height = puzFile[0x2d];
   const uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
 
-  uint16_t result = 0;
+  uint16_t result = seed;
   auto it = puzFile.begin() + 0x34 + (2 * width * height);
   auto titleStart = it;
   auto title = readString(it);
@@ -136,6 +136,17 @@ static uint64_t magicChecksum(const QByteArray &puzFile) {
   return result;
 }
 
+static uint64_t globalChecksum(const QByteArray &puzFile) {
+  const uint64_t width = puzFile[0x2c];
+  const uint64_t height = puzFile[0x2d];
+
+  auto result = 0;
+  result = checksum(puzFile.begin() + 0x2c,
+                    puzFile.begin() + 0x34 + (2 * width * height), result);
+  result = textChecksum(puzFile, result);
+  return result;
+}
+
 Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   QString str{puzFile};
 
@@ -144,10 +155,30 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   uint16_t headerChecksumActual = headerChecksum(puzFile);
   qDebug("H Actual:   %04x", headerChecksumActual);
 
+  if (headerChecksumExpected != headerChecksumActual) {
+    qCritical() << "Header checksum check failed";
+    return nullptr;
+  }
+
   uint64_t magicChecksumExpected = readUInt64LE(puzFile.begin() + 0x10);
   qDebug("M Expected: %16llx", magicChecksumExpected);
   uint64_t magicChecksumActual = magicChecksum(puzFile);
   qDebug("M Actual:   %16llx", magicChecksumActual);
+
+  if (magicChecksumExpected != magicChecksumActual) {
+    qCritical() << "Magic checksum check failed";
+    return nullptr;
+  }
+
+  uint64_t globalChecksumExpected = readUInt16LE(puzFile.begin());
+  qDebug("M Expected: %04llx", globalChecksumExpected);
+  uint64_t globalChecksumActual = readUInt16LE(puzFile.begin());
+  qDebug("M Actual:   %04llx", globalChecksumActual);
+
+  if (globalChecksumExpected != globalChecksumActual) {
+    qCritical() << "Global checksum check failed";
+    return nullptr;
+  }
 
   QStringRef magic{&str, 0x02, 0xb};
   if (magic != MAGIC || str[0x0d] != '\x00') {

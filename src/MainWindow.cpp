@@ -204,7 +204,10 @@ void MainWindow::open() {
     }
     QByteArray puzFile = file.readAll();
     puzzle.reset(Puzzle::loadFromFile(puzFile));
-    reloadPuzzle();
+    if (puzzle) {
+      // TODO: Handle null puzzle (failure case).
+      reloadPuzzle();
+    }
   }
 }
 
