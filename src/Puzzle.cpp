@@ -6,19 +6,31 @@ namespace cygnus {
 
 const static char *MAGIC{"\x41\x43\x52\x4f\x53\x53\x26\x44\x4f\x57\x4e"};
 
-static inline uint16_t readUInt16LE(const QByteArray &puzFile,
-                                    const uint32_t offset) {
-  return puzFile[offset] | (puzFile[offset + 1] << 8);
+/// Reads a Little-Endian 16-bit unsigned int.
+static inline uint16_t readUInt16LE(const QByteArray::const_iterator start) {
+  return (*start) | ((*(start + 1)) << 8);
 }
 
-static inline QString readString(const QByteArray &puzFile,
-                                 const uint32_t offset) {
-  return QString{puzFile.data() + offset};
+/// Reads a Little-Endian 64-bit unsigned int.
+static inline uint64_t readUInt64LE(const QByteArray::const_iterator start) {
+  uint64_t result = 0;
+  for (uint64_t i = 0; i < 8; ++i) {
+    uint64_t b = *(start + i) & 0xff;
+    result |= b << (8 * i);
+  }
+  return result;
 }
 
-static inline Grid<char> readGrid(const QByteArray &puzFile,
-                                  const uint32_t offset, const uint8_t height,
-                                  const uint8_t width) {
+/// Reads a null-terminated string from position \p offset.
+/// \param[in,out] start first byte, will be update to point after the NUL byte.
+static inline QString readString(QByteArray::const_iterator &start) {
+  QString result{start};
+  start += result.size() + 1;
+  return result;
+}
+
+static Grid<char> readGrid(QByteArray::const_iterator &start,
+                           const uint8_t height, const uint8_t width) {
   Grid<char> grid;
   grid.reserve(height);
 
@@ -26,7 +38,7 @@ static inline Grid<char> readGrid(const QByteArray &puzFile,
     std::vector<char> row;
     row.reserve(width);
     for (uint8_t c = 0; c < width; ++c) {
-      char cell = puzFile[offset + (r * width) + c];
+      char cell = *start++;
       switch (cell) {
       case '.':
         row.push_back('\0');
@@ -45,8 +57,98 @@ static inline Grid<char> readGrid(const QByteArray &puzFile,
   return grid;
 }
 
+/// Computes the 16-bit checksum of the provided region.
+/// \param seed the initial checksum to seed this computation with.
+static inline uint16_t checksum(const QByteArray::const_iterator start,
+                                const QByteArray::const_iterator end,
+                                const uint16_t seed = 0) {
+  uint16_t result = seed;
+  for (auto it = start; it != end; ++it) {
+    uint16_t lsb = result & 1;
+    result >>= 1;
+    // Carry the LSB over.
+    result |= lsb << 15;
+    result = (result + (*it & 0xff)) & 0xffff;
+  }
+  return result & 0xffff;
+}
+
+static inline uint16_t headerChecksum(const QByteArray &puzFile) {
+  return checksum(puzFile.begin() + 0x2c, puzFile.begin() + 0x34);
+}
+
+static uint16_t textChecksum(const QByteArray &puzFile) {
+  const uint8_t width = puzFile[0x2c];
+  const uint8_t height = puzFile[0x2d];
+  const uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
+
+  uint16_t result = 0;
+  auto it = puzFile.begin() + 0x34 + (2 * width * height);
+  auto titleStart = it;
+  auto title = readString(it);
+  auto authorStart = it;
+  auto author = readString(it);
+  auto copyrightStart = it;
+  auto copyright = readString(it);
+  auto cluesStart = it;
+
+  if (!title.isEmpty()) {
+    result = checksum(titleStart, authorStart, result);
+  }
+  if (!author.isEmpty()) {
+    result = checksum(authorStart, copyrightStart, result);
+  }
+  if (!copyright.isEmpty()) {
+    result = checksum(copyrightStart, cluesStart, result);
+  }
+
+  for (uint16_t i = 0; i < numClues; ++i) {
+    auto start = it;
+    auto clue = readString(it);
+    auto end = it - 1;
+    result = checksum(start, end, result);
+  }
+
+  return result;
+}
+
+static uint64_t magicChecksum(const QByteArray &puzFile) {
+  const uint64_t width = puzFile[0x2c];
+  const uint64_t height = puzFile[0x2d];
+
+  const char MASK[]{"ICHEATED"};
+
+  uint64_t checksums[4];
+  checksums[3] = headerChecksum(puzFile);
+  checksums[2] = checksum(puzFile.begin() + 0x34,
+                          puzFile.begin() + 0x34 + (width * height));
+  checksums[1] = checksum(puzFile.begin() + 0x34 + (width * height),
+                          puzFile.begin() + 0x34 + (2 * width * height));
+  checksums[0] = textChecksum(puzFile);
+
+  uint64_t result = 0;
+  for (uint64_t i = 0; i < 4; ++i) {
+    result <<= 8;
+    result |= MASK[4 - i - 1] ^ (checksums[i] & 0xff);
+    result |= (MASK[4 - i - 1 + 4] ^ (checksums[i] >> 8)) << 32;
+  }
+
+  return result;
+}
+
 Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   QString str{puzFile};
+
+  uint16_t headerChecksumExpected = readUInt16LE(puzFile.begin() + 0xe);
+  qDebug("H Expected: %04x", headerChecksumExpected);
+  uint16_t headerChecksumActual = headerChecksum(puzFile);
+  qDebug("H Actual:   %04x", headerChecksumActual);
+
+  uint64_t magicChecksumExpected = readUInt64LE(puzFile.begin() + 0x10);
+  qDebug("M Expected: %16llx", magicChecksumExpected);
+  uint64_t magicChecksumActual = magicChecksum(puzFile);
+  qDebug("M Actual:   %16llx", magicChecksumActual);
+
   QStringRef magic{&str, 0x02, 0xb};
   if (magic != MAGIC || str[0x0d] != '\x00') {
     return nullptr;
@@ -54,18 +156,15 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   uint8_t width = puzFile[0x2c];
   uint8_t height = puzFile[0x2d];
-  uint16_t numClues = readUInt16LE(puzFile, 0x2e);
+  uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
 
-  Grid<char> solution = readGrid(puzFile, 0x34, height, width);
-  Grid<char> grid = readGrid(puzFile, 0x34 + (width * height), height, width);
+  auto it = puzFile.begin() + 0x34;
+  Grid<char> solution = readGrid(it, height, width);
+  Grid<char> grid = readGrid(it, height, width);
 
-  uint32_t offset = 0x34 + (2 * width * height);
-  QString title = readString(puzFile, offset);
-  offset += title.size() + 1;
-  QString author = readString(puzFile, offset);
-  offset += author.size() + 1;
-  QString copyright = readString(puzFile, offset);
-  offset += copyright.size() + 1;
+  QString title = readString(it);
+  QString author = readString(it);
+  QString copyright = readString(it);
 
   uint32_t num = 1;
   std::vector<Clue> across{};
@@ -85,13 +184,11 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       if (a || d) {
         numRow.push_back(num);
         if (a) {
-          Clue clue{readString(puzFile, offset), r, c, num};
-          offset += clue.clue.size() + 1;
+          Clue clue{readString(it), r, c, num};
           across.push_back(clue);
         }
         if (d) {
-          Clue clue{readString(puzFile, offset), r, c, num};
-          offset += clue.clue.size() + 1;
+          Clue clue{readString(it), r, c, num};
           down.push_back(clue);
         }
         ++num;
