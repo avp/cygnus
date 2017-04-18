@@ -51,11 +51,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 void MainWindow::reloadPuzzle() {
   acrossWidget->clear();
-  for (const auto &clue : puzzle->getAcross()) {
+  for (const auto &clue : puzzle->getClues(Direction::ACROSS)) {
     acrossWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
   downWidget->clear();
-  for (const auto &clue : puzzle->getDown()) {
+  for (const auto &clue : puzzle->getClues(Direction::DOWN)) {
     downWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
 
@@ -68,7 +68,7 @@ void MainWindow::reloadPuzzle() {
                                       Qt::AlignHCenter | Qt::AlignTop);
 
   // Set cursor to first non-blank square.
-  const auto &across = puzzle->getAcross();
+  const auto &across = puzzle->getClues(Direction::ACROSS);
   if (across.size() > 0) {
     setCursor(across[0].row, across[0].col, Direction::ACROSS);
   } else {
@@ -133,28 +133,29 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   uint32_t flipNum =
       puzzle->getNumByPosition(cursor.row, cursor.col, flip(cursor.dir));
   if (cursor.dir == Direction::ACROSS) {
-    acrossWidget->item(puzzle->getAcrossClueByNum(curNum))
+    acrossWidget->item(puzzle->getClueByNum(cursor.dir, curNum))
         ->setBackground(Qt::white);
-    downWidget->item(puzzle->getDownClueByNum(flipNum))
+    downWidget->item(puzzle->getClueByNum(flip(cursor.dir), flipNum))
         ->setBackground(Qt::white);
   } else {
-    downWidget->item(puzzle->getDownClueByNum(curNum))
+    downWidget->item(puzzle->getClueByNum(cursor.dir, curNum))
         ->setBackground(Qt::white);
-    acrossWidget->item(puzzle->getAcrossClueByNum(flipNum))
+    acrossWidget->item(puzzle->getClueByNum(flip(cursor.dir), flipNum))
         ->setBackground(Qt::white);
   }
 
   curNum = puzzle->getNumByPosition(row, col, dir);
   flipNum = puzzle->getNumByPosition(row, col, flip(dir));
+
   if (dir == Direction::ACROSS) {
-    acrossWidget->item(puzzle->getAcrossClueByNum(curNum))
+    acrossWidget->item(puzzle->getClueByNum(dir, curNum))
         ->setBackground(Colors::PRIMARY_HIGHLIGHT);
-    downWidget->item(puzzle->getDownClueByNum(flipNum))
+    downWidget->item(puzzle->getClueByNum(flip(dir), flipNum))
         ->setBackground(Colors::SECONDARY_HIGHLIGHT);
   } else {
-    downWidget->item(puzzle->getDownClueByNum(curNum))
+    downWidget->item(puzzle->getClueByNum(dir, curNum))
         ->setBackground(Colors::PRIMARY_HIGHLIGHT);
-    acrossWidget->item(puzzle->getAcrossClueByNum(flipNum))
+    acrossWidget->item(puzzle->getClueByNum(flip(dir), flipNum))
         ->setBackground(Colors::SECONDARY_HIGHLIGHT);
   }
 
@@ -164,13 +165,8 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   cursor.dir = dir;
 
   uint32_t num = curNum;
-  if (dir == Direction::ACROSS) {
-    const Clue &clue = puzzle->getAcross()[puzzle->getAcrossClueByNum(num)];
-    curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
-  } else {
-    const Clue &clue = puzzle->getDown()[puzzle->getDownClueByNum(num)];
-    curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
-  }
+  const Clue &clue = puzzle->getClues(dir)[puzzle->getClueByNum(dir, num)];
+  curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
 }
 
 QListWidget *MainWindow::createClueWidget() {

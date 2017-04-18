@@ -4,7 +4,7 @@
 
 namespace cygnus {
 
-const static char *MAGIC{"\x41\x43\x52\x4f\x53\x53\x26\x44\x4f\x57\x4e"};
+const static char *MAGIC{"ACROSS&DOWN"};
 
 /// Reads a Little-Endian 16-bit unsigned int.
 static inline uint16_t readUInt16LE(const QByteArray::const_iterator start) {
@@ -180,8 +180,9 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
     return nullptr;
   }
 
-  QStringRef magic{&str, 0x02, 0xb};
+  QByteArray magic = puzFile.mid(0x2, 0xb);
   if (magic != MAGIC || str[0x0d] != '\x00') {
+    qCritical() << "Magic number check failed";
     return nullptr;
   }
 
@@ -230,39 +231,29 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
     nums.push_back(numRow);
   }
 
-  return new Puzzle(height, width, across, down, solution, grid, nums);
+  std::vector<Clue> clues[2]{across, down};
+  return new Puzzle{height, width, clues, solution, grid, nums};
 }
 
-Puzzle::Puzzle(uint8_t height, uint8_t width, std::vector<Clue> across,
-               std::vector<Clue> down, Grid<char> solution, Grid<char> grid,
-               Grid<uint32_t> nums)
-    : height_(height), width_(width), across_(across), down_(down),
+Puzzle::Puzzle(uint8_t height, uint8_t width, std::vector<Clue> clues[2],
+               Grid<char> solution, Grid<char> grid, Grid<uint32_t> nums)
+    : height_(height), width_(width), clues_{clues[0], clues[1]},
       solution_(solution), grid_(grid), nums_(nums) {}
 
 static bool compareForNum(const Clue &a, const Clue &b) {
   return a.num < b.num;
 }
 
-const int Puzzle::getAcrossClueByNum(uint32_t num) const {
+const int Puzzle::getClueByNum(Direction dir, uint32_t num) const {
   Clue clue{};
   clue.num = num;
+  auto clues = clues_[static_cast<int>(dir)];
   auto result =
-      std::lower_bound(across_.begin(), across_.end(), clue, compareForNum);
-  if (result == across_.end()) {
+      std::lower_bound(clues.begin(), clues.end(), clue, compareForNum);
+  if (result == clues.end()) {
     return -1;
   }
-  return result - across_.begin();
-}
-
-const int Puzzle::getDownClueByNum(uint32_t num) const {
-  Clue clue{};
-  clue.num = num;
-  auto result =
-      std::lower_bound(down_.begin(), down_.end(), clue, compareForNum);
-  if (result == down_.end()) {
-    return -1;
-  }
-  return result - down_.begin();
+  return result - clues.begin();
 }
 
 const uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
