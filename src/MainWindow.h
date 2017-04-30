@@ -55,6 +55,9 @@ private:
   void keyDown();
   void keyLeft();
   void keyRight();
+
+  void setLetter(char letter);
+  void clearLetter();
 };
 
 } // namespace cygnus

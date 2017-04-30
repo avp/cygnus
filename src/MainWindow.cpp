@@ -247,6 +247,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Right:
     keyRight();
     break;
+  case Qt::Key_A... Qt::Key_Z:
+    if (event->modifiers() == Qt::NoModifier ||
+        event->modifiers() == Qt::ShiftModifier) {
+      setLetter(static_cast<char>(event->key()));
+    }
+    break;
+  case Qt::Key_Backspace:
+  case Qt::Key_Delete:
+    clearLetter();
+    break;
   }
 }
 
@@ -316,6 +326,16 @@ void MainWindow::keyRight() {
     }
   } while (grid[cursor.row][col] == BLACK);
   setCursor(cursor.row, col, Direction::ACROSS);
+}
+
+void MainWindow::setLetter(char letter) {
+  puzzle->getGrid()[cursor.row][cursor.col] = letter;
+  puzzleWidget->setLetter(cursor.row, cursor.col, letter);
+}
+
+void MainWindow::clearLetter() {
+  puzzle->getGrid()[cursor.row][cursor.col] = EMPTY;
+  puzzleWidget->setLetter(cursor.row, cursor.col, EMPTY);
 }
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {

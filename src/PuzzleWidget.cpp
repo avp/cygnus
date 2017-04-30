@@ -24,17 +24,17 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
   numFont.setPointSize(numFont.pointSize() - 3);
   numLabel->setFont(numFont);
 
-  QLabel *entryLabel = new QLabel{};
-  entryLabel->setContentsMargins(0, 0, 0, 0);
-  entryLabel->setMargin(0);
-  entryLabel->setAlignment(Qt::AlignCenter);
-  auto entryFont = entryLabel->font();
+  entryLabel_ = new QLabel{};
+  entryLabel_->setContentsMargins(0, 0, 0, 0);
+  entryLabel_->setMargin(0);
+  entryLabel_->setAlignment(Qt::AlignCenter);
+  auto entryFont = entryLabel_->font();
   entryFont.setPointSize(entryFont.pointSize() + 2);
   entryFont.setBold(true);
-  entryLabel->setFont(entryFont);
+  entryLabel_->setFont(entryFont);
 
   layout->addWidget(numLabel, 0, 0, 1, 1);
-  layout->addWidget(entryLabel, 1, 0, 3, 4);
+  layout->addWidget(entryLabel_, 1, 0, 3, 4);
   layout->setContentsMargins(0, 0, 0, 0);
 
   layout->setSpacing(0);
@@ -58,6 +58,10 @@ void CellWidget::deselect() {
   auto pal = palette();
   pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
   setPalette(pal);
+}
+
+void CellWidget::setLetter(char letter) {
+  entryLabel_->setText(QString("%1").arg(letter != EMPTY ? letter : ' '));
 }
 
 void CellWidget::mousePressEvent(QMouseEvent *event) {
@@ -115,6 +119,10 @@ void PuzzleWidget::selectPosition(uint8_t row, uint8_t col) {
 
 void PuzzleWidget::deselectPosition(uint8_t row, uint8_t col) {
   cells_[row][col]->deselect();
+}
+
+void PuzzleWidget::setLetter(uint8_t row, uint8_t col, char letter) {
+  cells_[row][col]->setLetter(letter);
 }
 
 } // namespace cygnus

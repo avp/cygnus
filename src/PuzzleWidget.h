@@ -23,6 +23,8 @@ public slots:
 
   void deselect();
 
+  void setLetter(char letter);
+
 signals:
   void clicked(uint8_t row, uint8_t col);
   void rightClicked();
@@ -32,6 +34,8 @@ private:
 
   uint8_t row_;
   uint8_t col_;
+
+  QLabel *entryLabel_;
 
   void mousePressEvent(QMouseEvent *event) override;
 };
@@ -50,6 +54,8 @@ public slots:
 
   void cellClicked(uint8_t row, uint8_t col) { return clicked(row, col); }
   void cellRightClicked() { return rightClicked(); }
+
+  void setLetter(uint8_t row, uint8_t col, char letter);
 
 signals:
   void clicked(uint8_t row, uint8_t col);
