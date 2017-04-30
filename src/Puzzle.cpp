@@ -13,6 +13,12 @@ static inline uint16_t readUInt16LE(const QByteArray::const_iterator start) {
   return a | (b << 8);
 }
 
+/// Writes a Little-Endian 16-bit unsigned int.
+static inline void writeUInt16LE(QByteArray::iterator start, uint16_t x) {
+  *start++ = x & 0xff;
+  *start++ = (x >> 8) & 0xff;
+}
+
 /// Reads a Little-Endian 64-bit unsigned int.
 static inline uint64_t readUInt64LE(const QByteArray::const_iterator start) {
   uint64_t result = 0;
@@ -21,6 +27,14 @@ static inline uint64_t readUInt64LE(const QByteArray::const_iterator start) {
     result |= b << (8 * i);
   }
   return result;
+}
+
+/// Writes a Little-Endian 64-bit unsigned int.
+static inline void writeUInt64LE(QByteArray::iterator start, uint64_t x) {
+  for (uint64_t i = 0; i < 8; ++i) {
+    *start++ = x & 0xff;
+    x >>= 8;
+  }
 }
 
 /// Reads a null-terminated string from position \p offset.
@@ -42,22 +56,19 @@ static Grid<char> readGrid(QByteArray::const_iterator &start,
     for (uint8_t c = 0; c < width; ++c) {
       char cell = *start++;
       row.push_back(cell);
-      // switch (cell) {
-      // case '.':
-      //   row.push_back('\0');
-      //   break;
-      // case '-':
-      //   row.push_back(' ');
-      //   break;
-      // default:
-      //   row.push_back(cell);
-      //   break;
-      // }
     }
     grid.push_back(row);
   }
 
   return grid;
+}
+
+static inline void writeGrid(QByteArray::iterator start, Grid<char> grid) {
+  for (const auto &row : grid) {
+    for (const auto c : row) {
+      *start++ = c;
+    }
+  }
 }
 
 /// Computes the 16-bit checksum of the provided region.
@@ -247,6 +258,8 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   uint8_t width = puzFile[0x2c];
   uint8_t height = puzFile[0x2d];
   uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
+  uint16_t mask1 = readUInt16LE(puzFile.begin() + 0x30);
+  uint16_t mask2 = readUInt16LE(puzFile.begin() + 0x32);
 
   auto it = puzFile.begin() + 0x34;
   Grid<char> solution = readGrid(it, height, width);
@@ -290,13 +303,21 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   }
 
   std::vector<Clue> clues[2]{across, down};
-  return new Puzzle{height, width, clues, solution, grid, nums};
+  QByteArray version = puzFile.mid(0x18, 4);
+  return new Puzzle{version,  height,
+                    width,    mask1,
+                    mask2,    clues,
+                    solution, grid,
+                    nums,     puzFile.mid(0x34 + (2 * width * height))};
 }
 
-Puzzle::Puzzle(uint8_t height, uint8_t width, std::vector<Clue> clues[2],
-               Grid<char> solution, Grid<char> grid, Grid<uint32_t> nums)
-    : height_(height), width_(width), clues_{clues[0], clues[1]},
-      solution_(solution), grid_(grid), nums_(nums) {}
+Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
+               uint16_t mask1, uint16_t mask2, std::vector<Clue> clues[2],
+               Grid<char> solution, Grid<char> grid, Grid<uint32_t> nums,
+               QByteArray text)
+    : version_(version), height_(height), width_(width), mask1_(mask1),
+      mask2_(mask2), clues_{clues[0], clues[1]}, solution_(solution),
+      grid_(grid), nums_(nums), text_(text) {}
 
 static bool compareForNum(const Clue &a, const Clue &b) {
   return a.num < b.num;
@@ -332,6 +353,33 @@ const uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
     } while (row >= 0);
   }
   return 0;
+}
+
+QByteArray Puzzle::serialize() const {
+  QByteArray result(0x34 + (2 * width_ * height_) + text_.size(), 0);
+
+  writeUInt16LE(result.begin(),
+                globalChecksum(width_, height_, getNumClues(), mask1_, mask2_,
+                               solution_, grid_, text_));
+  result.replace(0x2, 0xd, MAGIC);
+  writeUInt16LE(result.begin() + 0x0e,
+                headerChecksum(width_, height_, getNumClues(), mask1_, mask2_));
+  writeUInt64LE(result.begin() + 0x10,
+                magicChecksum(width_, height_, getNumClues(), mask1_, mask2_,
+                              solution_, grid_, text_));
+  result.replace(0x18, version_.size(), version_);
+
+  result[0x2c] = width_;
+  result[0x2d] = height_;
+  writeUInt16LE(result.begin() + 0x2e, getNumClues());
+  writeUInt16LE(result.begin() + 0x30, mask1_);
+  writeUInt16LE(result.begin() + 0x32, mask2_);
+
+  writeGrid(result.begin() + 0x34, solution_);
+  writeGrid(result.begin() + 0x34 + (width_ * height_), grid_);
+
+  result.replace(0x34 + (2 * width_ * height_), text_.size(), text_);
+  return result;
 }
 
 } // namespace cygnus

@@ -30,15 +30,21 @@ template <typename T> using Grid = std::vector<std::vector<T>>;
 
 class Puzzle {
 private:
-  Puzzle(uint8_t height, uint8_t width, std::vector<Clue> clues[2],
-         Grid<char> solution, Grid<char> grid, Grid<uint32_t> nums);
+  Puzzle(QByteArray version, uint8_t height, uint8_t width, uint16_t mask1,
+         uint16_t mask2, std::vector<Clue> clues[2], Grid<char> solution,
+         Grid<char> grid, Grid<uint32_t> nums, QByteArray text);
+
+  QByteArray version_;
 
   uint8_t height_;
   uint8_t width_;
+  uint16_t mask1_;
+  uint16_t mask2_;
   std::vector<Clue> clues_[2];
   Grid<char> solution_;
   Grid<char> grid_;
   Grid<uint32_t> nums_;
+  QByteArray text_;
 
 public:
   static Puzzle *loadFromFile(const QByteArray &puzFile);
@@ -51,10 +57,15 @@ public:
   inline Grid<char> &getGrid() { return grid_; }
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<uint32_t> &getNums() const { return nums_; }
+  inline const uint16_t getNumClues() const {
+    return clues_[0].size() + clues_[1].size();
+  }
 
   const int getClueByNum(Direction dir, uint32_t num) const;
   const uint32_t getNumByPosition(uint8_t row, uint8_t col,
                                   Direction dir) const;
+
+  QByteArray serialize() const;
 };
 
 } // namespace cygnus

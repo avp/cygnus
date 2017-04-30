@@ -2,11 +2,11 @@
 
 #include "Colors.h"
 
-#include <memory>
 #include <QDebug>
 #include <QDir>
 #include <QFileDialog>
 #include <QtWidgets>
+#include <memory>
 
 namespace cygnus {
 
@@ -188,6 +188,11 @@ void MainWindow::createActions() {
   openAct->setShortcuts(QKeySequence::Open);
   openAct->setStatusTip(tr("Open an existing file"));
   connect(openAct, &QAction::triggered, this, &MainWindow::open);
+
+  saveAct = new QAction(tr("&Save..."), this);
+  saveAct->setShortcuts(QKeySequence::Save);
+  saveAct->setStatusTip(tr("Save the current puzzle"));
+  connect(saveAct, &QAction::triggered, this, &MainWindow::save);
 }
 
 void MainWindow::open() {
@@ -210,9 +215,22 @@ void MainWindow::open() {
   }
 }
 
+void MainWindow::save() {
+  if (!puzzle) {
+    return;
+  }
+
+  QFile file{"/Users/avp/test.puz"};
+  if (file.open(QIODevice::WriteOnly)) {
+    QByteArray bytes = puzzle->serialize();
+    file.write(bytes);
+  }
+}
+
 void MainWindow::createMenus() {
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(openAct);
+  fileMenu->addAction(saveAct);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {

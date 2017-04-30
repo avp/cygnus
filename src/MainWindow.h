@@ -22,6 +22,7 @@ public:
 
 private slots:
   void open();
+  void save();
   void setCursor(uint8_t row, uint8_t col, Direction dir);
   void puzzleClicked(uint8_t row, uint8_t col);
   void puzzleRightClicked();
@@ -34,6 +35,7 @@ private:
 
   QMenu *fileMenu;
   QAction *openAct;
+  QAction *saveAct;
 
   QListWidget *acrossWidget;
   QListWidget *downWidget;
