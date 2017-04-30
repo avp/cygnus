@@ -85,7 +85,7 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
     std::vector<CellWidget *> cellRow{};
     cellRow.reserve(puzzle->getHeight());
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
-      auto cell = new CellWidget(puzzle->getGrid()[r][c] == '\0', r, c,
+      auto cell = new CellWidget(puzzle->getGrid()[r][c] == BLACK, r, c,
                                  puzzle->getNums()[r][c]);
       cell->setFixedSize(40, 40);
       cell->setContentsMargins(0, 0, 0, 0);

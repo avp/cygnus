@@ -7,6 +7,9 @@
 
 namespace cygnus {
 
+const char BLACK = '.';
+const char EMPTY = '-';
+
 enum class Direction {
   ACROSS,
   DOWN,

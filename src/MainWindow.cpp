@@ -90,22 +90,24 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   // Clear current selection.
   if (cursor.dir == Direction::ACROSS) {
     for (uint8_t i = 0; cursor.col + i < puzzle->getWidth() &&
-                        grid[cursor.row][cursor.col + i] != '\0';
+                        grid[cursor.row][cursor.col + i] != BLACK;
          ++i) {
       puzzleWidget->deselectPosition(cursor.row, cursor.col + i);
     }
     for (uint8_t i = 0;
-         cursor.col - i >= 0 && grid[cursor.row][cursor.col - i] != '\0'; ++i) {
+         cursor.col - i >= 0 && grid[cursor.row][cursor.col - i] != BLACK;
+         ++i) {
       puzzleWidget->deselectPosition(cursor.row, cursor.col - i);
     }
   } else {
     for (uint8_t i = 0; cursor.row + i < puzzle->getHeight() &&
-                        grid[cursor.row + i][cursor.col] != '\0';
+                        grid[cursor.row + i][cursor.col] != BLACK;
          ++i) {
       puzzleWidget->deselectPosition(cursor.row + i, cursor.col);
     }
     for (uint8_t i = 0;
-         cursor.row - i >= 0 && grid[cursor.row - i][cursor.col] != '\0'; ++i) {
+         cursor.row - i >= 0 && grid[cursor.row - i][cursor.col] != BLACK;
+         ++i) {
       puzzleWidget->deselectPosition(cursor.row - i, cursor.col);
     }
   }
@@ -113,18 +115,18 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   // Select at new cursor position.
   if (dir == Direction::ACROSS) {
     for (uint8_t i = 0;
-         col + i < puzzle->getWidth() && grid[row][col + i] != '\0'; ++i) {
+         col + i < puzzle->getWidth() && grid[row][col + i] != BLACK; ++i) {
       puzzleWidget->selectPosition(row, col + i);
     }
-    for (uint8_t i = 0; col - i >= 0 && grid[row][col - i] != '\0'; ++i) {
+    for (uint8_t i = 0; col - i >= 0 && grid[row][col - i] != BLACK; ++i) {
       puzzleWidget->selectPosition(row, col - i);
     }
   } else {
     for (uint8_t i = 0;
-         row + i < puzzle->getHeight() && grid[row + i][col] != '\0'; ++i) {
+         row + i < puzzle->getHeight() && grid[row + i][col] != BLACK; ++i) {
       puzzleWidget->selectPosition(row + i, col);
     }
-    for (uint8_t i = 0; row - i >= 0 && grid[row - i][col] != '\0'; ++i) {
+    for (uint8_t i = 0; row - i >= 0 && grid[row - i][col] != BLACK; ++i) {
       puzzleWidget->selectPosition(row - i, col);
     }
   }
@@ -243,7 +245,7 @@ void MainWindow::keyUp() {
     } else {
       return;
     }
-  } while (grid[row][cursor.col] == '\0');
+  } while (grid[row][cursor.col] == BLACK);
   setCursor(row, cursor.col, Direction::DOWN);
 }
 
@@ -260,7 +262,7 @@ void MainWindow::keyDown() {
     } else {
       return;
     }
-  } while (grid[row][cursor.col] == '\0');
+  } while (grid[row][cursor.col] == BLACK);
   setCursor(row, cursor.col, Direction::DOWN);
 }
 
@@ -277,7 +279,7 @@ void MainWindow::keyLeft() {
     } else {
       return;
     }
-  } while (grid[cursor.row][col] == '\0');
+  } while (grid[cursor.row][col] == BLACK);
   setCursor(cursor.row, col, Direction::ACROSS);
 }
 
@@ -294,7 +296,7 @@ void MainWindow::keyRight() {
     } else {
       return;
     }
-  } while (grid[cursor.row][col] == '\0');
+  } while (grid[cursor.row][col] == BLACK);
   setCursor(cursor.row, col, Direction::ACROSS);
 }
 
@@ -302,7 +304,7 @@ void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
   const auto &grid = puzzle->getGrid();
   if ((0 <= row && row < puzzle->getHeight()) &&
       (0 <= col && col < puzzle->getWidth())) {
-    if (grid[row][col] != '\0') {
+    if (grid[row][col] != BLACK) {
       setCursor(row, col, cursor.dir);
     }
   } else {
