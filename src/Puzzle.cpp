@@ -73,17 +73,25 @@ static inline uint16_t checksum(const QByteArray::const_iterator start,
   return result & 0xffff;
 }
 
-static inline uint16_t headerChecksum(const QByteArray &puzFile) {
-  return checksum(puzFile.begin() + 0x2c, puzFile.begin() + 0x34);
+static inline uint16_t headerChecksum(uint8_t width, uint8_t height,
+                                      uint16_t numClues, uint16_t mask1,
+                                      uint16_t mask2, uint16_t seed = 0) {
+  QByteArray header(8, 0);
+  header[0] = width;
+  header[1] = height;
+  header[2] = numClues & 0xff;
+  header[3] = numClues >> 8;
+  header[4] = mask1 & 0xff;
+  header[5] = mask1 >> 8;
+  header[6] = mask2 & 0xff;
+  header[7] = mask2 >> 8;
+  return checksum(header.begin(), header.end(), seed);
 }
 
-static uint16_t textChecksum(const QByteArray &puzFile, uint16_t seed = 0) {
-  const uint8_t width = puzFile[0x2c];
-  const uint8_t height = puzFile[0x2d];
-  const uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
-
-  uint16_t result = seed;
-  auto it = puzFile.begin() + 0x34 + (2 * width * height);
+static uint16_t textChecksum(const uint16_t numClues, const QByteArray &text,
+                             uint16_t seed = 0) {
+  uint16_t result{seed};
+  auto it = text.begin();
   auto titleStart = it;
   auto title = readString(it);
   auto authorStart = it;
@@ -112,21 +120,19 @@ static uint16_t textChecksum(const QByteArray &puzFile, uint16_t seed = 0) {
   return result;
 }
 
-static uint64_t magicChecksum(const QByteArray &puzFile) {
-  const uint64_t width = puzFile[0x2c];
-  const uint64_t height = puzFile[0x2d];
-
+static uint64_t magicChecksum(uint8_t width, uint8_t height, uint16_t numClues,
+                              uint16_t mask1, uint16_t mask2,
+                              QByteArray solution, QByteArray puzzle,
+                              QByteArray text, uint16_t seed = 0) {
   const char MASK[]{"ICHEATED"};
 
   uint64_t checksums[4];
-  checksums[3] = headerChecksum(puzFile);
-  checksums[2] = checksum(puzFile.begin() + 0x34,
-                          puzFile.begin() + 0x34 + (width * height));
-  checksums[1] = checksum(puzFile.begin() + 0x34 + (width * height),
-                          puzFile.begin() + 0x34 + (2 * width * height));
-  checksums[0] = textChecksum(puzFile);
+  checksums[3] = headerChecksum(width, height, numClues, mask1, mask2);
+  checksums[2] = checksum(solution.begin(), solution.end());
+  checksums[1] = checksum(puzzle.begin(), puzzle.end());
+  checksums[0] = textChecksum(numClues, text);
 
-  uint64_t result = 0;
+  uint64_t result{seed};
   for (uint64_t i = 0; i < 4; ++i) {
     result <<= 8;
     result |= MASK[4 - i - 1] ^ (checksums[i] & 0xff);
@@ -139,50 +145,75 @@ static uint64_t magicChecksum(const QByteArray &puzFile) {
 static uint64_t globalChecksum(const QByteArray &puzFile) {
   const uint64_t width = puzFile[0x2c];
   const uint64_t height = puzFile[0x2d];
+  const uint64_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
 
   auto result = 0;
   result = checksum(puzFile.begin() + 0x2c,
                     puzFile.begin() + 0x34 + (2 * width * height), result);
-  result = textChecksum(puzFile, result);
+  result =
+      textChecksum(numClues, puzFile.mid(0x34 + (2 * width * height)), result);
   return result;
 }
 
-Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
-  QString str{puzFile};
+static bool validatePuzzle(const QByteArray &puzFile) {
+  if (puzFile.size() < 0x34) {
+    return false;
+  }
+  uint8_t width = puzFile[0x2c];
+  uint8_t height = puzFile[0x2d];
+  if (puzFile.size() < 0x34 + 2 * (width * height)) {
+    return false;
+  }
+
+  uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
+  uint16_t mask1 = readUInt16LE(puzFile.begin() + 0x30);
+  uint16_t mask2 = readUInt16LE(puzFile.begin() + 0x32);
 
   uint16_t headerChecksumExpected = readUInt16LE(puzFile.begin() + 0xe);
-  qDebug("H Expected: %04x", headerChecksumExpected);
-  uint16_t headerChecksumActual = headerChecksum(puzFile);
-  qDebug("H Actual:   %04x", headerChecksumActual);
+  qDebug("H Expected: 0x%04x", headerChecksumExpected);
+  uint16_t headerChecksumActual =
+      headerChecksum(width, height, numClues, mask1, mask2);
+  qDebug("H Actual:   0x%04x", headerChecksumActual);
 
   if (headerChecksumExpected != headerChecksumActual) {
     qCritical() << "Header checksum check failed";
-    return nullptr;
+    return false;
   }
 
   uint64_t magicChecksumExpected = readUInt64LE(puzFile.begin() + 0x10);
-  qDebug("M Expected: %16llx", magicChecksumExpected);
-  uint64_t magicChecksumActual = magicChecksum(puzFile);
-  qDebug("M Actual:   %16llx", magicChecksumActual);
+  qDebug("M Expected: 0x%16llx", magicChecksumExpected);
+  uint64_t magicChecksumActual = magicChecksum(
+      width, height, numClues, mask1, mask2, puzFile.mid(0x34, width * height),
+      puzFile.mid(0x34 + (width * height), width * height),
+      puzFile.mid(0x34 + (2 * width * height)));
+  qDebug("M Actual:   0x%16llx", magicChecksumActual);
 
   if (magicChecksumExpected != magicChecksumActual) {
     qCritical() << "Magic checksum check failed";
-    return nullptr;
+    return false;
   }
 
   uint64_t globalChecksumExpected = readUInt16LE(puzFile.begin());
-  qDebug("M Expected: %04llx", globalChecksumExpected);
+  qDebug("M Expected: 0x%04llx", globalChecksumExpected);
   uint64_t globalChecksumActual = readUInt16LE(puzFile.begin());
-  qDebug("M Actual:   %04llx", globalChecksumActual);
+  qDebug("M Actual:   0x%04llx", globalChecksumActual);
 
   if (globalChecksumExpected != globalChecksumActual) {
     qCritical() << "Global checksum check failed";
-    return nullptr;
+    return false;
   }
 
   QByteArray magic = puzFile.mid(0x2, 0xb);
-  if (magic != MAGIC || str[0x0d] != '\x00') {
+  if (magic != MAGIC || puzFile[0x0d] != '\x00') {
     qCritical() << "Magic number check failed";
+    return false;
+  }
+
+  return true;
+}
+
+Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
+  if (!validatePuzzle(puzFile)) {
     return nullptr;
   }
 
