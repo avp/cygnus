@@ -2,6 +2,7 @@
 
 #include "Colors.h"
 
+#include <memory>
 #include <QDebug>
 #include <QDir>
 #include <QFileDialog>

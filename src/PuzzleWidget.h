@@ -4,6 +4,7 @@
 #include "Puzzle.h"
 
 #include <QtWidgets>
+#include <memory>
 
 namespace cygnus {
 
