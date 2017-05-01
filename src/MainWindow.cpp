@@ -247,13 +247,28 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Right:
     keyRight();
     break;
+  case Qt::Key_Space:
+    setCursor(cursor.row, cursor.col, flip(cursor.dir));
+    break;
   case Qt::Key_A... Qt::Key_Z:
     if (event->modifiers() == Qt::NoModifier ||
         event->modifiers() == Qt::ShiftModifier) {
       setLetter(static_cast<char>(event->key()));
     }
+    if (cursor.dir == Direction::ACROSS) {
+      keyRight();
+    } else {
+      keyDown();
+    }
     break;
   case Qt::Key_Backspace:
+    clearLetter();
+    if (cursor.dir == Direction::ACROSS) {
+      keyLeft();
+    } else {
+      keyUp();
+    }
+    break;
   case Qt::Key_Delete:
     clearLetter();
     break;

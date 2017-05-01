@@ -202,10 +202,8 @@ static bool validatePuzzle(const QByteArray &puzFile) {
   uint16_t mask2 = readUInt16LE(puzFile.begin() + 0x32);
 
   uint16_t headerChecksumExpected = readUInt16LE(puzFile.begin() + 0xe);
-  qDebug("H Expected: 0x%04x", headerChecksumExpected);
   uint16_t headerChecksumActual =
       headerChecksum(width, height, numClues, mask1, mask2);
-  qDebug("H Actual:   0x%04x", headerChecksumActual);
 
   if (headerChecksumExpected != headerChecksumActual) {
     qCritical() << "Header checksum check failed";
@@ -217,11 +215,9 @@ static bool validatePuzzle(const QByteArray &puzFile) {
   Grid<char> puzzle = readGrid(it, height, width);
 
   uint64_t magicChecksumExpected = readUInt64LE(puzFile.begin() + 0x10);
-  qDebug("M Expected: 0x%16llx", magicChecksumExpected);
   uint64_t magicChecksumActual =
       magicChecksum(width, height, numClues, mask1, mask2, solution, puzzle,
                     puzFile.mid(0x34 + (2 * width * height)));
-  qDebug("M Actual:   0x%16llx", magicChecksumActual);
 
   if (magicChecksumExpected != magicChecksumActual) {
     qCritical() << "Magic checksum check failed";
@@ -229,11 +225,9 @@ static bool validatePuzzle(const QByteArray &puzFile) {
   }
 
   uint16_t globalChecksumExpected = readUInt16LE(puzFile.begin());
-  qDebug("G Expected: 0x%04x", globalChecksumExpected);
   uint16_t globalChecksumActual =
       globalChecksum(width, height, numClues, mask1, mask2, solution, puzzle,
                      puzFile.mid(0x34 + (2 * width * height)));
-  qDebug("G Actual:   0x%04x", globalChecksumActual);
 
   if (globalChecksumExpected != globalChecksumActual) {
     qCritical() << "Global checksum check failed";
