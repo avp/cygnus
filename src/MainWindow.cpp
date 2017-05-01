@@ -55,6 +55,7 @@ void MainWindow::reloadPuzzle() {
   for (const auto &clue : puzzle->getClues(Direction::ACROSS)) {
     acrossWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
+
   downWidget->clear();
   for (const auto &clue : puzzle->getClues(Direction::DOWN)) {
     downWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
@@ -135,31 +136,45 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
       puzzle->getNumByPosition(cursor.row, cursor.col, cursor.dir);
   uint32_t flipNum =
       puzzle->getNumByPosition(cursor.row, cursor.col, flip(cursor.dir));
+  int curClue = puzzle->getClueByNum(cursor.dir, curNum);
+  int flipClue = puzzle->getClueByNum(flip(cursor.dir), flipNum);
   if (cursor.dir == Direction::ACROSS) {
-    acrossWidget->item(puzzle->getClueByNum(cursor.dir, curNum))
-        ->setBackground(Qt::white);
-    downWidget->item(puzzle->getClueByNum(flip(cursor.dir), flipNum))
-        ->setBackground(Qt::white);
+    acrossWidget->item(curClue)->setBackground(Qt::white);
+    downWidget->item(flipClue)->setBackground(Qt::white);
   } else {
-    downWidget->item(puzzle->getClueByNum(cursor.dir, curNum))
-        ->setBackground(Qt::white);
-    acrossWidget->item(puzzle->getClueByNum(flip(cursor.dir), flipNum))
-        ->setBackground(Qt::white);
+    downWidget->item(curClue)->setBackground(Qt::white);
+    acrossWidget->item(flipClue)->setBackground(Qt::white);
   }
 
   curNum = puzzle->getNumByPosition(row, col, dir);
   flipNum = puzzle->getNumByPosition(row, col, flip(dir));
+  curClue = puzzle->getClueByNum(cursor.dir, curNum);
+  flipClue = puzzle->getClueByNum(flip(cursor.dir), flipNum);
+
+  QPalette pal;
 
   if (dir == Direction::ACROSS) {
-    acrossWidget->item(puzzle->getClueByNum(dir, curNum))
-        ->setBackground(Colors::PRIMARY_HIGHLIGHT);
-    downWidget->item(puzzle->getClueByNum(flip(dir), flipNum))
-        ->setBackground(Colors::SECONDARY_HIGHLIGHT);
+    acrossWidget->setCurrentRow(curClue);
+    downWidget->setCurrentRow(flipClue);
+
+    pal = acrossWidget->palette();
+    pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
+    acrossWidget->setPalette(pal);
+
+    pal = downWidget->palette();
+    pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
+    downWidget->setPalette(pal);
   } else {
-    downWidget->item(puzzle->getClueByNum(dir, curNum))
-        ->setBackground(Colors::PRIMARY_HIGHLIGHT);
-    acrossWidget->item(puzzle->getClueByNum(flip(dir), flipNum))
-        ->setBackground(Colors::SECONDARY_HIGHLIGHT);
+    downWidget->setCurrentRow(curClue);
+    acrossWidget->setCurrentRow(flipClue);
+
+    pal = downWidget->palette();
+    pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
+    downWidget->setPalette(pal);
+
+    pal = acrossWidget->palette();
+    pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
+    acrossWidget->setPalette(pal);
   }
 
   puzzleWidget->selectCursorPosition(row, col);
