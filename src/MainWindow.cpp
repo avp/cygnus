@@ -48,6 +48,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   cursor.row = 0;
   cursor.col = 0;
   cursor.dir = Direction::ACROSS;
+
+  connect(acrossWidget, &ClueWidget::itemPressed, this,
+          &MainWindow::acrossClueClicked);
+  connect(downWidget, &ClueWidget::itemPressed, this,
+          &MainWindow::downClueClicked);
 }
 
 void MainWindow::reloadPuzzle() {
@@ -148,8 +153,8 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
 
   curNum = puzzle->getNumByPosition(row, col, dir);
   flipNum = puzzle->getNumByPosition(row, col, flip(dir));
-  curClue = puzzle->getClueByNum(cursor.dir, curNum);
-  flipClue = puzzle->getClueByNum(flip(cursor.dir), flipNum);
+  curClue = puzzle->getClueByNum(dir, curNum);
+  flipClue = puzzle->getClueByNum(flip(dir), flipNum);
 
   QPalette pal;
 
@@ -187,8 +192,8 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
 }
 
-QListWidget *MainWindow::createClueWidget() {
-  auto result = new QListWidget{};
+ClueWidget *MainWindow::createClueWidget() {
+  auto result = new ClueWidget{};
   QSizePolicy cluesSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
   cluesSize.setHorizontalStretch(1);
   result->setFrameStyle(QFrame::NoFrame);
@@ -384,6 +389,18 @@ void MainWindow::puzzleRightClicked() {
   setCursor(cursor.row, cursor.col,
             cursor.dir == Direction::ACROSS ? Direction::DOWN
                                             : Direction::ACROSS);
+}
+
+void MainWindow::acrossClueClicked(const QListWidgetItem *item) {
+  auto idx = acrossWidget->row(item);
+  auto pos = puzzle->getPositionFromClue(Direction::ACROSS, idx);
+  setCursor(pos.first, pos.second, Direction::ACROSS);
+}
+
+void MainWindow::downClueClicked(const QListWidgetItem *item) {
+  auto idx = downWidget->row(item);
+  auto pos = puzzle->getPositionFromClue(Direction::DOWN, idx);
+  setCursor(pos.first, pos.second, Direction::DOWN);
 }
 
 } // namespace cygnus

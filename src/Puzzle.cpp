@@ -349,6 +349,21 @@ const uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
   return 0;
 }
 
+const std::pair<uint8_t, uint8_t>
+Puzzle::getPositionFromClue(Direction dir, uint32_t idx) const {
+  const Clue &clue = dir == Direction::ACROSS ? clues_[0][idx] : clues_[1][idx];
+  auto num = clue.num;
+  for (uint8_t r = 0; r < height_; ++r) {
+    for (uint8_t c = 0; c < width_; ++c) {
+      if (nums_[r][c] == clue.num) {
+        return {r, c};
+      }
+    }
+  }
+  qCritical() << "Failed to retrieve position for clue at idx" << idx;
+  return {0, 0};
+}
+
 QByteArray Puzzle::serialize() const {
   QByteArray result(0x34 + (2 * width_ * height_) + text_.size(), 0);
 

@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "ClueWidget.h"
 #include "Puzzle.h"
 #include "PuzzleWidget.h"
 
@@ -27,6 +28,9 @@ private slots:
   void puzzleClicked(uint8_t row, uint8_t col);
   void puzzleRightClicked();
 
+  void acrossClueClicked(const QListWidgetItem *item);
+  void downClueClicked(const QListWidgetItem *item);
+
 private:
   std::unique_ptr<Puzzle> puzzle;
   Cursor cursor;
@@ -37,8 +41,8 @@ private:
   QAction *openAct;
   QAction *saveAct;
 
-  QListWidget *acrossWidget;
-  QListWidget *downWidget;
+  ClueWidget *acrossWidget;
+  ClueWidget *downWidget;
 
   QWidget *puzzleContainer;
   QVBoxLayout *puzzleContainerLayout;
@@ -48,7 +52,7 @@ private:
   void createActions();
   void createMenus();
 
-  QListWidget *createClueWidget();
+  ClueWidget *createClueWidget();
 
   void keyPressEvent(QKeyEvent *event) override;
   void keyUp();

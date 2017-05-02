@@ -15,6 +15,8 @@ add_compile_options(-std=c++14)
 set(SOURCES
   main.cpp
   MainWindow.cpp
+
+  ClueWidget.cpp
   PuzzleWidget.cpp
 
   Puzzle.cpp

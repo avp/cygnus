@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <QString>
+#include <utility>
 #include <vector>
 
 namespace cygnus {
@@ -64,6 +65,10 @@ public:
   const int getClueByNum(Direction dir, uint32_t num) const;
   const uint32_t getNumByPosition(uint8_t row, uint8_t col,
                                   Direction dir) const;
+
+  /// Given the \p idx clue in \p dir, return the {row,col} of the clue.
+  const std::pair<uint8_t, uint8_t> getPositionFromClue(Direction dir,
+                                                        uint32_t idx) const;
 
   QByteArray serialize() const;
 };
