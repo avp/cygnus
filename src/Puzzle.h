@@ -30,10 +30,21 @@ struct Clue {
 template <typename T> using Grid = std::vector<std::vector<T>>;
 
 class Puzzle {
+public:
+  struct CellData {
+    uint32_t acrossNum{0};
+    uint32_t acrossIdx{0};
+    bool acrossStart{false};
+
+    uint32_t downNum{0};
+    uint32_t downIdx{0};
+    bool downStart{false};
+  };
+
 private:
   Puzzle(QByteArray version, uint8_t height, uint8_t width, uint16_t mask1,
          uint16_t mask2, std::vector<Clue> clues[2], Grid<char> solution,
-         Grid<char> grid, Grid<uint32_t> nums, QByteArray text);
+         Grid<char> grid, Grid<CellData> data, QByteArray text);
 
   QByteArray version_;
 
@@ -44,7 +55,7 @@ private:
   std::vector<Clue> clues_[2];
   Grid<char> solution_;
   Grid<char> grid_;
-  Grid<uint32_t> nums_;
+  Grid<CellData> data_;
   QByteArray text_;
 
 public:
@@ -57,7 +68,7 @@ public:
   }
   inline Grid<char> &getGrid() { return grid_; }
   inline const Grid<char> &getSolution() const { return solution_; }
-  inline const Grid<uint32_t> &getNums() const { return nums_; }
+  inline const Grid<CellData> &getCellData() const { return data_; }
   inline const uint16_t getNumClues() const {
     return clues_[0].size() + clues_[1].size();
   }

@@ -4,8 +4,8 @@
 
 namespace cygnus {
 
-CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
-                       QWidget *parent)
+CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
+                       const Puzzle::CellData &cellData, QWidget *parent)
     : QFrame(parent), row_(row), col_(col), isBlack_(isBlack) {
   QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
@@ -16,13 +16,20 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
   setFrameStyle(QFrame::Box);
 
   QLabel *numLabel = new QLabel{};
-  numLabel->setText(num == 0 ? "" : QString("%1").arg(num));
   numLabel->setContentsMargins(1, 1, 1, 1);
   numLabel->setMargin(0);
   numLabel->setAlignment(Qt::AlignCenter);
   auto numFont = numLabel->font();
   numFont.setPointSize(numFont.pointSize() - 3);
   numLabel->setFont(numFont);
+
+  if (cellData.acrossStart) {
+    numLabel->setText(QString("%1").arg(cellData.acrossNum));
+  } else if (cellData.downStart) {
+    numLabel->setText(QString("%1").arg(cellData.downNum));
+  } else {
+    numLabel->setText("");
+  }
 
   entryLabel_ = new QLabel{};
   entryLabel_->setContentsMargins(0, 0, 0, 0);
@@ -84,13 +91,12 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
 
   cells_.clear();
   auto &grid = puzzle->getGrid();
-  auto &nums = puzzle->getNums();
+  auto &cellData = puzzle->getCellData();
   for (uint8_t r = 0; r < puzzle->getHeight(); ++r) {
     std::vector<CellWidget *> cellRow{};
     cellRow.reserve(puzzle->getHeight());
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
-      auto cell = new CellWidget(puzzle->getGrid()[r][c] == BLACK, r, c,
-                                 puzzle->getNums()[r][c]);
+      auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c]);
       cell->setFixedSize(40, 40);
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);

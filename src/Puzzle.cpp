@@ -266,34 +266,71 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   uint32_t num = 1;
   std::vector<Clue> across{};
   std::vector<Clue> down{};
-  Grid<uint32_t> nums{};
-  nums.reserve(height);
+  Grid<CellData> data{};
+  data.reserve(height);
+
+  uint32_t acrossIdx = 0;
+  uint32_t downIdx = 0;
 
   for (uint8_t r = 0; r < height; ++r) {
-    std::vector<uint32_t> numRow{};
+    std::vector<CellData> dataRow{};
+    dataRow.reserve(width);
     for (uint8_t c = 0; c < width; ++c) {
       if (grid[r][c] == BLACK) {
-        numRow.push_back(0);
+        dataRow.push_back(CellData{});
         continue;
       }
       bool a = c == 0 || grid[r][c - 1] == BLACK;
       bool d = r == 0 || grid[r - 1][c] == BLACK;
       if (a || d) {
-        numRow.push_back(num);
+        CellData data{};
         if (a) {
           Clue clue{readString(it), r, c, num};
           across.push_back(clue);
+          data.acrossNum = num;
+          data.acrossStart = true;
+          data.acrossIdx = acrossIdx++;
         }
         if (d) {
           Clue clue{readString(it), r, c, num};
           down.push_back(clue);
+          data.downNum = num;
+          data.downStart = true;
+          data.downIdx = downIdx++;
         }
+        dataRow.push_back(data);
         ++num;
       } else {
-        numRow.push_back(0);
+        dataRow.push_back(CellData{});
       }
     }
-    nums.push_back(numRow);
+    data.push_back(dataRow);
+  }
+
+  uint32_t curNum = 0;
+  uint32_t curIdx = 0;
+  for (uint8_t r = 0; r < height; ++r) {
+    for (uint8_t c = 0; c < width; ++c) {
+      if (data[r][c].acrossStart) {
+        curNum = data[r][c].acrossNum;
+        curIdx = data[r][c].acrossIdx;
+      } else {
+        data[r][c].acrossNum = curNum;
+        data[r][c].acrossIdx = curIdx;
+      }
+    }
+  }
+
+  for (uint8_t c = 0; c < width; ++c) {
+    for (uint8_t r = 0; r < height; ++r) {
+      if (data[r][c].downStart) {
+        curNum = data[r][c].downNum;
+        curIdx = data[r][c].downIdx;
+      } else {
+        data[r][c].downNum = curNum;
+        data[r][c].downIdx = curIdx;
+      }
+    }
   }
 
   std::vector<Clue> clues[2]{across, down};
@@ -302,16 +339,16 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
                     width,    mask1,
                     mask2,    clues,
                     solution, grid,
-                    nums,     puzFile.mid(0x34 + (2 * width * height))};
+                    data,     puzFile.mid(0x34 + (2 * width * height))};
 }
 
 Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
                uint16_t mask1, uint16_t mask2, std::vector<Clue> clues[2],
-               Grid<char> solution, Grid<char> grid, Grid<uint32_t> nums,
+               Grid<char> solution, Grid<char> grid, Grid<CellData> data,
                QByteArray text)
     : version_(version), height_(height), width_(width), mask1_(mask1),
       mask2_(mask2), clues_{clues[0], clues[1]}, solution_(solution),
-      grid_(grid), nums_(nums), text_(text) {}
+      grid_(grid), data_(data), text_(text) {}
 
 static bool compareForNum(const Clue &a, const Clue &b) {
   return a.num < b.num;
@@ -331,22 +368,8 @@ const int Puzzle::getClueByNum(Direction dir, uint32_t num) const {
 
 const uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
                                         Direction dir) const {
-  if (dir == Direction::ACROSS) {
-    do {
-      if (col == 0 || grid_[row][col - 1] == BLACK) {
-        return nums_[row][col];
-      }
-      --col;
-    } while (col >= 0);
-  } else {
-    do {
-      if (row == 0 || grid_[row - 1][col] == BLACK) {
-        return nums_[row][col];
-      }
-      --row;
-    } while (row >= 0);
-  }
-  return 0;
+  return dir == Direction::ACROSS ? data_[row][col].acrossNum
+                                  : data_[row][col].downNum;
 }
 
 const std::pair<uint8_t, uint8_t>
@@ -355,7 +378,7 @@ Puzzle::getPositionFromClue(Direction dir, uint32_t idx) const {
   auto num = clue.num;
   for (uint8_t r = 0; r < height_; ++r) {
     for (uint8_t c = 0; c < width_; ++c) {
-      if (nums_[r][c] == clue.num) {
+      if (data_[r][c].acrossNum == clue.num) {
         return {r, c};
       }
     }

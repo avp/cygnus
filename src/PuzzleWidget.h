@@ -11,7 +11,8 @@ namespace cygnus {
 class CellWidget : public QFrame {
   Q_OBJECT
 public:
-  explicit CellWidget(bool isBlack, uint8_t row, uint8_t col, uint32_t num,
+  explicit CellWidget(bool isBlack, uint8_t row, uint8_t col,
+                      const Puzzle::CellData &cellData,
                       QWidget *parent = nullptr);
 
   inline uint8_t getRow() const { return row_; }
