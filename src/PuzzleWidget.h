@@ -13,10 +13,13 @@ class CellWidget : public QFrame {
 public:
   explicit CellWidget(bool isBlack, uint8_t row, uint8_t col,
                       const Puzzle::CellData &cellData,
-                      QWidget *parent = nullptr);
+                      const Puzzle::Markup markup, QWidget *parent = nullptr);
 
   inline uint8_t getRow() const { return row_; }
   inline uint8_t getCol() const { return col_; }
+
+protected:
+  void paintEvent(QPaintEvent *pe) override;
 
 public slots:
   void selectCursor();
@@ -32,6 +35,7 @@ signals:
 
 private:
   bool isBlack_;
+  Puzzle::Markup markup_;
 
   uint8_t row_;
   uint8_t col_;

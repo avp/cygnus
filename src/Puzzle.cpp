@@ -1,6 +1,8 @@
 #include "Puzzle.h"
 
 #include <QDebug>
+#include <cassert>
+#include <cstring>
 
 namespace cygnus {
 
@@ -45,16 +47,19 @@ static inline QString readString(QByteArray::const_iterator &start) {
   return result;
 }
 
-static Grid<char> readGrid(QByteArray::const_iterator &start,
-                           const uint8_t height, const uint8_t width) {
-  Grid<char> grid;
+template <typename T>
+static Grid<T> readGrid(QByteArray::const_iterator &start, const uint8_t height,
+                        const uint8_t width) {
+  static_assert(sizeof(T) == sizeof(char),
+                "readGrid can only read single bytes");
+  Grid<T> grid;
   grid.reserve(height);
 
   for (uint8_t r = 0; r < height; ++r) {
-    std::vector<char> row;
+    std::vector<T> row;
     row.reserve(width);
     for (uint8_t c = 0; c < width; ++c) {
-      char cell = *start++;
+      T cell = static_cast<T>(*start++);
       row.push_back(cell);
     }
     grid.push_back(row);
@@ -211,8 +216,8 @@ static bool validatePuzzle(const QByteArray &puzFile) {
   }
 
   auto it = puzFile.begin() + 0x34;
-  Grid<char> solution = readGrid(it, height, width);
-  Grid<char> puzzle = readGrid(it, height, width);
+  auto solution = readGrid<char>(it, height, width);
+  auto puzzle = readGrid<char>(it, height, width);
 
   uint64_t magicChecksumExpected = readUInt64LE(puzFile.begin() + 0x10);
   uint64_t magicChecksumActual =
@@ -256,8 +261,8 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   uint16_t mask2 = readUInt16LE(puzFile.begin() + 0x32);
 
   auto it = puzFile.begin() + 0x34;
-  Grid<char> solution = readGrid(it, height, width);
-  Grid<char> grid = readGrid(it, height, width);
+  auto solution = readGrid<char>(it, height, width);
+  auto grid = readGrid<char>(it, height, width);
 
   QString title = readString(it);
   QString author = readString(it);
@@ -307,6 +312,32 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
     data.push_back(dataRow);
   }
 
+  Grid<Markup> markup{};
+  markup.resize(height);
+  for (uint8_t i = 0; i < height; ++i) {
+    markup[i].resize(width);
+    std::fill(markup[i].begin(), markup[i].end(), DEFAULT);
+  }
+
+  // Try and read extensions.
+  ++it;
+  while (it < puzFile.end() - 8) {
+    uint16_t len = readUInt16LE(it + 4);
+    if (::strncmp(it, "GEXT", 4) == 0) {
+      // Read the markup.
+      qDebug() << "Reading extension: Markup";
+      it += 8;
+      markup = readGrid<Markup>(it, height, width);
+      qDebug() << "Read extension:    Markup";
+    } else {
+      it += 8;
+      it += len;
+    }
+    // Account for the NUL character.
+    ++it;
+  }
+
+  // Perform post-processing on the cellData.
   uint32_t curNum = 0;
   uint32_t curIdx = 0;
   for (uint8_t r = 0; r < height; ++r) {
@@ -335,20 +366,19 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   std::vector<Clue> clues[2]{across, down};
   QByteArray version = puzFile.mid(0x18, 4);
-  return new Puzzle{version,  height,
-                    width,    mask1,
-                    mask2,    clues,
-                    solution, grid,
-                    data,     puzFile.mid(0x34 + (2 * width * height))};
+  return new Puzzle{
+      version, height,   width, mask1, mask2,
+      clues,   solution, grid,  data,  puzFile.mid(0x34 + (2 * width * height)),
+      markup};
 }
 
 Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
                uint16_t mask1, uint16_t mask2, std::vector<Clue> clues[2],
                Grid<char> solution, Grid<char> grid, Grid<CellData> data,
-               QByteArray text)
+               QByteArray text, Grid<Markup> markup)
     : version_(version), height_(height), width_(width), mask1_(mask1),
       mask2_(mask2), clues_{clues[0], clues[1]}, solution_(solution),
-      grid_(grid), data_(data), text_(text) {}
+      grid_(grid), data_(data), text_(text), markup_(markup) {}
 
 static bool compareForNum(const Clue &a, const Clue &b) {
   return a.num < b.num;

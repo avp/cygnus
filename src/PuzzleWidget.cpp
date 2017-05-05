@@ -5,8 +5,9 @@
 namespace cygnus {
 
 CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
-                       const Puzzle::CellData &cellData, QWidget *parent)
-    : QFrame(parent), row_(row), col_(col), isBlack_(isBlack) {
+                       const Puzzle::CellData &cellData,
+                       const Puzzle::Markup markup, QWidget *parent)
+    : QFrame(parent), row_(row), col_(col), isBlack_(isBlack), markup_(markup) {
   QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
   auto pal = palette();
@@ -82,6 +83,18 @@ void CellWidget::mousePressEvent(QMouseEvent *event) {
   }
 }
 
+void CellWidget::paintEvent(QPaintEvent *pe) {
+  QFrame::paintEvent(pe);
+
+  // Draw a circle if necessary.
+  if (markup_ & CIRCLED) {
+    QPainter p(this);
+    p.setPen(QColor(150, 150, 150));
+    auto radius = height() / 2 - 1;
+    p.drawEllipse(rect().center(), radius, radius);
+  }
+}
+
 PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                            QWidget *parent)
     : QFrame(parent) {
@@ -91,13 +104,15 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
 
   cells_.clear();
   auto &grid = puzzle->getGrid();
+  auto &markup = puzzle->getMarkup();
   auto &cellData = puzzle->getCellData();
   for (uint8_t r = 0; r < puzzle->getHeight(); ++r) {
     std::vector<CellWidget *> cellRow{};
     cellRow.reserve(puzzle->getHeight());
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
-      auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c]);
-      cell->setFixedSize(40, 40);
+      auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c],
+                                 markup[r][c]);
+      cell->setFixedSize(35, 35);
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);

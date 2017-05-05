@@ -29,6 +29,12 @@ struct Clue {
 
 template <typename T> using Grid = std::vector<std::vector<T>>;
 
+static const uint8_t DEFAULT = 0x00;
+static const uint8_t PREVIOUS_INCORRECT = 0x10;
+static const uint8_t INCORRECT = 0x20;
+static const uint8_t REVEALED = 0x40;
+static const uint8_t CIRCLED = 0x80;
+
 class Puzzle {
 public:
   struct CellData {
@@ -41,11 +47,13 @@ public:
     bool downStart{false};
   };
 
+  using Markup = uint8_t;
+
 private:
   Puzzle(QByteArray version, uint8_t height, uint8_t width, uint16_t mask1,
          uint16_t mask2, std::vector<Clue> clues[2], Grid<char> solution,
-         Grid<char> grid, Grid<CellData> data, QByteArray text);
-
+         Grid<char> grid, Grid<CellData> data, QByteArray text,
+         Grid<Markup> markup);
   QByteArray version_;
 
   uint8_t height_;
@@ -57,6 +65,7 @@ private:
   Grid<char> grid_;
   Grid<CellData> data_;
   QByteArray text_;
+  Grid<Markup> markup_;
 
 public:
   static Puzzle *loadFromFile(const QByteArray &puzFile);
@@ -69,6 +78,7 @@ public:
   inline Grid<char> &getGrid() { return grid_; }
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<CellData> &getCellData() const { return data_; }
+  inline const Grid<Markup> &getMarkup() const { return markup_; }
   inline const uint16_t getNumClues() const {
     return clues_[0].size() + clues_[1].size();
   }
