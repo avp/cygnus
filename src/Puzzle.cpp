@@ -8,6 +8,12 @@ namespace cygnus {
 
 const static char *MAGIC{"ACROSS&DOWN"};
 
+const Puzzle::Markup Puzzle::DefaultTag = 0x00;
+const Puzzle::Markup Puzzle::PreviousIncorrectTag = 0x10;
+const Puzzle::Markup Puzzle::IncorrectTag = 0x20;
+const Puzzle::Markup Puzzle::RevealedTag = 0x40;
+const Puzzle::Markup Puzzle::CircledTag = 0x80;
+
 /// Reads a Little-Endian 16-bit unsigned int.
 static inline uint16_t readUInt16LE(const QByteArray::const_iterator start) {
   uint16_t a = *start & 0xff;
@@ -316,7 +322,7 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   markup.resize(height);
   for (uint8_t i = 0; i < height; ++i) {
     markup[i].resize(width);
-    std::fill(markup[i].begin(), markup[i].end(), DEFAULT);
+    std::fill(markup[i].begin(), markup[i].end(), Puzzle::DefaultTag);
   }
 
   // Try and read extensions.

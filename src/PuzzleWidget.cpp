@@ -87,7 +87,7 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
   QFrame::paintEvent(pe);
 
   // Draw a circle if necessary.
-  if (markup_ & CIRCLED) {
+  if (markup_ & Puzzle::CircledTag) {
     QPainter p(this);
     p.setPen(QColor(150, 150, 150));
     auto radius = height() / 2 - 1;

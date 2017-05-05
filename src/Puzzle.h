@@ -29,12 +29,6 @@ struct Clue {
 
 template <typename T> using Grid = std::vector<std::vector<T>>;
 
-static const uint8_t DEFAULT = 0x00;
-static const uint8_t PREVIOUS_INCORRECT = 0x10;
-static const uint8_t INCORRECT = 0x20;
-static const uint8_t REVEALED = 0x40;
-static const uint8_t CIRCLED = 0x80;
-
 class Puzzle {
 public:
   struct CellData {
@@ -48,6 +42,11 @@ public:
   };
 
   using Markup = uint8_t;
+  static const Markup DefaultTag;
+  static const Markup PreviousIncorrectTag;
+  static const Markup IncorrectTag;
+  static const Markup RevealedTag;
+  static const Markup CircledTag;
 
 private:
   Puzzle(QByteArray version, uint8_t height, uint8_t width, uint16_t mask1,
