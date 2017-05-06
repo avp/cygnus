@@ -41,6 +41,16 @@ public:
     bool downStart{false};
   };
 
+  enum class PuzzleType : uint16_t {
+    NORMAL = 0x0001,
+    DIAGRAMLESS = 0x0401,
+  };
+
+  enum class SolutionState : uint16_t {
+    UNLOCKED = 0x0000,
+    LOCKED = 0x0004,
+  };
+
   using Markup = uint8_t;
   static const Markup DefaultTag;
   static const Markup PreviousIncorrectTag;
@@ -49,16 +59,16 @@ public:
   static const Markup CircledTag;
 
 private:
-  Puzzle(QByteArray version, uint8_t height, uint8_t width, uint16_t mask1,
-         uint16_t mask2, std::vector<Clue> clues[2], Grid<char> solution,
-         Grid<char> grid, Grid<CellData> data, QByteArray text,
-         Grid<Markup> markup);
+  Puzzle(QByteArray version, uint8_t height, uint8_t width,
+         PuzzleType puzzleType, SolutionState solutionState,
+         std::vector<Clue> clues[2], Grid<char> solution, Grid<char> grid,
+         Grid<CellData> data, QByteArray text, Grid<Markup> markup);
   QByteArray version_;
 
   uint8_t height_;
   uint8_t width_;
-  uint16_t mask1_;
-  uint16_t mask2_;
+  PuzzleType puzzleType_;
+  SolutionState solutionState_;
   std::vector<Clue> clues_[2];
   Grid<char> solution_;
   Grid<char> grid_;
@@ -91,6 +101,37 @@ public:
                                                         uint32_t idx) const;
 
   QByteArray serialize() const;
+
+private:
+  static bool validatePuzzle(const QByteArray &puzFile);
+
+  static uint16_t checksum(const QByteArray::const_iterator start,
+                           const QByteArray::const_iterator end,
+                           uint16_t seed = 0);
+
+  static uint16_t checksum(const Grid<char> &grid, const uint16_t seed = 0);
+
+  static uint16_t headerChecksum(uint8_t width, uint8_t height,
+                                 uint16_t numClues, PuzzleType puzzleType,
+                                 SolutionState solutionState,
+                                 uint16_t seed = 0);
+
+  static uint16_t textChecksum(uint16_t numClues, const QByteArray &text,
+                               uint16_t seed = 0);
+
+  static uint64_t magicChecksum(uint8_t width, uint8_t height,
+                                uint16_t numClues, PuzzleType puzzleType,
+                                SolutionState solutionState,
+                                const Grid<char> &solution,
+                                const Grid<char> &puzzle,
+                                const QByteArray &text, uint16_t seed = 0);
+
+  static uint16_t globalChecksum(uint8_t width, uint8_t height,
+                                 uint16_t numClues, PuzzleType puzzleType,
+                                 SolutionState solutionState,
+                                 const Grid<char> &solution,
+                                 const Grid<char> &puzzle,
+                                 const QByteArray &text, uint16_t seed = 0);
 };
 
 } // namespace cygnus

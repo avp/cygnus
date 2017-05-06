@@ -84,9 +84,8 @@ static inline void writeGrid(QByteArray::iterator start, Grid<char> grid) {
 
 /// Computes the 16-bit checksum of the provided region.
 /// \param seed the initial checksum to seed this computation with.
-static inline uint16_t checksum(const QByteArray::const_iterator start,
-                                const QByteArray::const_iterator end,
-                                const uint16_t seed = 0) {
+uint16_t Puzzle::checksum(const QByteArray::const_iterator start,
+                          const QByteArray::const_iterator end, uint16_t seed) {
   uint16_t result = seed;
   for (auto it = start; it != end; ++it) {
     uint16_t lsb = result & 1;
@@ -100,8 +99,7 @@ static inline uint16_t checksum(const QByteArray::const_iterator start,
 
 /// Computes the 16-bit checksum of the provided grid.
 /// \param seed the initial checksum to seed this computation with.
-static inline uint16_t checksum(const Grid<char> &grid,
-                                const uint16_t seed = 0) {
+uint16_t Puzzle::checksum(const Grid<char> &grid, uint16_t seed) {
   uint16_t result = seed;
   for (const auto &row : grid) {
     for (const auto c : row) {
@@ -115,23 +113,24 @@ static inline uint16_t checksum(const Grid<char> &grid,
   return result & 0xffff;
 }
 
-static inline uint16_t headerChecksum(uint8_t width, uint8_t height,
-                                      uint16_t numClues, uint16_t mask1,
-                                      uint16_t mask2, uint16_t seed = 0) {
+inline uint16_t Puzzle::headerChecksum(uint8_t width, uint8_t height,
+                                       uint16_t numClues, PuzzleType puzzleType,
+                                       SolutionState solutionState,
+                                       uint16_t seed) {
   QByteArray header(8, 0);
   header[0] = width;
   header[1] = height;
   header[2] = numClues & 0xff;
   header[3] = numClues >> 8;
-  header[4] = mask1 & 0xff;
-  header[5] = mask1 >> 8;
-  header[6] = mask2 & 0xff;
-  header[7] = mask2 >> 8;
+  header[4] = uint16_t(puzzleType) & 0xff;
+  header[5] = uint16_t(puzzleType) >> 8;
+  header[6] = uint16_t(solutionState) & 0xff;
+  header[7] = uint16_t(solutionState) >> 8;
   return checksum(header.begin(), header.end(), seed);
 }
 
-static uint16_t textChecksum(const uint16_t numClues, const QByteArray &text,
-                             uint16_t seed = 0) {
+uint16_t Puzzle::textChecksum(uint16_t numClues, const QByteArray &text,
+                              uint16_t seed) {
   uint16_t result{seed};
   auto it = text.begin();
   auto titleStart = it;
@@ -162,15 +161,17 @@ static uint16_t textChecksum(const uint16_t numClues, const QByteArray &text,
   return result;
 }
 
-static uint64_t magicChecksum(uint8_t width, uint8_t height, uint16_t numClues,
-                              uint16_t mask1, uint16_t mask2,
-                              const Grid<char> &solution,
-                              const Grid<char> &puzzle, const QByteArray &text,
-                              uint16_t seed = 0) {
+uint64_t Puzzle::magicChecksum(uint8_t width, uint8_t height, uint16_t numClues,
+                               PuzzleType puzzleType,
+                               SolutionState solutionState,
+                               const Grid<char> &solution,
+                               const Grid<char> &puzzle, const QByteArray &text,
+                               uint16_t seed) {
   const char MASK[]{"ICHEATED"};
 
   uint64_t checksums[4];
-  checksums[3] = headerChecksum(width, height, numClues, mask1, mask2);
+  checksums[3] =
+      headerChecksum(width, height, numClues, puzzleType, solutionState);
   checksums[2] = checksum(solution);
   checksums[1] = checksum(puzzle);
   checksums[0] = textChecksum(numClues, text);
@@ -185,20 +186,22 @@ static uint64_t magicChecksum(uint8_t width, uint8_t height, uint16_t numClues,
   return result;
 }
 
-static uint16_t globalChecksum(uint8_t width, uint8_t height, uint16_t numClues,
-                               uint16_t mask1, uint16_t mask2,
-                               const Grid<char> &solution,
-                               const Grid<char> &puzzle, const QByteArray &text,
-                               uint16_t seed = 0) {
+uint16_t Puzzle::globalChecksum(uint8_t width, uint8_t height,
+                                uint16_t numClues, PuzzleType puzzleType,
+                                SolutionState solutionState,
+                                const Grid<char> &solution,
+                                const Grid<char> &puzzle,
+                                const QByteArray &text, uint16_t seed) {
   uint64_t result{seed};
-  result = headerChecksum(width, height, numClues, mask1, mask2, result);
+  result = headerChecksum(width, height, numClues, puzzleType, solutionState,
+                          result);
   result = checksum(solution, result);
   result = checksum(puzzle, result);
   result = textChecksum(numClues, text, result);
   return result;
 }
 
-static bool validatePuzzle(const QByteArray &puzFile) {
+bool Puzzle::validatePuzzle(const QByteArray &puzFile) {
   if (puzFile.size() < 0x34) {
     return false;
   }
@@ -209,12 +212,13 @@ static bool validatePuzzle(const QByteArray &puzFile) {
   }
 
   uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
-  uint16_t mask1 = readUInt16LE(puzFile.begin() + 0x30);
-  uint16_t mask2 = readUInt16LE(puzFile.begin() + 0x32);
+  PuzzleType puzzleType = PuzzleType(readUInt16LE(puzFile.begin() + 0x30));
+  SolutionState solutionState =
+      SolutionState(readUInt16LE(puzFile.begin() + 0x32));
 
   uint16_t headerChecksumExpected = readUInt16LE(puzFile.begin() + 0xe);
   uint16_t headerChecksumActual =
-      headerChecksum(width, height, numClues, mask1, mask2);
+      headerChecksum(width, height, numClues, puzzleType, solutionState);
 
   if (headerChecksumExpected != headerChecksumActual) {
     qCritical() << "Header checksum check failed";
@@ -227,8 +231,8 @@ static bool validatePuzzle(const QByteArray &puzFile) {
 
   uint64_t magicChecksumExpected = readUInt64LE(puzFile.begin() + 0x10);
   uint64_t magicChecksumActual =
-      magicChecksum(width, height, numClues, mask1, mask2, solution, puzzle,
-                    puzFile.mid(0x34 + (2 * width * height)));
+      magicChecksum(width, height, numClues, puzzleType, solutionState,
+                    solution, puzzle, puzFile.mid(0x34 + (2 * width * height)));
 
   if (magicChecksumExpected != magicChecksumActual) {
     qCritical() << "Magic checksum check failed";
@@ -236,9 +240,9 @@ static bool validatePuzzle(const QByteArray &puzFile) {
   }
 
   uint16_t globalChecksumExpected = readUInt16LE(puzFile.begin());
-  uint16_t globalChecksumActual =
-      globalChecksum(width, height, numClues, mask1, mask2, solution, puzzle,
-                     puzFile.mid(0x34 + (2 * width * height)));
+  uint16_t globalChecksumActual = globalChecksum(
+      width, height, numClues, puzzleType, solutionState, solution, puzzle,
+      puzFile.mid(0x34 + (2 * width * height)));
 
   if (globalChecksumExpected != globalChecksumActual) {
     qCritical() << "Global checksum check failed";
@@ -263,8 +267,9 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   uint8_t width = puzFile[0x2c];
   uint8_t height = puzFile[0x2d];
   uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
-  uint16_t mask1 = readUInt16LE(puzFile.begin() + 0x30);
-  uint16_t mask2 = readUInt16LE(puzFile.begin() + 0x32);
+  PuzzleType puzzleType = PuzzleType(readUInt16LE(puzFile.begin() + 0x30));
+  SolutionState solutionState =
+      SolutionState(readUInt16LE(puzFile.begin() + 0x32));
 
   auto it = puzFile.begin() + 0x34;
   auto solution = readGrid<char>(it, height, width);
@@ -372,19 +377,23 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   std::vector<Clue> clues[2]{across, down};
   QByteArray version = puzFile.mid(0x18, 4);
-  return new Puzzle{
-      version, height,   width, mask1, mask2,
-      clues,   solution, grid,  data,  puzFile.mid(0x34 + (2 * width * height)),
-      markup};
+  return new Puzzle{version,       height,
+                    width,         puzzleType,
+                    solutionState, clues,
+                    solution,      grid,
+                    data,          puzFile.mid(0x34 + (2 * width * height)),
+                    markup};
 }
 
 Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
-               uint16_t mask1, uint16_t mask2, std::vector<Clue> clues[2],
-               Grid<char> solution, Grid<char> grid, Grid<CellData> data,
-               QByteArray text, Grid<Markup> markup)
-    : version_(version), height_(height), width_(width), mask1_(mask1),
-      mask2_(mask2), clues_{clues[0], clues[1]}, solution_(solution),
-      grid_(grid), data_(data), text_(text), markup_(markup) {}
+               PuzzleType puzzleType, SolutionState solutionState,
+               std::vector<Clue> clues[2], Grid<char> solution, Grid<char> grid,
+               Grid<CellData> data, QByteArray text, Grid<Markup> markup)
+    : version_(version), height_(height), width_(width),
+      puzzleType_(puzzleType),
+      solutionState_(solutionState), clues_{clues[0], clues[1]},
+      solution_(solution), grid_(grid), data_(data), text_(text),
+      markup_(markup) {}
 
 static bool compareForNum(const Clue &a, const Clue &b) {
   return a.num < b.num;
@@ -427,21 +436,22 @@ QByteArray Puzzle::serialize() const {
   QByteArray result(0x34 + (2 * width_ * height_) + text_.size(), 0);
 
   writeUInt16LE(result.begin(),
-                globalChecksum(width_, height_, getNumClues(), mask1_, mask2_,
-                               solution_, grid_, text_));
+                globalChecksum(width_, height_, getNumClues(), puzzleType_,
+                               solutionState_, solution_, grid_, text_));
   result.replace(0x2, 0xd, MAGIC);
   writeUInt16LE(result.begin() + 0x0e,
-                headerChecksum(width_, height_, getNumClues(), mask1_, mask2_));
+                headerChecksum(width_, height_, getNumClues(), puzzleType_,
+                               solutionState_));
   writeUInt64LE(result.begin() + 0x10,
-                magicChecksum(width_, height_, getNumClues(), mask1_, mask2_,
-                              solution_, grid_, text_));
+                magicChecksum(width_, height_, getNumClues(), puzzleType_,
+                              solutionState_, solution_, grid_, text_));
   result.replace(0x18, version_.size(), version_);
 
   result[0x2c] = width_;
   result[0x2d] = height_;
   writeUInt16LE(result.begin() + 0x2e, getNumClues());
-  writeUInt16LE(result.begin() + 0x30, mask1_);
-  writeUInt16LE(result.begin() + 0x32, mask2_);
+  writeUInt16LE(result.begin() + 0x30, uint16_t(puzzleType_));
+  writeUInt16LE(result.begin() + 0x32, uint16_t(solutionState_));
 
   writeGrid(result.begin() + 0x34, solution_);
   writeGrid(result.begin() + 0x34 + (width_ * height_), grid_);
