@@ -112,7 +112,10 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
       auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c],
                                  markup[r][c]);
-      cell->setFixedSize(35, 35);
+
+      auto cellSize = height() < width() ? height() / puzzle->getHeight()
+                                         : width() / puzzle->getWidth();
+      cell->setFixedSize(cellSize, cellSize);
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);

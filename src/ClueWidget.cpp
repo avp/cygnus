@@ -2,7 +2,9 @@
 
 namespace cygnus {
 
-ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {}
+ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {
+  setMinimumWidth(200);
+}
 
 void ClueWidget::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
