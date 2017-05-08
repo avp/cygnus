@@ -32,22 +32,26 @@ private slots:
   void downClueClicked(const QListWidgetItem *item);
 
 private:
-  std::unique_ptr<Puzzle> puzzle;
-  Cursor cursor;
+  std::unique_ptr<Puzzle> puzzle_;
+  Cursor cursor_;
 
   void reloadPuzzle();
 
-  QMenu *fileMenu;
-  QAction *openAct;
-  QAction *saveAct;
+  QMenu *fileMenu_;
+  QAction *openAct_;
+  QAction *saveAct_;
 
-  ClueWidget *acrossWidget;
-  ClueWidget *downWidget;
+  QLabel *titleLabel_;
+  QLabel *authorLabel_;
+  QLabel *copyrightLabel_;
 
-  QWidget *puzzleContainer;
-  QVBoxLayout *puzzleContainerLayout;
-  QLabel *curClueLabel;
-  PuzzleWidget *puzzleWidget;
+  ClueWidget *acrossWidget_;
+  ClueWidget *downWidget_;
+
+  QWidget *puzzleContainer_;
+  QVBoxLayout *puzzleContainerLayout_;
+  QLabel *curClueLabel_;
+  PuzzleWidget *puzzleWidget_;
 
   void createActions();
   void createMenus();

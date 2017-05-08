@@ -48,7 +48,7 @@ static inline void writeUInt64LE(QByteArray::iterator start, uint64_t x) {
 /// Reads a null-terminated string from position \p offset.
 /// \param[in,out] start first byte, will be update to point after the NUL byte.
 static inline QString readString(QByteArray::const_iterator &start) {
-  QString result{start};
+  QString result = QString::fromLatin1(start);
   start += result.size() + 1;
   return result;
 }
@@ -393,7 +393,12 @@ Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
       puzzleType_(puzzleType),
       solutionState_(solutionState), clues_{clues[0], clues[1]},
       solution_(solution), grid_(grid), data_(data), text_(text),
-      markup_(markup) {}
+      markup_(markup) {
+  QByteArray::const_iterator it = text.begin();
+  title_ = readString(it);
+  author_ = readString(it);
+  copyright_ = readString(it);
+}
 
 static bool compareForNum(const Clue &a, const Clue &b) {
   return a.num < b.num;

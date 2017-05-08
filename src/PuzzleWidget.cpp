@@ -99,6 +99,7 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                            QWidget *parent)
     : QFrame(parent) {
   setFrameStyle(QFrame::Box);
+  // setFixedSize(600, 600);
 
   gridLayout_ = new QGridLayout{};
 
@@ -113,9 +114,10 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
       auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c],
                                  markup[r][c]);
 
-      auto cellSize = height() < width() ? height() / puzzle->getHeight()
-                                         : width() / puzzle->getWidth();
-      cell->setFixedSize(cellSize, cellSize);
+      // auto cellSize = this->height() < this->width()
+      //                     ? this->height() / puzzle->getHeight()
+      //                     : this->width() / puzzle->getWidth();
+      // cell->setFixedSize(cellSize, cellSize);
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);

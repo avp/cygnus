@@ -76,6 +76,10 @@ private:
   QByteArray text_;
   Grid<Markup> markup_;
 
+  QString title_;
+  QString author_;
+  QString copyright_;
+
 public:
   static Puzzle *loadFromFile(const QByteArray &puzFile);
 
@@ -91,6 +95,9 @@ public:
   inline const uint16_t getNumClues() const {
     return clues_[0].size() + clues_[1].size();
   }
+  inline const QString &getTitle() const { return title_; }
+  inline const QString &getAuthor() const { return author_; }
+  inline const QString &getCopyright() const { return copyright_; }
 
   const int getClueByNum(Direction dir, uint32_t num) const;
   const uint32_t getNumByPosition(uint8_t row, uint8_t col,

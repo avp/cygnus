@@ -11,7 +11,10 @@
 namespace cygnus {
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-  QHBoxLayout *layout = new QHBoxLayout{};
+  QVBoxLayout *vLayout = new QVBoxLayout{};
+
+  QHBoxLayout *infoLayout = new QHBoxLayout{};
+  QHBoxLayout *hLayout = new QHBoxLayout{};
 
   createActions();
   createMenus();
@@ -20,176 +23,193 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   QWidget *window = new QWidget(this);
   setCentralWidget(window);
 
-  QSizePolicy puzzleContainerSize{QSizePolicy::Preferred,
-                                  QSizePolicy::Preferred};
+  QSizePolicy puzzleContainerSize{QSizePolicy::MinimumExpanding,
+                                  QSizePolicy::MinimumExpanding};
   puzzleContainerSize.setHorizontalStretch(2);
 
-  acrossWidget = createClueWidget();
-  downWidget = createClueWidget();
+  acrossWidget_ = createClueWidget();
+  downWidget_ = createClueWidget();
 
-  puzzleContainer = new QWidget{};
-  puzzleContainerLayout = new QVBoxLayout{};
-  puzzleContainer->setSizePolicy(puzzleContainerSize);
-  puzzleContainer->setLayout(puzzleContainerLayout);
+  puzzleContainer_ = new QWidget{};
+  puzzleContainerLayout_ = new QVBoxLayout{};
+  puzzleContainer_->setSizePolicy(puzzleContainerSize);
+  puzzleContainer_->setLayout(puzzleContainerLayout_);
 
-  curClueLabel = new QLabel{};
-  puzzleContainerLayout->addWidget(curClueLabel);
-  puzzleContainerLayout->addStretch();
-  auto clueFont = curClueLabel->font();
+  curClueLabel_ = new QLabel{};
+  puzzleContainerLayout_->addWidget(curClueLabel_);
+  puzzleContainerLayout_->addStretch();
+  auto clueFont = curClueLabel_->font();
   clueFont.setPointSize(clueFont.pointSize() + 3);
-  curClueLabel->setFont(clueFont);
+  curClueLabel_->setFont(clueFont);
 
-  // Set QWidget as the central layout of the main window
-  layout->addWidget(acrossWidget);
-  layout->addWidget(puzzleContainer);
-  layout->addWidget(downWidget);
-  window->setLayout(layout);
+  titleLabel_ = new QLabel{};
+  infoLayout->addWidget(titleLabel_);
+  authorLabel_ = new QLabel{};
+  infoLayout->addWidget(authorLabel_);
+  copyrightLabel_ = new QLabel{};
+  infoLayout->addWidget(copyrightLabel_);
 
-  cursor.row = 0;
-  cursor.col = 0;
-  cursor.dir = Direction::ACROSS;
+  hLayout->addWidget(acrossWidget_);
+  hLayout->addWidget(puzzleContainer_);
+  hLayout->addWidget(downWidget_);
 
-  connect(acrossWidget, &ClueWidget::itemPressed, this,
+  vLayout->addLayout(infoLayout);
+  vLayout->addLayout(hLayout);
+
+  window->setLayout(vLayout);
+
+  cursor_.row = 0;
+  cursor_.col = 0;
+  cursor_.dir = Direction::ACROSS;
+
+  connect(acrossWidget_, &ClueWidget::itemPressed, this,
           &MainWindow::acrossClueClicked);
-  connect(downWidget, &ClueWidget::itemPressed, this,
+  connect(downWidget_, &ClueWidget::itemPressed, this,
           &MainWindow::downClueClicked);
 }
 
 void MainWindow::reloadPuzzle() {
-  acrossWidget->clear();
-  for (const auto &clue : puzzle->getClues(Direction::ACROSS)) {
-    acrossWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
+  titleLabel_->setText(puzzle_->getTitle());
+  authorLabel_->setText(puzzle_->getAuthor());
+  copyrightLabel_->setText(puzzle_->getCopyright());
+
+  acrossWidget_->clear();
+  for (const auto &clue : puzzle_->getClues(Direction::ACROSS)) {
+    acrossWidget_->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
 
-  downWidget->clear();
-  for (const auto &clue : puzzle->getClues(Direction::DOWN)) {
-    downWidget->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
+  downWidget_->clear();
+  for (const auto &clue : puzzle_->getClues(Direction::DOWN)) {
+    downWidget_->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
 
-  if (puzzleWidget) {
-    puzzleWidget->deleteLater();
+  if (puzzleWidget_) {
+    puzzleWidget_->deleteLater();
   }
-  puzzleWidget = new PuzzleWidget{puzzle};
-  puzzleContainerLayout->insertWidget(1, puzzleWidget);
-  puzzleContainerLayout->setAlignment(puzzleWidget,
-                                      Qt::AlignHCenter | Qt::AlignTop);
+  puzzleWidget_ = new PuzzleWidget{puzzle_};
+  puzzleContainerLayout_->insertWidget(1, puzzleWidget_);
+  puzzleContainerLayout_->setAlignment(puzzleWidget_,
+                                       Qt::AlignHCenter | Qt::AlignTop);
 
-  // Set cursor to first non-blank square.
-  const auto &across = puzzle->getClues(Direction::ACROSS);
+  auto puzzleSize = std::min(this->height(), this->width()) - 200;
+  puzzleWidget_->setFixedSize(puzzleSize, puzzleSize);
+
+  // Set cursor_ to first non-blank square.
+  const auto &across = puzzle_->getClues(Direction::ACROSS);
   if (across.size() > 0) {
     setCursor(across[0].row, across[0].col, Direction::ACROSS);
   } else {
-    qCritical() << "No across clues in puzzle";
+    qCritical() << "No across clues in puzzle_";
     return;
   }
 
-  // Connect the signals from the puzzle.
-  connect(puzzleWidget, &PuzzleWidget::clicked, this,
+  // Connect the signals from the puzzle_.
+  connect(puzzleWidget_, &PuzzleWidget::clicked, this,
           &MainWindow::puzzleClicked);
-  connect(puzzleWidget, &PuzzleWidget::rightClicked, this,
+  connect(puzzleWidget_, &PuzzleWidget::rightClicked, this,
           &MainWindow::puzzleRightClicked);
 }
 
 void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
-  const auto &grid = puzzle->getGrid();
+  const auto &grid = puzzle_->getGrid();
 
   // Clear current selection.
-  if (cursor.dir == Direction::ACROSS) {
-    for (uint8_t i = 0; cursor.col + i < puzzle->getWidth() &&
-                        grid[cursor.row][cursor.col + i] != BLACK;
+  if (cursor_.dir == Direction::ACROSS) {
+    for (uint8_t i = 0; cursor_.col + i < puzzle_->getWidth() &&
+                        grid[cursor_.row][cursor_.col + i] != BLACK;
          ++i) {
-      puzzleWidget->deselectPosition(cursor.row, cursor.col + i);
+      puzzleWidget_->deselectPosition(cursor_.row, cursor_.col + i);
     }
     for (uint8_t i = 0;
-         cursor.col - i >= 0 && grid[cursor.row][cursor.col - i] != BLACK;
+         cursor_.col - i >= 0 && grid[cursor_.row][cursor_.col - i] != BLACK;
          ++i) {
-      puzzleWidget->deselectPosition(cursor.row, cursor.col - i);
+      puzzleWidget_->deselectPosition(cursor_.row, cursor_.col - i);
     }
   } else {
-    for (uint8_t i = 0; cursor.row + i < puzzle->getHeight() &&
-                        grid[cursor.row + i][cursor.col] != BLACK;
+    for (uint8_t i = 0; cursor_.row + i < puzzle_->getHeight() &&
+                        grid[cursor_.row + i][cursor_.col] != BLACK;
          ++i) {
-      puzzleWidget->deselectPosition(cursor.row + i, cursor.col);
+      puzzleWidget_->deselectPosition(cursor_.row + i, cursor_.col);
     }
     for (uint8_t i = 0;
-         cursor.row - i >= 0 && grid[cursor.row - i][cursor.col] != BLACK;
+         cursor_.row - i >= 0 && grid[cursor_.row - i][cursor_.col] != BLACK;
          ++i) {
-      puzzleWidget->deselectPosition(cursor.row - i, cursor.col);
+      puzzleWidget_->deselectPosition(cursor_.row - i, cursor_.col);
     }
   }
 
-  // Select at new cursor position.
+  // Select at new cursor_ position.
   if (dir == Direction::ACROSS) {
     for (uint8_t i = 0;
-         col + i < puzzle->getWidth() && grid[row][col + i] != BLACK; ++i) {
-      puzzleWidget->selectPosition(row, col + i);
+         col + i < puzzle_->getWidth() && grid[row][col + i] != BLACK; ++i) {
+      puzzleWidget_->selectPosition(row, col + i);
     }
     for (uint8_t i = 0; col - i >= 0 && grid[row][col - i] != BLACK; ++i) {
-      puzzleWidget->selectPosition(row, col - i);
+      puzzleWidget_->selectPosition(row, col - i);
     }
   } else {
     for (uint8_t i = 0;
-         row + i < puzzle->getHeight() && grid[row + i][col] != BLACK; ++i) {
-      puzzleWidget->selectPosition(row + i, col);
+         row + i < puzzle_->getHeight() && grid[row + i][col] != BLACK; ++i) {
+      puzzleWidget_->selectPosition(row + i, col);
     }
     for (uint8_t i = 0; row - i >= 0 && grid[row - i][col] != BLACK; ++i) {
-      puzzleWidget->selectPosition(row - i, col);
+      puzzleWidget_->selectPosition(row - i, col);
     }
   }
 
   uint32_t curNum =
-      puzzle->getNumByPosition(cursor.row, cursor.col, cursor.dir);
+      puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir);
   uint32_t flipNum =
-      puzzle->getNumByPosition(cursor.row, cursor.col, flip(cursor.dir));
-  int curClue = puzzle->getClueByNum(cursor.dir, curNum);
-  int flipClue = puzzle->getClueByNum(flip(cursor.dir), flipNum);
-  if (cursor.dir == Direction::ACROSS) {
-    acrossWidget->item(curClue)->setBackground(Qt::white);
-    downWidget->item(flipClue)->setBackground(Qt::white);
+      puzzle_->getNumByPosition(cursor_.row, cursor_.col, flip(cursor_.dir));
+  int curClue = puzzle_->getClueByNum(cursor_.dir, curNum);
+  int flipClue = puzzle_->getClueByNum(flip(cursor_.dir), flipNum);
+  if (cursor_.dir == Direction::ACROSS) {
+    acrossWidget_->item(curClue)->setBackground(Qt::white);
+    downWidget_->item(flipClue)->setBackground(Qt::white);
   } else {
-    downWidget->item(curClue)->setBackground(Qt::white);
-    acrossWidget->item(flipClue)->setBackground(Qt::white);
+    downWidget_->item(curClue)->setBackground(Qt::white);
+    acrossWidget_->item(flipClue)->setBackground(Qt::white);
   }
 
-  curNum = puzzle->getNumByPosition(row, col, dir);
-  flipNum = puzzle->getNumByPosition(row, col, flip(dir));
-  curClue = puzzle->getClueByNum(dir, curNum);
-  flipClue = puzzle->getClueByNum(flip(dir), flipNum);
+  curNum = puzzle_->getNumByPosition(row, col, dir);
+  flipNum = puzzle_->getNumByPosition(row, col, flip(dir));
+  curClue = puzzle_->getClueByNum(dir, curNum);
+  flipClue = puzzle_->getClueByNum(flip(dir), flipNum);
 
   QPalette pal;
 
   if (dir == Direction::ACROSS) {
-    acrossWidget->setCurrentRow(curClue);
-    downWidget->setCurrentRow(flipClue);
+    acrossWidget_->setCurrentRow(curClue);
+    downWidget_->setCurrentRow(flipClue);
 
-    pal = acrossWidget->palette();
+    pal = acrossWidget_->palette();
     pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
-    acrossWidget->setPalette(pal);
+    acrossWidget_->setPalette(pal);
 
-    pal = downWidget->palette();
+    pal = downWidget_->palette();
     pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
-    downWidget->setPalette(pal);
+    downWidget_->setPalette(pal);
   } else {
-    downWidget->setCurrentRow(curClue);
-    acrossWidget->setCurrentRow(flipClue);
+    downWidget_->setCurrentRow(curClue);
+    acrossWidget_->setCurrentRow(flipClue);
 
-    pal = downWidget->palette();
+    pal = downWidget_->palette();
     pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
-    downWidget->setPalette(pal);
+    downWidget_->setPalette(pal);
 
-    pal = acrossWidget->palette();
+    pal = acrossWidget_->palette();
     pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
-    acrossWidget->setPalette(pal);
+    acrossWidget_->setPalette(pal);
   }
 
-  puzzleWidget->selectCursorPosition(row, col);
-  cursor.row = row;
-  cursor.col = col;
-  cursor.dir = dir;
+  puzzleWidget_->selectCursorPosition(row, col);
+  cursor_.row = row;
+  cursor_.col = col;
+  cursor_.dir = dir;
 
   uint32_t num = curNum;
-  const Clue &clue = puzzle->getClues(dir)[puzzle->getClueByNum(dir, num)];
-  curClueLabel->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
+  const Clue &clue = puzzle_->getClues(dir)[puzzle_->getClueByNum(dir, num)];
+  curClueLabel_->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
 }
 
 ClueWidget *MainWindow::createClueWidget() {
@@ -204,20 +224,20 @@ ClueWidget *MainWindow::createClueWidget() {
 }
 
 void MainWindow::createActions() {
-  openAct = new QAction(tr("&Open..."), this);
-  openAct->setShortcuts(QKeySequence::Open);
-  openAct->setStatusTip(tr("Open an existing file"));
-  connect(openAct, &QAction::triggered, this, &MainWindow::open);
+  openAct_ = new QAction(tr("&Open..."), this);
+  openAct_->setShortcuts(QKeySequence::Open);
+  openAct_->setStatusTip(tr("Open an existing file"));
+  connect(openAct_, &QAction::triggered, this, &MainWindow::open);
 
-  saveAct = new QAction(tr("&Save..."), this);
-  saveAct->setShortcuts(QKeySequence::Save);
-  saveAct->setStatusTip(tr("Save the current puzzle"));
-  connect(saveAct, &QAction::triggered, this, &MainWindow::save);
+  saveAct_ = new QAction(tr("&Save..."), this);
+  saveAct_->setShortcuts(QKeySequence::Save);
+  saveAct_->setStatusTip(tr("Save the current puzzle_"));
+  connect(saveAct_, &QAction::triggered, this, &MainWindow::save);
 }
 
 void MainWindow::open() {
   auto fileName =
-      QFileDialog::getOpenFileName(this, tr("Open Puzzle"), QDir::homePath(),
+      QFileDialog::getOpenFileName(this, tr("Open puzzle_"), QDir::homePath(),
                                    tr("Across Lite File (*.puz)"));
 
   if (!fileName.isEmpty()) {
@@ -227,30 +247,30 @@ void MainWindow::open() {
       return;
     }
     QByteArray puzFile = file.readAll();
-    puzzle.reset(Puzzle::loadFromFile(puzFile));
-    if (puzzle) {
-      // TODO: Handle null puzzle (failure case).
+    puzzle_.reset(Puzzle::loadFromFile(puzFile));
+    if (puzzle_) {
+      // TODO: Handle null puzzle_ (failure case).
       reloadPuzzle();
     }
   }
 }
 
 void MainWindow::save() {
-  if (!puzzle) {
+  if (!puzzle_) {
     return;
   }
 
   QFile file{"/Users/avp/test.puz"};
   if (file.open(QIODevice::WriteOnly)) {
-    QByteArray bytes = puzzle->serialize();
+    QByteArray bytes = puzzle_->serialize();
     file.write(bytes);
   }
 }
 
 void MainWindow::createMenus() {
-  fileMenu = menuBar()->addMenu(tr("&File"));
-  fileMenu->addAction(openAct);
-  fileMenu->addAction(saveAct);
+  fileMenu_ = menuBar()->addMenu(tr("&File"));
+  fileMenu_->addAction(openAct_);
+  fileMenu_->addAction(saveAct_);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -268,14 +288,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     keyRight();
     break;
   case Qt::Key_Space:
-    setCursor(cursor.row, cursor.col, flip(cursor.dir));
+    setCursor(cursor_.row, cursor_.col, flip(cursor_.dir));
     break;
   case Qt::Key_A... Qt::Key_Z:
     if (event->modifiers() == Qt::NoModifier ||
         event->modifiers() == Qt::ShiftModifier) {
       setLetter(static_cast<char>(event->key()));
     }
-    if (cursor.dir == Direction::ACROSS) {
+    if (cursor_.dir == Direction::ACROSS) {
       keyRight();
     } else {
       keyDown();
@@ -283,7 +303,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     break;
   case Qt::Key_Backspace:
     clearLetter();
-    if (cursor.dir == Direction::ACROSS) {
+    if (cursor_.dir == Direction::ACROSS) {
       keyLeft();
     } else {
       keyUp();
@@ -296,89 +316,89 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
 }
 
 void MainWindow::keyUp() {
-  const auto &grid = puzzle->getGrid();
-  if (cursor.dir == Direction::ACROSS) {
-    setCursor(cursor.row, cursor.col, Direction::DOWN);
+  const auto &grid = puzzle_->getGrid();
+  if (cursor_.dir == Direction::ACROSS) {
+    setCursor(cursor_.row, cursor_.col, Direction::DOWN);
     return;
   }
-  uint8_t row = cursor.row;
+  uint8_t row = cursor_.row;
   do {
     if (row > 0) {
       --row;
     } else {
       return;
     }
-  } while (grid[row][cursor.col] == BLACK);
-  setCursor(row, cursor.col, Direction::DOWN);
+  } while (grid[row][cursor_.col] == BLACK);
+  setCursor(row, cursor_.col, Direction::DOWN);
 }
 
 void MainWindow::keyDown() {
-  const auto &grid = puzzle->getGrid();
-  if (cursor.dir == Direction::ACROSS) {
-    setCursor(cursor.row, cursor.col, Direction::DOWN);
+  const auto &grid = puzzle_->getGrid();
+  if (cursor_.dir == Direction::ACROSS) {
+    setCursor(cursor_.row, cursor_.col, Direction::DOWN);
     return;
   }
-  uint8_t row = cursor.row;
+  uint8_t row = cursor_.row;
   do {
-    if (row < puzzle->getHeight() - 1) {
+    if (row < puzzle_->getHeight() - 1) {
       ++row;
     } else {
       return;
     }
-  } while (grid[row][cursor.col] == BLACK);
-  setCursor(row, cursor.col, Direction::DOWN);
+  } while (grid[row][cursor_.col] == BLACK);
+  setCursor(row, cursor_.col, Direction::DOWN);
 }
 
 void MainWindow::keyLeft() {
-  const auto &grid = puzzle->getGrid();
-  if (cursor.dir == Direction::DOWN) {
-    setCursor(cursor.row, cursor.col, Direction::ACROSS);
+  const auto &grid = puzzle_->getGrid();
+  if (cursor_.dir == Direction::DOWN) {
+    setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
     return;
   }
-  uint8_t col = cursor.col;
+  uint8_t col = cursor_.col;
   do {
     if (col > 0) {
       --col;
     } else {
       return;
     }
-  } while (grid[cursor.row][col] == BLACK);
-  setCursor(cursor.row, col, Direction::ACROSS);
+  } while (grid[cursor_.row][col] == BLACK);
+  setCursor(cursor_.row, col, Direction::ACROSS);
 }
 
 void MainWindow::keyRight() {
-  const auto &grid = puzzle->getGrid();
-  if (cursor.dir == Direction::DOWN) {
-    setCursor(cursor.row, cursor.col, Direction::ACROSS);
+  const auto &grid = puzzle_->getGrid();
+  if (cursor_.dir == Direction::DOWN) {
+    setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
     return;
   }
-  uint8_t col = cursor.col;
+  uint8_t col = cursor_.col;
   do {
-    if (col < puzzle->getWidth() - 1) {
+    if (col < puzzle_->getWidth() - 1) {
       ++col;
     } else {
       return;
     }
-  } while (grid[cursor.row][col] == BLACK);
-  setCursor(cursor.row, col, Direction::ACROSS);
+  } while (grid[cursor_.row][col] == BLACK);
+  setCursor(cursor_.row, col, Direction::ACROSS);
 }
 
 void MainWindow::setLetter(char letter) {
-  puzzle->getGrid()[cursor.row][cursor.col] = letter;
-  puzzleWidget->setLetter(cursor.row, cursor.col, letter);
+  puzzle_->getGrid()[cursor_.row][cursor_.col] = letter;
+  puzzleWidget_->setLetter(cursor_.row, cursor_.col, letter);
 }
 
 void MainWindow::clearLetter() {
-  puzzle->getGrid()[cursor.row][cursor.col] = EMPTY;
-  puzzleWidget->setLetter(cursor.row, cursor.col, EMPTY);
+  puzzle_->getGrid()[cursor_.row][cursor_.col] = EMPTY;
+  puzzleWidget_->setLetter(cursor_.row, cursor_.col, EMPTY);
 }
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
-  const auto &grid = puzzle->getGrid();
-  if ((0 <= row && row < puzzle->getHeight()) &&
-      (0 <= col && col < puzzle->getWidth())) {
+  const auto &grid = puzzle_->getGrid();
+  if ((0 <= row && row < puzzle_->getHeight()) &&
+      (0 <= col && col < puzzle_->getWidth())) {
     if (grid[row][col] != BLACK) {
-      setCursor(row, col, cursor.dir);
+      setCursor(row, col, cursor_.dir);
     }
   } else {
     qCritical() << "Click event out of bounds:" << row << col;
@@ -386,20 +406,20 @@ void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
 }
 
 void MainWindow::puzzleRightClicked() {
-  setCursor(cursor.row, cursor.col,
-            cursor.dir == Direction::ACROSS ? Direction::DOWN
-                                            : Direction::ACROSS);
+  setCursor(cursor_.row, cursor_.col,
+            cursor_.dir == Direction::ACROSS ? Direction::DOWN
+                                             : Direction::ACROSS);
 }
 
 void MainWindow::acrossClueClicked(const QListWidgetItem *item) {
-  auto idx = acrossWidget->row(item);
-  auto pos = puzzle->getPositionFromClue(Direction::ACROSS, idx);
+  auto idx = acrossWidget_->row(item);
+  auto pos = puzzle_->getPositionFromClue(Direction::ACROSS, idx);
   setCursor(pos.first, pos.second, Direction::ACROSS);
 }
 
 void MainWindow::downClueClicked(const QListWidgetItem *item) {
-  auto idx = downWidget->row(item);
-  auto pos = puzzle->getPositionFromClue(Direction::DOWN, idx);
+  auto idx = downWidget_->row(item);
+  auto pos = puzzle_->getPositionFromClue(Direction::DOWN, idx);
   setCursor(pos.first, pos.second, Direction::DOWN);
 }
 
