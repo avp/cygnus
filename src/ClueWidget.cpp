@@ -1,5 +1,7 @@
 #include "ClueWidget.h"
 
+#include "Colors.h"
+
 namespace cygnus {
 
 ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {
@@ -25,6 +27,16 @@ void ClueWidget::mouseReleaseEvent(QMouseEvent *event) {
     mousePressed_ = false;
   }
   QListWidget::mouseReleaseEvent(event);
+}
+
+void ClueWidget::setPrimary() {
+  setStyleSheet(QString("QListView::item:selected { background: %1 }")
+                    .arg(Colors::colorToString(Colors::PRIMARY_HIGHLIGHT)));
+}
+
+void ClueWidget::setSecondary() {
+  setStyleSheet(QString("QListView::item:selected { background: %1 }")
+                    .arg(Colors::colorToString(Colors::SECONDARY_HIGHLIGHT)));
 }
 
 } // namespace cygnus

@@ -15,6 +15,9 @@ public slots:
   void mouseMoveEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
 
+  void setPrimary();
+  void setSecondary();
+
 private:
   bool mousePressed_{false};
 };

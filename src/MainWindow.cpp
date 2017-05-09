@@ -182,24 +182,14 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
     acrossWidget_->setCurrentRow(curClue);
     downWidget_->setCurrentRow(flipClue);
 
-    pal = acrossWidget_->palette();
-    pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
-    acrossWidget_->setPalette(pal);
-
-    pal = downWidget_->palette();
-    pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
-    downWidget_->setPalette(pal);
+    acrossWidget_->setPrimary();
+    downWidget_->setSecondary();
   } else {
     downWidget_->setCurrentRow(curClue);
     acrossWidget_->setCurrentRow(flipClue);
 
-    pal = downWidget_->palette();
-    pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
-    downWidget_->setPalette(pal);
-
-    pal = acrossWidget_->palette();
-    pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
-    acrossWidget_->setPalette(pal);
+    downWidget_->setPrimary();
+    acrossWidget_->setSecondary();
   }
 
   puzzleWidget_->selectCursorPosition(row, col);
@@ -216,7 +206,7 @@ ClueWidget *MainWindow::createClueWidget() {
   auto result = new ClueWidget{};
   QSizePolicy cluesSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
   cluesSize.setHorizontalStretch(1);
-  result->setFrameStyle(QFrame::NoFrame);
+  // result->setFrameStyle(QFrame::NoFrame);
   result->setSizePolicy(cluesSize);
   result->setWordWrap(true);
   result->setFocusPolicy(Qt::NoFocus);

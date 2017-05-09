@@ -426,10 +426,20 @@ const std::pair<uint8_t, uint8_t>
 Puzzle::getPositionFromClue(Direction dir, uint32_t idx) const {
   const Clue &clue = dir == Direction::ACROSS ? clues_[0][idx] : clues_[1][idx];
   auto num = clue.num;
-  for (uint8_t r = 0; r < height_; ++r) {
+  if (dir == Direction::ACROSS) {
+    for (uint8_t r = 0; r < height_; ++r) {
+      for (uint8_t c = 0; c < width_; ++c) {
+        if (data_[r][c].acrossNum == clue.num) {
+          return {r, c};
+        }
+      }
+    }
+  } else {
     for (uint8_t c = 0; c < width_; ++c) {
-      if (data_[r][c].acrossNum == clue.num) {
-        return {r, c};
+      for (uint8_t r = 0; r < height_; ++r) {
+        if (data_[r][c].downNum == clue.num) {
+          return {r, c};
+        }
       }
     }
   }
