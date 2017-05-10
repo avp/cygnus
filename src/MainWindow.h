@@ -24,6 +24,8 @@ public:
 private slots:
   void open();
   void save();
+  void saveAs();
+
   void setCursor(uint8_t row, uint8_t col, Direction dir);
   void puzzleClicked(uint8_t row, uint8_t col);
   void puzzleRightClicked();
@@ -40,6 +42,7 @@ private:
   QMenu *fileMenu_;
   QAction *openAct_;
   QAction *saveAct_;
+  QAction *saveAsAct_;
 
   QLabel *titleLabel_;
   QLabel *authorLabel_;

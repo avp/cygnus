@@ -221,8 +221,13 @@ void MainWindow::createActions() {
 
   saveAct_ = new QAction(tr("&Save..."), this);
   saveAct_->setShortcuts(QKeySequence::Save);
-  saveAct_->setStatusTip(tr("Save the current puzzle_"));
+  saveAct_->setStatusTip(tr("Save the current puzzle"));
   connect(saveAct_, &QAction::triggered, this, &MainWindow::save);
+
+  saveAsAct_ = new QAction(tr("&Save As..."), this);
+  saveAsAct_->setShortcuts(QKeySequence::SaveAs);
+  saveAsAct_->setStatusTip(tr("Save the current puzzle as..."));
+  connect(saveAsAct_, &QAction::triggered, this, &MainWindow::saveAs);
 }
 
 void MainWindow::open() {
@@ -261,10 +266,27 @@ void MainWindow::save() {
   }
 }
 
+void MainWindow::saveAs() {
+  if (!puzzle_) {
+    return;
+  }
+
+  QString fileName = QFileDialog::getSaveFileName(
+      this, tr("Save Puzzle"), "",
+      tr("Across Lite File (*.puz);;All Files (*)"));
+
+  QFile file{fileName};
+  if (file.open(QIODevice::WriteOnly)) {
+    QByteArray bytes = puzzle_->serialize();
+    file.write(bytes);
+  }
+}
+
 void MainWindow::createMenus() {
   fileMenu_ = menuBar()->addMenu(tr("&File"));
   fileMenu_->addAction(openAct_);
   fileMenu_->addAction(saveAct_);
+  fileMenu_->addAction(saveAsAct_);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
