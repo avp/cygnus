@@ -87,13 +87,17 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
 
   QPainter painter(this);
   painter.setPen({Qt::black, 2});
-  painter.drawRect(0, 0, width() + 1, height() + 1);
+  painter.drawRect(0, 0, width(), height());
 
   // Draw a circle if necessary.
   if (markup_ & Puzzle::CircledTag) {
     painter.setPen({Colors::GRAY, 1});
-    auto radius = height() / 2 - 3;
-    painter.drawEllipse(rect().center(), radius, radius);
+    painter.setRenderHint(QPainter::Antialiasing);
+    auto radius = height() / 2 - 1;
+    auto center = rect().center();
+    center.setX(center.x() + 1);
+    center.setY(center.y() + 1);
+    painter.drawEllipse(center, radius, radius);
   }
 }
 
@@ -124,9 +128,16 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   }
 
   gridLayout_->setSpacing(0);
-  gridLayout_->setContentsMargins(5, 5, 5, 5);
+  gridLayout_->setContentsMargins(1, 1, 1, 1);
 
   setLayout(gridLayout_);
+}
+
+void PuzzleWidget::paintEvent(QPaintEvent *pe) {
+  QFrame::paintEvent(pe);
+  QPainter painter(this);
+  painter.setPen({Qt::black, 2});
+  painter.drawRect(0, 0, width(), height());
 }
 
 void PuzzleWidget::selectCursorPosition(uint8_t row, uint8_t col) {

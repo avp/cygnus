@@ -50,6 +50,9 @@ public:
   explicit PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                         QWidget *parent = nullptr);
 
+protected:
+  void paintEvent(QPaintEvent *pe) override;
+
 public slots:
   void selectCursorPosition(uint8_t row, uint8_t col);
   void selectPosition(uint8_t row, uint8_t col);
