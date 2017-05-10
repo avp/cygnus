@@ -84,7 +84,7 @@ void MainWindow::reloadPuzzle() {
   }
 
   if (puzzleWidget_) {
-    puzzleWidget_->deleteLater();
+	delete puzzleWidget_;
   }
   puzzleWidget_ = new PuzzleWidget{puzzle_};
   puzzleContainerLayout_->insertWidget(1, puzzleWidget_);
@@ -280,17 +280,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Space:
     setCursor(cursor_.row, cursor_.col, flip(cursor_.dir));
     break;
-  case Qt::Key_A... Qt::Key_Z:
-    if (event->modifiers() == Qt::NoModifier ||
-        event->modifiers() == Qt::ShiftModifier) {
-      setLetter(static_cast<char>(event->key()));
-    }
-    if (cursor_.dir == Direction::ACROSS) {
-      keyRight();
-    } else {
-      keyDown();
-    }
-    break;
   case Qt::Key_Backspace:
     clearLetter();
     if (cursor_.dir == Direction::ACROSS) {
@@ -302,6 +291,19 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Delete:
     clearLetter();
     break;
+  }
+
+  if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
+	  if (event->modifiers() == Qt::NoModifier ||
+		  event->modifiers() == Qt::ShiftModifier) {
+		  setLetter(static_cast<char>(event->key()));
+	  }
+	  if (cursor_.dir == Direction::ACROSS) {
+		  keyRight();
+	  }
+	  else {
+		  keyDown();
+	  }
   }
 }
 

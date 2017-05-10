@@ -94,7 +94,7 @@ uint16_t Puzzle::checksum(const QByteArray::const_iterator start,
     result |= lsb << 15;
     result = (result + (*it & 0xff)) & 0xffff;
   }
-  return result & 0xffff;
+  return static_cast<uint16_t>(result & 0xffff);
 }
 
 /// Computes the 16-bit checksum of the provided grid.

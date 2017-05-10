@@ -93,7 +93,7 @@ public:
   inline const Grid<CellData> &getCellData() const { return data_; }
   inline const Grid<Markup> &getMarkup() const { return markup_; }
   inline const uint16_t getNumClues() const {
-    return clues_[0].size() + clues_[1].size();
+    return static_cast<uint16_t>(clues_[0].size() + clues_[1].size());
   }
   inline const QString &getTitle() const { return title_; }
   inline const QString &getAuthor() const { return author_; }

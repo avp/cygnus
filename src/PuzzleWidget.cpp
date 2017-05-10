@@ -86,11 +86,14 @@ void CellWidget::mousePressEvent(QMouseEvent *event) {
 void CellWidget::paintEvent(QPaintEvent *pe) {
   QFrame::paintEvent(pe);
 
+  QPainter p(this);
+  p.setPen(Qt::black);
+  p.drawRect(0, 0, width(), height());
+
   // Draw a circle if necessary.
   if (markup_ & Puzzle::CircledTag) {
-    QPainter p(this);
     p.setPen(QColor(150, 150, 150));
-    auto radius = height() / 2 - 1;
+    auto radius = height() / 2 - 3;
     p.drawEllipse(rect().center(), radius, radius);
   }
 }

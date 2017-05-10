@@ -51,7 +51,7 @@ private:
   QWidget *puzzleContainer_;
   QVBoxLayout *puzzleContainerLayout_;
   QLabel *curClueLabel_;
-  PuzzleWidget *puzzleWidget_;
+  PuzzleWidget *puzzleWidget_{nullptr};
 
   void createActions();
   void createMenus();
