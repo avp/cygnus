@@ -17,7 +17,9 @@ const QColor PRIMARY_HIGHLIGHT{120, 210, 250};
 
 const QColor SECONDARY_HIGHLIGHT{220, 220, 235};
 
-}; // namespace Colors
+const QColor GRAY{150, 150, 150};
+
+} // namespace Colors
 } // namespace cygnus
 
 #endif

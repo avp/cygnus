@@ -20,6 +20,7 @@ public:
 
 protected:
   void paintEvent(QPaintEvent *pe) override;
+  void mousePressEvent(QMouseEvent *event) override;
 
 public slots:
   void selectCursor();
@@ -41,8 +42,6 @@ private:
   uint8_t col_;
 
   QLabel *entryLabel_;
-
-  void mousePressEvent(QMouseEvent *event) override;
 };
 
 class PuzzleWidget : public QFrame {

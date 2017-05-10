@@ -14,7 +14,6 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
   setAutoFillBackground(true);
   setPalette(pal);
-  setFrameStyle(QFrame::Box);
 
   QLabel *numLabel = new QLabel{};
   numLabel->setContentsMargins(1, 1, 1, 1);
@@ -86,24 +85,21 @@ void CellWidget::mousePressEvent(QMouseEvent *event) {
 void CellWidget::paintEvent(QPaintEvent *pe) {
   QFrame::paintEvent(pe);
 
-  QPainter p(this);
-  p.setPen(Qt::black);
-  p.drawRect(0, 0, width(), height());
+  QPainter painter(this);
+  painter.setPen({Qt::black, 2});
+  painter.drawRect(0, 0, width() + 1, height() + 1);
 
   // Draw a circle if necessary.
   if (markup_ & Puzzle::CircledTag) {
-    p.setPen(QColor(150, 150, 150));
+    painter.setPen({Colors::GRAY, 1});
     auto radius = height() / 2 - 3;
-    p.drawEllipse(rect().center(), radius, radius);
+    painter.drawEllipse(rect().center(), radius, radius);
   }
 }
 
 PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                            QWidget *parent)
     : QFrame(parent) {
-  setFrameStyle(QFrame::Box);
-  // setFixedSize(600, 600);
-
   gridLayout_ = new QGridLayout{};
 
   cells_.clear();
@@ -116,11 +112,6 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
       auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c],
                                  markup[r][c]);
-
-      // auto cellSize = this->height() < this->width()
-      //                     ? this->height() / puzzle->getHeight()
-      //                     : this->width() / puzzle->getWidth();
-      // cell->setFixedSize(cellSize, cellSize);
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);
@@ -133,7 +124,7 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   }
 
   gridLayout_->setSpacing(0);
-  gridLayout_->setContentsMargins(0, 0, 0, 0);
+  gridLayout_->setContentsMargins(5, 5, 5, 5);
 
   setLayout(gridLayout_);
 }

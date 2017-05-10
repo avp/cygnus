@@ -84,7 +84,7 @@ void MainWindow::reloadPuzzle() {
   }
 
   if (puzzleWidget_) {
-	delete puzzleWidget_;
+    delete puzzleWidget_;
   }
   puzzleWidget_ = new PuzzleWidget{puzzle_};
   puzzleContainerLayout_->insertWidget(1, puzzleWidget_);
@@ -241,6 +241,10 @@ void MainWindow::open() {
     if (puzzle_) {
       // TODO: Handle null puzzle_ (failure case).
       reloadPuzzle();
+    } else {
+      QMessageBox::warning(
+          this, QString("Corrupted File"),
+          QString("The file %1 isn't a valid puzzle file.").arg(fileName));
     }
   }
 }
@@ -294,16 +298,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   }
 
   if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
-	  if (event->modifiers() == Qt::NoModifier ||
-		  event->modifiers() == Qt::ShiftModifier) {
-		  setLetter(static_cast<char>(event->key()));
-	  }
-	  if (cursor_.dir == Direction::ACROSS) {
-		  keyRight();
-	  }
-	  else {
-		  keyDown();
-	  }
+    if (event->modifiers() == Qt::NoModifier ||
+        event->modifiers() == Qt::ShiftModifier) {
+      setLetter(static_cast<char>(event->key()));
+
+      if (cursor_.dir == Direction::ACROSS) {
+        keyRight();
+      } else {
+        keyDown();
+      }
+    }
   }
 }
 
