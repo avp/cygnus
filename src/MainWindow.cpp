@@ -300,29 +300,46 @@ void MainWindow::saveAs() {
   }
 }
 
-void MainWindow::revealCurrent() {
-  char solution = puzzle_->getSolution()[cursor_.row][cursor_.col];
-  char current = puzzle_->getGrid()[cursor_.row][cursor_.col];
+void MainWindow::reveal(uint8_t row, uint8_t col) {
+  char solution = puzzle_->getSolution()[row][col];
+  char current = puzzle_->getGrid()[row][col];
   if (current == EMPTY || current != solution) {
-    setLetter(cursor_.row, cursor_.col, solution);
+    setLetter(row, col, solution);
   }
 }
 
-void MainWindow::revealClue() {}
+void MainWindow::revealCurrent() { reveal(cursor_.row, cursor_.col); }
+
+void MainWindow::revealClue() {
+  const auto num =
+      puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir);
+  const auto idx = puzzle_->getClueByNum(cursor_.dir, num);
+  const auto start = puzzle_->getPositionFromClue(cursor_.dir, idx);
+  uint8_t r = start.first;
+  uint8_t c = start.second;
+  if (cursor_.dir == Direction::ACROSS) {
+    while (c < puzzle_->getWidth() &&
+           puzzle_->getCellData()[r][c].acrossNum == num) {
+      reveal(r, c);
+      ++c;
+    }
+  } else {
+    while (r < puzzle_->getHeight() &&
+           puzzle_->getCellData()[r][c].downNum == num) {
+      reveal(r, c);
+      ++r;
+    }
+  }
+}
 
 void MainWindow::revealAll() {
-  const auto cursor0 = cursor_;
-  cursor_.dir = Direction::ACROSS;
   for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
     for (uint8_t c = 0; c < puzzle_->getHeight(); ++c) {
-      cursor_.row = r;
-      cursor_.col = c;
       if (puzzle_->getGrid()[r][c] != BLACK) {
         revealCurrent();
       }
     }
   }
-  cursor_ = cursor0;
 }
 
 void MainWindow::createMenus() {

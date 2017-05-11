@@ -26,6 +26,7 @@ private slots:
   void save();
   void saveAs();
 
+  void reveal(uint8_t row, uint8_t col);
   void revealCurrent();
   void revealClue();
   void revealAll();
