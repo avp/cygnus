@@ -336,7 +336,7 @@ void MainWindow::revealAll() {
   for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
     for (uint8_t c = 0; c < puzzle_->getHeight(); ++c) {
       if (puzzle_->getGrid()[r][c] != BLACK) {
-        revealCurrent();
+        reveal(r, c);
       }
     }
   }

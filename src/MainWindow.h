@@ -26,7 +26,6 @@ private slots:
   void save();
   void saveAs();
 
-  void reveal(uint8_t row, uint8_t col);
   void revealCurrent();
   void revealClue();
   void revealAll();
@@ -80,6 +79,8 @@ private:
 
   void setLetter(uint8_t row, uint8_t col, char letter);
   void clearLetter(uint8_t row, uint8_t col);
+
+  void reveal(uint8_t row, uint8_t col);
 };
 
 } // namespace cygnus
