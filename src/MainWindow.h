@@ -26,6 +26,10 @@ private slots:
   void save();
   void saveAs();
 
+  void revealCurrent();
+  void revealClue();
+  void revealAll();
+
   void setCursor(uint8_t row, uint8_t col, Direction dir);
   void puzzleClicked(uint8_t row, uint8_t col);
   void puzzleRightClicked();
@@ -43,6 +47,12 @@ private:
   QAction *openAct_;
   QAction *saveAct_;
   QAction *saveAsAct_;
+
+  QMenu *puzzleMenu_;
+  QMenu *revealMenu_;
+  QAction *revealCurrentAct_;
+  QAction *revealClueAct_;
+  QAction *revealAllAct_;
 
   QLabel *titleLabel_;
   QLabel *authorLabel_;
@@ -67,8 +77,8 @@ private:
   void keyLeft();
   void keyRight();
 
-  void setLetter(char letter);
-  void clearLetter();
+  void setLetter(uint8_t row, uint8_t col, char letter);
+  void clearLetter(uint8_t row, uint8_t col);
 };
 
 } // namespace cygnus

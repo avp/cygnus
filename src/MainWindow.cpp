@@ -69,6 +69,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 }
 
 void MainWindow::reloadPuzzle() {
+  saveAct_->setEnabled(true);
+  saveAsAct_->setEnabled(true);
+  puzzleMenu_->setEnabled(true);
+
   titleLabel_->setText(puzzle_->getTitle());
   authorLabel_->setText(puzzle_->getAuthor());
   copyrightLabel_->setText(puzzle_->getCopyright());
@@ -206,7 +210,6 @@ ClueWidget *MainWindow::createClueWidget() {
   auto result = new ClueWidget{};
   QSizePolicy cluesSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
   cluesSize.setHorizontalStretch(1);
-  // result->setFrameStyle(QFrame::NoFrame);
   result->setSizePolicy(cluesSize);
   result->setWordWrap(true);
   result->setFocusPolicy(Qt::NoFocus);
@@ -224,10 +227,23 @@ void MainWindow::createActions() {
   saveAct_->setStatusTip(tr("Save the current puzzle"));
   connect(saveAct_, &QAction::triggered, this, &MainWindow::save);
 
-  saveAsAct_ = new QAction(tr("&Save As..."), this);
+  saveAsAct_ = new QAction(tr("Save &As..."), this);
   saveAsAct_->setShortcuts(QKeySequence::SaveAs);
   saveAsAct_->setStatusTip(tr("Save the current puzzle as..."));
   connect(saveAsAct_, &QAction::triggered, this, &MainWindow::saveAs);
+
+  revealCurrentAct_ = new QAction(tr("Current Letter"), this);
+  revealCurrentAct_->setStatusTip(tr("Reveal the current letter"));
+  connect(revealCurrentAct_, &QAction::triggered, this,
+          &MainWindow::revealCurrent);
+
+  revealClueAct_ = new QAction(tr("Current Clue"), this);
+  revealClueAct_->setStatusTip(tr("Reveal the current clue"));
+  connect(revealClueAct_, &QAction::triggered, this, &MainWindow::revealClue);
+
+  revealAllAct_ = new QAction(tr("Whole Puzzle"), this);
+  revealAllAct_->setStatusTip(tr("Reveal the whole puzzle"));
+  connect(revealAllAct_, &QAction::triggered, this, &MainWindow::revealAll);
 }
 
 void MainWindow::open() {
@@ -259,7 +275,8 @@ void MainWindow::save() {
     return;
   }
 
-  QFile file{"/Users/avp/test.puz"};
+  QFile file{QDir::home().absoluteFilePath("test.puz")};
+  qDebug() << "Saving to:" << file.fileName();
   if (file.open(QIODevice::WriteOnly)) {
     QByteArray bytes = puzzle_->serialize();
     file.write(bytes);
@@ -276,17 +293,52 @@ void MainWindow::saveAs() {
       tr("Across Lite File (*.puz);;All Files (*)"));
 
   QFile file{fileName};
+  qDebug() << "Saving to:" << file.fileName();
   if (file.open(QIODevice::WriteOnly)) {
     QByteArray bytes = puzzle_->serialize();
     file.write(bytes);
   }
 }
 
+void MainWindow::revealCurrent() {
+  char solution = puzzle_->getSolution()[cursor_.row][cursor_.col];
+  char current = puzzle_->getGrid()[cursor_.row][cursor_.col];
+  if (current == EMPTY || current != solution) {
+    setLetter(cursor_.row, cursor_.col, solution);
+  }
+}
+
+void MainWindow::revealClue() {}
+
+void MainWindow::revealAll() {
+  const auto cursor0 = cursor_;
+  cursor_.dir = Direction::ACROSS;
+  for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
+    for (uint8_t c = 0; c < puzzle_->getHeight(); ++c) {
+      cursor_.row = r;
+      cursor_.col = c;
+      if (puzzle_->getGrid()[r][c] != BLACK) {
+        revealCurrent();
+      }
+    }
+  }
+  cursor_ = cursor0;
+}
+
 void MainWindow::createMenus() {
   fileMenu_ = menuBar()->addMenu(tr("&File"));
   fileMenu_->addAction(openAct_);
   fileMenu_->addAction(saveAct_);
+  saveAct_->setEnabled(false);
   fileMenu_->addAction(saveAsAct_);
+  saveAsAct_->setEnabled(false);
+
+  puzzleMenu_ = menuBar()->addMenu(tr("&Puzzle"));
+  puzzleMenu_->setEnabled(false);
+  revealMenu_ = puzzleMenu_->addMenu(tr("&Reveal..."));
+  revealMenu_->addAction(revealCurrentAct_);
+  revealMenu_->addAction(revealClueAct_);
+  revealMenu_->addAction(revealAllAct_);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -307,7 +359,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     setCursor(cursor_.row, cursor_.col, flip(cursor_.dir));
     break;
   case Qt::Key_Backspace:
-    clearLetter();
+    clearLetter(cursor_.row, cursor_.col);
     if (cursor_.dir == Direction::ACROSS) {
       keyLeft();
     } else {
@@ -315,14 +367,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
     break;
   case Qt::Key_Delete:
-    clearLetter();
+    clearLetter(cursor_.row, cursor_.col);
     break;
   }
 
   if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
     if (event->modifiers() == Qt::NoModifier ||
         event->modifiers() == Qt::ShiftModifier) {
-      setLetter(static_cast<char>(event->key()));
+      setLetter(cursor_.row, cursor_.col, static_cast<char>(event->key()));
 
       if (cursor_.dir == Direction::ACROSS) {
         keyRight();
@@ -401,14 +453,14 @@ void MainWindow::keyRight() {
   setCursor(cursor_.row, col, Direction::ACROSS);
 }
 
-void MainWindow::setLetter(char letter) {
-  puzzle_->getGrid()[cursor_.row][cursor_.col] = letter;
-  puzzleWidget_->setLetter(cursor_.row, cursor_.col, letter);
+void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
+  puzzle_->getGrid()[row][col] = letter;
+  puzzleWidget_->setLetter(row, col, letter);
+  puzzle_->dumpGrid(qDebug());
 }
 
-void MainWindow::clearLetter() {
-  puzzle_->getGrid()[cursor_.row][cursor_.col] = EMPTY;
-  puzzleWidget_->setLetter(cursor_.row, cursor_.col, EMPTY);
+void MainWindow::clearLetter(uint8_t row, uint8_t col) {
+  setLetter(row, col, EMPTY);
 }
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {

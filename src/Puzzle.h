@@ -2,6 +2,7 @@
 #define PUZZLE_H
 
 #include <QByteArray>
+#include <QDebug>
 #include <QString>
 #include <utility>
 #include <vector>
@@ -99,7 +100,11 @@ public:
   inline const QString &getAuthor() const { return author_; }
   inline const QString &getCopyright() const { return copyright_; }
 
+  /// \return the clue index of clue number \p num in direction \p dir.
   const int getClueByNum(Direction dir, uint32_t num) const;
+
+  /// \return the number of the clue at position (\p row, \p col),
+  /// in direction \p dir.
   const uint32_t getNumByPosition(uint8_t row, uint8_t col,
                                   Direction dir) const;
 
@@ -108,6 +113,17 @@ public:
                                                         uint32_t idx) const;
 
   QByteArray serialize() const;
+
+  inline QDebug dumpGrid(QDebug &stream) const {
+    for (uint8_t r = 0; r < height_; ++r) {
+      QString row;
+      for (uint8_t c = 0; c < width_; ++c) {
+        row += grid_[r][c];
+      }
+      stream << row << "\n";
+    }
+    return stream;
+  }
 
 private:
   static bool validatePuzzle(const QByteArray &puzFile);

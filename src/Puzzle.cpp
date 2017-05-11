@@ -74,6 +74,7 @@ static Grid<T> readGrid(QByteArray::const_iterator &start, const uint8_t height,
   return grid;
 }
 
+/// Writes \p grid to \p start in place.
 static inline void writeGrid(QByteArray::iterator start, Grid<char> grid) {
   for (const auto &row : grid) {
     for (const auto c : row) {
@@ -122,10 +123,8 @@ inline uint16_t Puzzle::headerChecksum(uint8_t width, uint8_t height,
   header[1] = height;
   header[2] = numClues & 0xff;
   header[3] = numClues >> 8;
-  header[4] = uint16_t(puzzleType) & 0xff;
-  header[5] = uint16_t(puzzleType) >> 8;
-  header[6] = uint16_t(solutionState) & 0xff;
-  header[7] = uint16_t(solutionState) >> 8;
+  writeUInt16LE(header.begin() + 4, static_cast<uint16_t>(puzzleType));
+  writeUInt16LE(header.begin() + 6, static_cast<uint16_t>(solutionState));
   return checksum(header.begin(), header.end(), seed);
 }
 
