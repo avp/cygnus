@@ -303,6 +303,9 @@ void MainWindow::saveAs() {
 void MainWindow::reveal(uint8_t row, uint8_t col) {
   char solution = puzzle_->getSolution()[row][col];
   char current = puzzle_->getGrid()[row][col];
+  if (current == BLACK) {
+    return;
+  }
   if (current == EMPTY || current != solution) {
     setLetter(row, col, solution);
   }
@@ -335,9 +338,7 @@ void MainWindow::revealClue() {
 void MainWindow::revealAll() {
   for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
     for (uint8_t c = 0; c < puzzle_->getWidth(); ++c) {
-      if (puzzle_->getGrid()[r][c] != BLACK) {
-        reveal(r, c);
-      }
+      reveal(r, c);
     }
   }
 }
