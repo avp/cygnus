@@ -383,7 +383,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
     if (event->modifiers() == Qt::NoModifier ||
         event->modifiers() == Qt::ShiftModifier) {
-      setLetter(cursor_.row, cursor_.col, static_cast<char>(event->key()));
+      // Convert to lowercase if shift is being held.
+      char letter = event->modifiers() == Qt::ShiftModifier ? event->key() | 32
+                                                            : event->key();
+      setLetter(cursor_.row, cursor_.col, letter);
 
       if (cursor_.dir == Direction::ACROSS) {
         keyRight();
