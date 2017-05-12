@@ -222,14 +222,14 @@ void MainWindow::createActions() {
   openAct_->setStatusTip(tr("Open an existing file"));
   connect(openAct_, &QAction::triggered, this, &MainWindow::open);
 
-  saveAct_ = new QAction(tr("&Save..."), this);
+  saveAct_ = new QAction(tr("&Save"), this);
   saveAct_->setShortcuts(QKeySequence::Save);
   saveAct_->setStatusTip(tr("Save the current puzzle"));
   connect(saveAct_, &QAction::triggered, this, &MainWindow::save);
 
   saveAsAct_ = new QAction(tr("Save &As..."), this);
   saveAsAct_->setShortcuts(QKeySequence::SaveAs);
-  saveAsAct_->setStatusTip(tr("Save the current puzzle as..."));
+  saveAsAct_->setStatusTip(tr("Save the current puzzle as"));
   connect(saveAsAct_, &QAction::triggered, this, &MainWindow::saveAs);
 
   revealCurrentAct_ = new QAction(tr("Current Letter"), this);
@@ -260,7 +260,6 @@ void MainWindow::open() {
     QByteArray puzFile = file.readAll();
     puzzle_.reset(Puzzle::loadFromFile(puzFile));
     if (puzzle_) {
-      // TODO: Handle null puzzle_ (failure case).
       reloadPuzzle();
     } else {
       QMessageBox::warning(
@@ -271,10 +270,6 @@ void MainWindow::open() {
 }
 
 void MainWindow::save() {
-  if (!puzzle_) {
-    return;
-  }
-
   QFile file{QDir::home().absoluteFilePath("test.puz")};
   qDebug() << "Saving to:" << file.fileName();
   if (file.open(QIODevice::WriteOnly)) {
@@ -284,10 +279,6 @@ void MainWindow::save() {
 }
 
 void MainWindow::saveAs() {
-  if (!puzzle_) {
-    return;
-  }
-
   QString fileName = QFileDialog::getSaveFileName(
       this, tr("Save Puzzle"), "",
       tr("Across Lite File (*.puz);;All Files (*)"));

@@ -68,7 +68,18 @@ void CellWidget::deselect() {
 }
 
 void CellWidget::setLetter(char letter) {
-  entryLabel_->setText(QString("%1").arg(letter != EMPTY ? letter : ' '));
+  auto pal = palette();
+  if (letter == EMPTY) {
+    entryLabel_->setText("");
+  } else if ('A' <= letter && letter <= 'Z') {
+    entryLabel_->setText(QString("%1").arg(static_cast<char>(letter)));
+    pal.setColor(QPalette::Foreground, Qt::black);
+  } else if ('a' <= letter && letter <= 'z') {
+    // Convert to uppercase by turning off the 5th bit.
+    entryLabel_->setText(QString("%1").arg(static_cast<char>(letter & ~32)));
+    pal.setColor(QPalette::Foreground, Colors::PENCIL);
+  }
+  setPalette(pal);
 }
 
 void CellWidget::mousePressEvent(QMouseEvent *event) {
@@ -91,7 +102,7 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
 
   // Draw a circle if necessary.
   if (markup_ & Puzzle::CircledTag) {
-    painter.setPen({Colors::GRAY, 1});
+    painter.setPen({Colors::CIRCLE, 1});
     painter.setRenderHint(QPainter::Antialiasing);
     auto radius = height() / 2 - 1;
     auto center = rect().center();

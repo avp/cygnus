@@ -17,7 +17,9 @@ const QColor PRIMARY_HIGHLIGHT{120, 210, 250};
 
 const QColor SECONDARY_HIGHLIGHT{220, 220, 235};
 
-const QColor GRAY{100, 100, 100};
+const QColor CIRCLE{100, 100, 100};
+
+const QColor PENCIL{128, 128, 128};
 
 } // namespace Colors
 } // namespace cygnus
