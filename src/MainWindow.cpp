@@ -364,6 +364,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Right:
     keyRight();
     break;
+  case Qt::Key_Tab:
+    keyTab();
+    break;
   case Qt::Key_Space:
     setCursor(cursor_.row, cursor_.col, flip(cursor_.dir));
     break;
@@ -463,6 +466,15 @@ void MainWindow::keyRight() {
     }
   } while (grid[cursor_.row][col] == BLACK);
   setCursor(cursor_.row, col, Direction::ACROSS);
+}
+
+void MainWindow::keyTab() {
+  const Direction dir = cursor_.dir;
+  auto curNum = puzzle_->getNumByPosition(cursor_.row, cursor_.col, dir);
+  auto curIdx = puzzle_->getClueByNum(dir, curNum);
+  auto newIdx = (curIdx + 1) % puzzle_->getClues(dir).size();
+  auto newPos = puzzle_->getPositionFromClue(dir, newIdx);
+  setCursor(newPos.first, newPos.second, dir);
 }
 
 void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
