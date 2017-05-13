@@ -26,6 +26,7 @@ struct Clue {
   uint32_t row;
   uint32_t col;
   uint32_t num;
+  Direction dir;
 };
 
 template <typename T> using Grid = std::vector<std::vector<T>>;
@@ -101,16 +102,17 @@ public:
   inline const QString &getCopyright() const { return copyright_; }
 
   /// \return the clue index of clue number \p num in direction \p dir.
-  const int getClueByNum(Direction dir, uint32_t num) const;
+  int getClueIdxByNum(Direction dir, uint32_t num) const;
+
+  /// \return the clue in direction \p dir with number \p num.
+  const Clue &getClueByNum(Direction dir, uint32_t num) const;
+
+  /// \return the clue in direction \p dir at index \p idx.
+  const Clue &getClueByIdx(Direction dir, uint32_t idx) const;
 
   /// \return the number of the clue at position (\p row, \p col),
   /// in direction \p dir.
-  const uint32_t getNumByPosition(uint8_t row, uint8_t col,
-                                  Direction dir) const;
-
-  /// Given the \p idx clue in \p dir, return the {row,col} of the clue.
-  const std::pair<uint8_t, uint8_t> getPositionFromClue(Direction dir,
-                                                        uint32_t idx) const;
+  uint32_t getNumByPosition(uint8_t row, uint8_t col, Direction dir) const;
 
   QByteArray serialize() const;
 

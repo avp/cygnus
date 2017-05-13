@@ -165,8 +165,8 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
       puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir);
   uint32_t flipNum =
       puzzle_->getNumByPosition(cursor_.row, cursor_.col, flip(cursor_.dir));
-  int curClue = puzzle_->getClueByNum(cursor_.dir, curNum);
-  int flipClue = puzzle_->getClueByNum(flip(cursor_.dir), flipNum);
+  int curClue = puzzle_->getClueIdxByNum(cursor_.dir, curNum);
+  int flipClue = puzzle_->getClueIdxByNum(flip(cursor_.dir), flipNum);
   if (cursor_.dir == Direction::ACROSS) {
     acrossWidget_->item(curClue)->setBackground(Qt::white);
     downWidget_->item(flipClue)->setBackground(Qt::white);
@@ -177,8 +177,8 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
 
   curNum = puzzle_->getNumByPosition(row, col, dir);
   flipNum = puzzle_->getNumByPosition(row, col, flip(dir));
-  curClue = puzzle_->getClueByNum(dir, curNum);
-  flipClue = puzzle_->getClueByNum(flip(dir), flipNum);
+  curClue = puzzle_->getClueIdxByNum(dir, curNum);
+  flipClue = puzzle_->getClueIdxByNum(flip(dir), flipNum);
 
   QPalette pal;
 
@@ -202,7 +202,7 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   cursor_.dir = dir;
 
   uint32_t num = curNum;
-  const Clue &clue = puzzle_->getClues(dir)[puzzle_->getClueByNum(dir, num)];
+  const Clue &clue = puzzle_->getClues(dir)[puzzle_->getClueIdxByNum(dir, num)];
   curClueLabel_->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
 }
 
@@ -305,12 +305,10 @@ void MainWindow::reveal(uint8_t row, uint8_t col) {
 void MainWindow::revealCurrent() { reveal(cursor_.row, cursor_.col); }
 
 void MainWindow::revealClue() {
-  const auto num =
-      puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir);
-  const auto idx = puzzle_->getClueByNum(cursor_.dir, num);
-  const auto start = puzzle_->getPositionFromClue(cursor_.dir, idx);
-  uint8_t r = start.first;
-  uint8_t c = start.second;
+  auto num = puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir);
+  const Clue &clue = puzzle_->getClueByNum(cursor_.dir, num);
+  uint8_t r = clue.row;
+  uint8_t c = clue.col;
   if (cursor_.dir == Direction::ACROSS) {
     while (c < puzzle_->getWidth() &&
            puzzle_->getCellData()[r][c].acrossNum == num) {
@@ -471,16 +469,15 @@ void MainWindow::keyRight() {
 void MainWindow::keyTab() {
   const Direction dir = cursor_.dir;
   auto curNum = puzzle_->getNumByPosition(cursor_.row, cursor_.col, dir);
-  auto curIdx = puzzle_->getClueByNum(dir, curNum);
+  auto curIdx = puzzle_->getClueIdxByNum(dir, curNum);
   auto newIdx = (curIdx + 1) % puzzle_->getClues(dir).size();
-  auto newPos = puzzle_->getPositionFromClue(dir, newIdx);
-  setCursor(newPos.first, newPos.second, dir);
+  const Clue &newClue = puzzle_->getClueByIdx(dir, newIdx);
+  setCursor(newClue.row, newClue.col, dir);
 }
 
 void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
   puzzle_->getGrid()[row][col] = letter;
   puzzleWidget_->setLetter(row, col, letter);
-  puzzle_->dumpGrid(qDebug());
 }
 
 void MainWindow::clearLetter(uint8_t row, uint8_t col) {
@@ -507,14 +504,14 @@ void MainWindow::puzzleRightClicked() {
 
 void MainWindow::acrossClueClicked(const QListWidgetItem *item) {
   auto idx = acrossWidget_->row(item);
-  auto pos = puzzle_->getPositionFromClue(Direction::ACROSS, idx);
-  setCursor(pos.first, pos.second, Direction::ACROSS);
+  const Clue &clue = puzzle_->getClueByIdx(Direction::ACROSS, idx);
+  setCursor(clue.row, clue.col, Direction::ACROSS);
 }
 
 void MainWindow::downClueClicked(const QListWidgetItem *item) {
   auto idx = downWidget_->row(item);
-  auto pos = puzzle_->getPositionFromClue(Direction::DOWN, idx);
-  setCursor(pos.first, pos.second, Direction::DOWN);
+  const Clue &clue = puzzle_->getClueByIdx(Direction::DOWN, idx);
+  setCursor(clue.row, clue.col, Direction::DOWN);
 }
 
 } // namespace cygnus

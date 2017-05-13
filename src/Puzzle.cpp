@@ -300,14 +300,14 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       if (a || d) {
         CellData data{};
         if (a) {
-          Clue clue{readString(it), r, c, num};
+          Clue clue{readString(it), r, c, num, Direction::ACROSS};
           across.push_back(clue);
           data.acrossNum = num;
           data.acrossStart = true;
           data.acrossIdx = acrossIdx++;
         }
         if (d) {
-          Clue clue{readString(it), r, c, num};
+          Clue clue{readString(it), r, c, num, Direction::DOWN};
           down.push_back(clue);
           data.downNum = num;
           data.downStart = true;
@@ -403,7 +403,7 @@ static bool compareForNum(const Clue &a, const Clue &b) {
   return a.num < b.num;
 }
 
-const int Puzzle::getClueByNum(Direction dir, uint32_t num) const {
+int Puzzle::getClueIdxByNum(Direction dir, uint32_t num) const {
   Clue clue{};
   clue.num = num;
   auto clues = clues_[static_cast<int>(dir)];
@@ -415,35 +415,19 @@ const int Puzzle::getClueByNum(Direction dir, uint32_t num) const {
   return result - clues.begin();
 }
 
-const uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
-                                        Direction dir) const {
+const Clue &Puzzle::getClueByNum(Direction dir, uint32_t num) const {
+  int idx = getClueIdxByNum(dir, num);
+  return clues_[size_t(dir)][idx];
+}
+
+uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
+                                  Direction dir) const {
   return dir == Direction::ACROSS ? data_[row][col].acrossNum
                                   : data_[row][col].downNum;
 }
 
-const std::pair<uint8_t, uint8_t>
-Puzzle::getPositionFromClue(Direction dir, uint32_t idx) const {
-  const Clue &clue = dir == Direction::ACROSS ? clues_[0][idx] : clues_[1][idx];
-  auto num = clue.num;
-  if (dir == Direction::ACROSS) {
-    for (uint8_t r = 0; r < height_; ++r) {
-      for (uint8_t c = 0; c < width_; ++c) {
-        if (data_[r][c].acrossNum == clue.num) {
-          return {r, c};
-        }
-      }
-    }
-  } else {
-    for (uint8_t c = 0; c < width_; ++c) {
-      for (uint8_t r = 0; r < height_; ++r) {
-        if (data_[r][c].downNum == clue.num) {
-          return {r, c};
-        }
-      }
-    }
-  }
-  qCritical() << "Failed to retrieve position for clue at idx" << idx;
-  return {0, 0};
+const Clue &Puzzle::getClueByIdx(Direction dir, uint32_t idx) const {
+  return clues_[size_t(dir)][idx];
 }
 
 QByteArray Puzzle::serialize() const {
