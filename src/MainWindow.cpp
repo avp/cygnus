@@ -363,7 +363,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     keyRight();
     break;
   case Qt::Key_Tab:
-    keyTab();
+    keyTab(false);
+    break;
+  case Qt::Key_Backtab:
+    keyTab(true);
     break;
   case Qt::Key_Space:
     setCursor(cursor_.row, cursor_.col, flip(cursor_.dir));
@@ -466,11 +469,16 @@ void MainWindow::keyRight() {
   setCursor(cursor_.row, col, Direction::ACROSS);
 }
 
-void MainWindow::keyTab() {
+void MainWindow::keyTab(bool reverse) {
   const Direction dir = cursor_.dir;
   auto curNum = puzzle_->getNumByPosition(cursor_.row, cursor_.col, dir);
   auto curIdx = puzzle_->getClueIdxByNum(dir, curNum);
-  auto newIdx = (curIdx + 1) % puzzle_->getClues(dir).size();
+  uint32_t newIdx;
+  if (reverse) {
+    newIdx = curIdx == 0 ? puzzle_->getClues(dir).size() - 1 : curIdx - 1;
+  } else {
+    newIdx = (curIdx + (reverse ? -1 : +1)) % puzzle_->getClues(dir).size();
+  }
   const Clue &newClue = puzzle_->getClueByIdx(dir, newIdx);
   setCursor(newClue.row, newClue.col, dir);
 }

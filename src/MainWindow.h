@@ -76,7 +76,7 @@ private:
   void keyDown();
   void keyLeft();
   void keyRight();
-  void keyTab();
+  void keyTab(bool reverse);
 
   void setLetter(uint8_t row, uint8_t col, char letter);
   void clearLetter(uint8_t row, uint8_t col);
