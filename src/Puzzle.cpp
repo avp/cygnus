@@ -339,12 +339,43 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       it += 8;
       markup = readGrid<Markup>(it, height, width);
       qDebug() << "Read extension:    Markup";
+      // Account for the NUL character.
+      ++it;
+    } else if (::strncmp(it, "LTIM", 4) == 0) {
+      qDebug() << "Reading extension: Timer";
+      it += 4;
+      auto len = readUInt16LE(it);
+      it += 2;
+      auto cksum = readUInt16LE(it);
+      // TODO: Check checksum here.
+      it += 2;
+      auto timerString = readString(it);
+      if (timerString.size() != len) {
+        qDebug() << "Invalid length";
+        return nullptr;
+      }
+      auto sepIndex = timerString.indexOf(',');
+      if (sepIndex != len - 2) {
+        qDebug() << "Invalid comma location";
+        return nullptr;
+      }
+      Timer timer;
+      bool ok;
+      timer.current = timerString.leftRef(len - 2).toULongLong(&ok);
+      if (!ok) {
+        qDebug() << "Invalid time";
+        return nullptr;
+      }
+      timer.running = timerString.at(len - 1) == '1';
+      qDebug() << "Read extension:    Timer";
+      qDebug() << "Time:" << timer.current << "s";
+      qDebug() << "Running:" << timer.running;
     } else {
       it += 8;
       it += len;
+      // Account for the NUL character.
+      ++it;
     }
-    // Account for the NUL character.
-    ++it;
   }
 
   // Perform post-processing on the cellData.

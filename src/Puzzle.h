@@ -60,6 +60,11 @@ public:
   static const Markup RevealedTag;
   static const Markup CircledTag;
 
+  struct Timer {
+    uint64_t current{0};
+    bool running{false};
+  };
+
 private:
   Puzzle(QByteArray version, uint8_t height, uint8_t width,
          PuzzleType puzzleType, SolutionState solutionState,
@@ -77,6 +82,7 @@ private:
   Grid<CellData> data_;
   QByteArray text_;
   Grid<Markup> markup_;
+  Timer timer_;
 
   QString title_;
   QString author_;
