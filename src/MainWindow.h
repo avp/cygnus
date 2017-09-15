@@ -20,6 +20,7 @@ class MainWindow : public QMainWindow {
 
 public:
   explicit MainWindow(QWidget *parent = nullptr);
+  void showMaximized();
 
 private slots:
   void open();

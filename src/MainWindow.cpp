@@ -68,6 +68,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
           &MainWindow::downClueClicked);
 }
 
+void MainWindow::showMaximized() {
+  QMainWindow::showMaximized();
+
+  // Show the open dialog.
+  open();
+}
+
 void MainWindow::reloadPuzzle() {
   saveAct_->setEnabled(true);
   saveAsAct_->setEnabled(true);
