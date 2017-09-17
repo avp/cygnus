@@ -69,7 +69,8 @@ private:
   Puzzle(QByteArray version, uint8_t height, uint8_t width,
          PuzzleType puzzleType, SolutionState solutionState,
          std::vector<Clue> clues[2], Grid<char> solution, Grid<char> grid,
-         Grid<CellData> data, QByteArray text, Grid<Markup> markup);
+         Grid<CellData> data, QByteArray text, Grid<Markup> markup,
+         Timer timer);
   QByteArray version_;
 
   uint8_t height_;
@@ -100,6 +101,7 @@ public:
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<CellData> &getCellData() const { return data_; }
   inline const Grid<Markup> &getMarkup() const { return markup_; }
+  inline const Timer &getTimer() const { return timer_; }
   inline const uint16_t getNumClues() const {
     return static_cast<uint16_t>(clues_[0].size() + clues_[1].size());
   }
