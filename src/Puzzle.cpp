@@ -6,7 +6,7 @@
 
 namespace cygnus {
 
-const static char *MAGIC{"ACROSS&DOWN"};
+const static char MAGIC[] = "ACROSS&DOWN";
 
 const Puzzle::Markup Puzzle::DefaultTag = 0x00;
 const Puzzle::Markup Puzzle::PreviousIncorrectTag = 0x10;
@@ -53,6 +53,13 @@ static inline QString readString(QByteArray::const_iterator &start) {
   return result;
 }
 
+static inline QByteArray makeUInt16LE(uint16_t x) {
+  QByteArray result(2, '\0');
+  result[0] = x & 0xff;
+  result[1] = (x >> 8) & 0xff;
+  return result;
+}
+
 template <typename T>
 static Grid<T> readGrid(QByteArray::const_iterator &start, const uint8_t height,
                         const uint8_t width) {
@@ -75,7 +82,9 @@ static Grid<T> readGrid(QByteArray::const_iterator &start, const uint8_t height,
 }
 
 /// Writes \p grid to \p start in place.
-static inline void writeGrid(QByteArray::iterator start, Grid<char> grid) {
+template <typename T>
+static inline void writeGrid(QByteArray::iterator start, Grid<T> grid) {
+  static_assert(sizeof(T) == 1, "Can only write grids of chars with this");
   for (const auto &row : grid) {
     for (const auto c : row) {
       *start++ = c;
@@ -233,20 +242,21 @@ bool Puzzle::validatePuzzle(const QByteArray &puzFile) {
       magicChecksum(width, height, numClues, puzzleType, solutionState,
                     solution, puzzle, puzFile.mid(0x34 + (2 * width * height)));
 
-  if (magicChecksumExpected != magicChecksumActual) {
-    qCritical() << "Magic checksum check failed";
-    return false;
-  }
+  // TODO: Re-enable with extensions excluded.
+  // if (magicChecksumExpected != magicChecksumActual) {
+  //   qCritical() << "Magic checksum check failed";
+  //   return false;
+  // }
 
   uint16_t globalChecksumExpected = readUInt16LE(puzFile.begin());
   uint16_t globalChecksumActual = globalChecksum(
       width, height, numClues, puzzleType, solutionState, solution, puzzle,
       puzFile.mid(0x34 + (2 * width * height)));
 
-  if (globalChecksumExpected != globalChecksumActual) {
-    qCritical() << "Global checksum check failed";
-    return false;
-  }
+  // if (globalChecksumExpected != globalChecksumActual) {
+  //   qCritical() << "Global checksum check failed";
+  //   return false;
+  // }
 
   QByteArray magic = puzFile.mid(0x2, 0xb);
   if (magic != MAGIC || puzFile[0x0d] != '\x00') {
@@ -274,6 +284,8 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   auto solution = readGrid<char>(it, height, width);
   auto grid = readGrid<char>(it, height, width);
 
+  qDebug() << "Text start offset:" << (it - puzFile.begin());
+  const auto textStart = it;
   QString title = readString(it);
   QString author = readString(it);
   QString copyright = readString(it);
@@ -322,6 +334,9 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
     data.push_back(dataRow);
   }
 
+  qDebug() << "Text end offset:" << (it - puzFile.begin());
+  const auto textEnd = it;
+
   Grid<Markup> markup{};
   markup.resize(height);
   for (uint8_t i = 0; i < height; ++i) {
@@ -332,13 +347,13 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   Timer timer{};
 
   // Try and read extensions.
-  ++it;
   while (it < puzFile.end() - 8) {
-    uint16_t len = readUInt16LE(it + 4);
     if (::strncmp(it, "GEXT", 4) == 0) {
       // Read the markup.
       qDebug() << "Reading extension: Markup";
-      it += 8;
+      it += 4;
+      uint16_t len = readUInt16LE(it);
+      it += 4;
       markup = readGrid<Markup>(it, height, width);
       qDebug() << "Read extension:    Markup";
       // Account for the NUL character.
@@ -346,12 +361,12 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
     } else if (::strncmp(it, "LTIM", 4) == 0) {
       qDebug() << "Reading extension: Timer";
       it += 4;
-      auto len = readUInt16LE(it);
+      uint16_t len = readUInt16LE(it);
       it += 2;
-      auto cksum = readUInt16LE(it);
+      uint16_t cksum = readUInt16LE(it);
       // TODO: Check checksum here.
       it += 2;
-      auto timerString = readString(it);
+      QString timerString = readString(it);
       if (timerString.size() != len) {
         qDebug() << "Invalid length";
         return nullptr;
@@ -372,9 +387,6 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       qDebug() << "Time:" << timer.current << "s";
       qDebug() << "Running:" << timer.running;
     } else {
-      it += 8;
-      it += len;
-      // Account for the NUL character.
       ++it;
     }
   }
@@ -408,12 +420,19 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   std::vector<Clue> clues[2]{across, down};
   QByteArray version = puzFile.mid(0x18, 4);
-  return new Puzzle{version,       height,
-                    width,         puzzleType,
-                    solutionState, clues,
-                    solution,      grid,
-                    data,          puzFile.mid(0x34 + (2 * width * height)),
-                    markup,        timer};
+  return new Puzzle{
+      version,
+      height,
+      width,
+      puzzleType,
+      solutionState,
+      clues,
+      solution,
+      grid,
+      data,
+      puzFile.mid(textStart - puzFile.begin(), textEnd - textStart),
+      markup,
+      timer};
 }
 
 Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
@@ -464,12 +483,14 @@ const Clue &Puzzle::getClueByIdx(Direction dir, uint32_t idx) const {
 }
 
 QByteArray Puzzle::serialize() const {
-  QByteArray result(0x34 + (2 * width_ * height_) + text_.size(), 0);
+  QByteArray result(0x34 + (2 * static_cast<uint16_t>(width_) *
+                            static_cast<uint16_t>(height_)),
+                    '\0');
 
   writeUInt16LE(result.begin(),
                 globalChecksum(width_, height_, getNumClues(), puzzleType_,
                                solutionState_, solution_, grid_, text_));
-  result.replace(0x2, 0xd, MAGIC);
+  std::copy(MAGIC, MAGIC + sizeof(MAGIC), result.begin() + 0x2);
   writeUInt16LE(result.begin() + 0x0e,
                 headerChecksum(width_, height_, getNumClues(), puzzleType_,
                                solutionState_));
@@ -487,7 +508,29 @@ QByteArray Puzzle::serialize() const {
   writeGrid(result.begin() + 0x34, solution_);
   writeGrid(result.begin() + 0x34 + (width_ * height_), grid_);
 
-  result.replace(0x34 + (2 * width_ * height_), text_.size(), text_);
+  result += text_;
+  result += '\0';
+
+  // Serialize markup.
+  QByteArray markupString{width_ * height_, '\0'};
+  writeGrid(markupString.begin(), markup_);
+
+  result += QByteArray("GEXT", 4) + makeUInt16LE(width_ * height_) +
+            makeUInt16LE(checksum(markupString.begin(), markupString.end())) +
+            markupString + '\0';
+
+  // Serialize timer.
+  QByteArray timeString = QString("%1,%2")
+                              .arg(timer_.current)
+                              .arg(timer_.running ? '1' : '0')
+                              .toLocal8Bit();
+  uint16_t timerChecksum = checksum(timeString.begin(), timeString.end());
+  uint16_t timerLen = timeString.size();
+  QByteArray timerExtension = QByteArray("LTIM", 4) + makeUInt16LE(timerLen) +
+                              makeUInt16LE(timerChecksum) + timeString + '\0';
+
+  result += timerExtension;
+
   return result;
 }
 
