@@ -4,6 +4,7 @@
 #include "ClueWidget.h"
 #include "Puzzle.h"
 #include "PuzzleWidget.h"
+#include "TimerWidget.h"
 
 #include <QtWidgets>
 
@@ -38,6 +39,9 @@ private slots:
   void acrossClueClicked(const QListWidgetItem *item);
   void downClueClicked(const QListWidgetItem *item);
 
+  void tickTimer();
+  void toggleTimer();
+
 private:
   std::unique_ptr<Puzzle> puzzle_;
   Cursor cursor_;
@@ -58,6 +62,7 @@ private:
   QLabel *titleLabel_;
   QLabel *authorLabel_;
   QLabel *copyrightLabel_;
+  TimerWidget *timerWidget_;
 
   ClueWidget *acrossWidget_;
   ClueWidget *downWidget_;

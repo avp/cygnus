@@ -18,6 +18,7 @@ set(SOURCES
 
   ClueWidget.cpp
   PuzzleWidget.cpp
+  TimerWidget.cpp
 
   Puzzle.cpp
 )

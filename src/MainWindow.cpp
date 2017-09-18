@@ -48,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   infoLayout->addWidget(authorLabel_);
   copyrightLabel_ = new QLabel{};
   infoLayout->addWidget(copyrightLabel_);
+  timerWidget_ = new TimerWidget{};
+  infoLayout->addWidget(timerWidget_);
 
   hLayout->addWidget(acrossWidget_);
   hLayout->addWidget(puzzleContainer_);
@@ -66,6 +68,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
           &MainWindow::acrossClueClicked);
   connect(downWidget_, &ClueWidget::itemPressed, this,
           &MainWindow::downClueClicked);
+
+  QTimer *timer = new QTimer(this);
+  timer->start(1000);
+  connect(timer, &QTimer::timeout, this, &MainWindow::tickTimer);
+  connect(timerWidget_, &TimerWidget::clicked, this, &MainWindow::toggleTimer);
 }
 
 void MainWindow::showMaximized() {
@@ -83,6 +90,8 @@ void MainWindow::reloadPuzzle() {
   titleLabel_->setText(puzzle_->getTitle());
   authorLabel_->setText(puzzle_->getAuthor());
   copyrightLabel_->setText(puzzle_->getCopyright());
+  timerWidget_->setCurrent(puzzle_->getTimer().current);
+  timerWidget_->setRunning(puzzle_->getTimer().running);
 
   acrossWidget_->clear();
   for (const auto &clue : puzzle_->getClues(Direction::ACROSS)) {
@@ -529,4 +538,23 @@ void MainWindow::downClueClicked(const QListWidgetItem *item) {
   setCursor(clue.row, clue.col, Direction::DOWN);
 }
 
+void MainWindow::tickTimer() {
+  if (!puzzle_) {
+    return;
+  }
+
+  if (puzzle_->getTimer().running) {
+    puzzle_->getTimer().current += 1;
+    timerWidget_->setCurrent(puzzle_->getTimer().current);
+  }
+}
+
+void MainWindow::toggleTimer() {
+  if (!puzzle_) {
+    return;
+  }
+
+  puzzle_->getTimer().running = !puzzle_->getTimer().running;
+  timerWidget_->setRunning(puzzle_->getTimer().running);
+}
 } // namespace cygnus

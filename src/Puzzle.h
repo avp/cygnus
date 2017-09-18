@@ -101,13 +101,13 @@ public:
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<CellData> &getCellData() const { return data_; }
   inline const Grid<Markup> &getMarkup() const { return markup_; }
-  inline const Timer &getTimer() const { return timer_; }
   inline const uint16_t getNumClues() const {
     return static_cast<uint16_t>(clues_[0].size() + clues_[1].size());
   }
   inline const QString &getTitle() const { return title_; }
   inline const QString &getAuthor() const { return author_; }
   inline const QString &getCopyright() const { return copyright_; }
+  inline Timer &getTimer() { return timer_; }
 
   /// \return the clue index of clue number \p num in direction \p dir.
   int getClueIdxByNum(Direction dir, uint32_t num) const;
