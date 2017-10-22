@@ -1,6 +1,7 @@
 #include "PuzzleWidget.h"
 
 #include "Colors.h"
+#include "FilledLabel.h"
 
 namespace cygnus {
 
@@ -15,13 +16,11 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   setAutoFillBackground(true);
   setPalette(pal);
 
-  QLabel *numLabel = new QLabel{};
-  numLabel->setContentsMargins(1, 1, 1, 1);
+  FilledLabel *numLabel = new FilledLabel{};
+  numLabel->setContentsMargins(0, 0, 0, 0);
   numLabel->setMargin(0);
   numLabel->setAlignment(Qt::AlignCenter);
-  auto numFont = numLabel->font();
-  numFont.setPointSize(numFont.pointSize() - 3);
-  numLabel->setFont(numFont);
+  numLabel->setStyleSheet("QLabel { padding: 0; }");
 
   if (cellData.acrossStart) {
     numLabel->setText(QString("%1").arg(cellData.acrossNum));
@@ -31,20 +30,20 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
     numLabel->setText("");
   }
 
-  entryLabel_ = new QLabel{};
+  entryLabel_ = new FilledLabel{};
   entryLabel_->setContentsMargins(0, 0, 0, 0);
   entryLabel_->setMargin(0);
   entryLabel_->setAlignment(Qt::AlignCenter);
-  auto entryFont = entryLabel_->font();
-  entryFont.setPointSize(entryFont.pointSize() + 2);
-  entryFont.setBold(true);
-  entryLabel_->setFont(entryFont);
 
   layout->addWidget(numLabel, 0, 0, 1, 1);
-  layout->addWidget(entryLabel_, 1, 0, 3, 4);
+  layout->addWidget(entryLabel_, 1, 0, 2, 3);
   layout->setContentsMargins(0, 0, 0, 0);
 
   layout->setSpacing(0);
+}
+
+void CellWidget::resizeEvent(QResizeEvent *event) {
+  QFrame::resizeEvent(event);
 }
 
 void CellWidget::selectCursor() {

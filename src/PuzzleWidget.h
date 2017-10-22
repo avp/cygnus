@@ -8,6 +8,8 @@
 
 namespace cygnus {
 
+class FilledLabel;
+
 class CellWidget : public QFrame {
   Q_OBJECT
 public:
@@ -21,6 +23,7 @@ public:
 protected:
   void paintEvent(QPaintEvent *pe) override;
   void mousePressEvent(QMouseEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
 
 public slots:
   void selectCursor();
@@ -35,13 +38,12 @@ signals:
   void rightClicked();
 
 private:
+  uint8_t row_;
+  uint8_t col_;
   bool isBlack_;
   Puzzle::Markup markup_;
 
-  uint8_t row_;
-  uint8_t col_;
-
-  QLabel *entryLabel_;
+  FilledLabel *entryLabel_;
 };
 
 class PuzzleWidget : public QFrame {

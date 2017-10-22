@@ -92,8 +92,8 @@ private:
 public:
   static Puzzle *loadFromFile(const QByteArray &puzFile);
 
-  inline const uint8_t getHeight() const { return height_; }
-  inline const uint8_t getWidth() const { return width_; }
+  inline uint8_t getHeight() const { return height_; }
+  inline uint8_t getWidth() const { return width_; }
   inline const std::vector<Clue> &getClues(Direction dir) const {
     return clues_[static_cast<int>(dir)];
   }
@@ -101,7 +101,7 @@ public:
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<CellData> &getCellData() const { return data_; }
   inline const Grid<Markup> &getMarkup() const { return markup_; }
-  inline const uint16_t getNumClues() const {
+  inline uint16_t getNumClues() const {
     return static_cast<uint16_t>(clues_[0].size() + clues_[1].size());
   }
   inline const QString &getTitle() const { return title_; }

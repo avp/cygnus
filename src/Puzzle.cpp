@@ -276,6 +276,7 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   uint8_t width = puzFile[0x2c];
   uint8_t height = puzFile[0x2d];
   uint16_t numClues = readUInt16LE(puzFile.begin() + 0x2e);
+  (void)numClues;
   PuzzleType puzzleType = PuzzleType(readUInt16LE(puzFile.begin() + 0x30));
   SolutionState solutionState =
       SolutionState(readUInt16LE(puzFile.begin() + 0x32));
@@ -353,6 +354,7 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       qDebug() << "Reading extension: Markup";
       it += 4;
       uint16_t len = readUInt16LE(it);
+      (void)len;
       it += 4;
       markup = readGrid<Markup>(it, height, width);
       qDebug() << "Read extension:    Markup";
@@ -365,6 +367,7 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       it += 2;
       uint16_t cksum = readUInt16LE(it);
       // TODO: Check checksum here.
+      (void)cksum;
       it += 2;
       QString timerString = readString(it);
       if (timerString.size() != len) {

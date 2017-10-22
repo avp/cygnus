@@ -1,2 +1,7 @@
 build/
 build_release/
+.vs/
+build-cygnus-*/
+
+*.txt.user
+*.pro.user

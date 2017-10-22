@@ -510,8 +510,7 @@ void MainWindow::clearLetter(uint8_t row, uint8_t col) {
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
   const auto &grid = puzzle_->getGrid();
-  if ((0 <= row && row < puzzle_->getHeight()) &&
-      (0 <= col && col < puzzle_->getWidth())) {
+  if ((row < puzzle_->getHeight()) && (col < puzzle_->getWidth())) {
     if (grid[row][col] != BLACK) {
       setCursor(row, col, cursor_.dir);
     }
