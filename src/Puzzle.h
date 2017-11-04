@@ -98,9 +98,11 @@ public:
     return clues_[static_cast<int>(dir)];
   }
   inline Grid<char> &getGrid() { return grid_; }
+  inline const Grid<char> &getGrid() const { return grid_; }
+  inline Grid<Markup> &getMarkup() { return markup_; }
+  inline const Grid<Markup> &getMarkup() const { return markup_; }
   inline const Grid<char> &getSolution() const { return solution_; }
   inline const Grid<CellData> &getCellData() const { return data_; }
-  inline const Grid<Markup> &getMarkup() const { return markup_; }
   inline uint16_t getNumClues() const {
     return static_cast<uint16_t>(clues_[0].size() + clues_[1].size());
   }

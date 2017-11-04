@@ -31,7 +31,8 @@ public slots:
 
   void deselect();
 
-  void setLetter(char letter);
+  void setLetter(QChar letter);
+  void setMarkup(Puzzle::Markup markup);
 
 signals:
   void clicked(uint8_t row, uint8_t col);
@@ -64,7 +65,8 @@ public slots:
   void cellClicked(uint8_t row, uint8_t col) { return clicked(row, col); }
   void cellRightClicked() { return rightClicked(); }
 
-  void setLetter(uint8_t row, uint8_t col, char letter);
+  void setLetter(uint8_t row, uint8_t col, QChar letter);
+  void setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup);
 
 signals:
   void clicked(uint8_t row, uint8_t col);

@@ -260,6 +260,19 @@ void MainWindow::createActions() {
   revealAllAct_ = new QAction(tr("Whole Puzzle"), this);
   revealAllAct_->setStatusTip(tr("Reveal the whole puzzle"));
   connect(revealAllAct_, &QAction::triggered, this, &MainWindow::revealAll);
+
+  checkCurrentAct_ = new QAction(tr("Current Letter"), this);
+  checkCurrentAct_->setStatusTip(tr("Check the current letter"));
+  connect(checkCurrentAct_, &QAction::triggered, this,
+          &MainWindow::checkCurrent);
+
+  checkClueAct_ = new QAction(tr("Current Clue"), this);
+  checkClueAct_->setStatusTip(tr("Check the current clue"));
+  connect(checkClueAct_, &QAction::triggered, this, &MainWindow::checkClue);
+
+  checkAllAct_ = new QAction(tr("Whole Puzzle"), this);
+  checkAllAct_->setStatusTip(tr("Check the whole puzzle"));
+  connect(checkAllAct_, &QAction::triggered, this, &MainWindow::checkAll);
 }
 
 void MainWindow::open() {
@@ -316,6 +329,7 @@ void MainWindow::reveal(uint8_t row, uint8_t col) {
   if (current == EMPTY || current != solution) {
     setLetter(row, col, solution);
   }
+  checkSuccess();
 }
 
 void MainWindow::revealCurrent() { reveal(cursor_.row, cursor_.col); }
@@ -348,6 +362,83 @@ void MainWindow::revealAll() {
   }
 }
 
+bool MainWindow::check(uint8_t row, uint8_t col) {
+  qDebug() << "Checking" << row << ',' << col;
+  const char solution = puzzle_->getSolution()[row][col];
+  const char current = puzzle_->getGrid()[row][col];
+  qDebug() << "Current" << current;
+  qDebug() << "Solution" << solution;
+  if (current == BLACK || current == EMPTY) {
+    // Black or empty squares are always considered correct.
+    qDebug() << "Result: black or empty";
+    return true;
+  }
+  if ((current == solution) || (current == (solution | 32))) {
+    qDebug() << "Result: correct";
+    return true;
+  }
+  // Otherwise, it's incorrect. Mark it as such.
+  qDebug() << "Result: incorrect";
+  return false;
+}
+
+bool MainWindow::checkAndMark(uint8_t row, uint8_t col) {
+  if (check(row, col)) {
+    return true;
+  }
+  puzzle_->getMarkup()[row][col] |= Puzzle::IncorrectTag;
+  puzzleWidget_->setMarkup(row, col, puzzle_->getMarkup()[row][col]);
+  return false;
+}
+
+void MainWindow::checkSuccess() {
+  // See if the puzzle's complete.
+  for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
+    for (uint8_t c = 0; c < puzzle_->getWidth(); ++c) {
+      if (puzzle_->getGrid()[r][c] == EMPTY) {
+        return;
+      } else if (!check(r, c)) {
+        return;
+      }
+    }
+  }
+
+  // Puzzle is complete.
+  setTimerStatus(false);
+  QMessageBox::information(this, "Congratulations!",
+                           "You completeed the puzzle correctly.");
+}
+
+void MainWindow::checkCurrent() { checkAndMark(cursor_.row, cursor_.col); }
+
+void MainWindow::checkClue() {
+  auto num = puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir);
+  const Clue &clue = puzzle_->getClueByNum(cursor_.dir, num);
+  uint8_t r = clue.row;
+  uint8_t c = clue.col;
+  if (cursor_.dir == Direction::ACROSS) {
+    while (c < puzzle_->getWidth() &&
+           puzzle_->getCellData()[r][c].acrossNum == num) {
+      checkAndMark(r, c);
+      ++c;
+    }
+  } else {
+    while (r < puzzle_->getHeight() &&
+           puzzle_->getCellData()[r][c].downNum == num) {
+      checkAndMark(r, c);
+      ++r;
+    }
+  }
+}
+
+void MainWindow::checkAll() {
+  for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
+    for (uint8_t c = 0; c < puzzle_->getWidth(); ++c) {
+      checkAndMark(r, c);
+    }
+  }
+}
+
 void MainWindow::createMenus() {
   fileMenu_ = menuBar()->addMenu(tr("&File"));
   fileMenu_->addAction(openAct_);
@@ -362,6 +453,10 @@ void MainWindow::createMenus() {
   revealMenu_->addAction(revealCurrentAct_);
   revealMenu_->addAction(revealClueAct_);
   revealMenu_->addAction(revealAllAct_);
+  checkMenu_ = puzzleMenu_->addMenu(tr("&Check..."));
+  checkMenu_->addAction(checkCurrentAct_);
+  checkMenu_->addAction(checkClueAct_);
+  checkMenu_->addAction(checkAllAct_);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -407,6 +502,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
       char letter = event->modifiers() == Qt::ShiftModifier ? event->key() | 32
                                                             : event->key();
       setLetter(cursor_.row, cursor_.col, letter);
+      checkSuccess();
 
       if (cursor_.dir == Direction::ACROSS) {
         keyRight();
@@ -500,8 +596,17 @@ void MainWindow::keyTab(bool reverse) {
 }
 
 void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
+  if (puzzle_->getGrid()[row][col] == letter) {
+    return;
+  }
   puzzle_->getGrid()[row][col] = letter;
   puzzleWidget_->setLetter(row, col, letter);
+  Puzzle::Markup &markup = puzzle_->getMarkup()[row][col];
+  if (markup & Puzzle::IncorrectTag) {
+    markup &= ~Puzzle::IncorrectTag;
+    markup |= Puzzle::PreviousIncorrectTag;
+  }
+  puzzleWidget_->setMarkup(row, col, markup);
 }
 
 void MainWindow::clearLetter(uint8_t row, uint8_t col) {
@@ -548,12 +653,15 @@ void MainWindow::tickTimer() {
   }
 }
 
-void MainWindow::toggleTimer() {
+void MainWindow::setTimerStatus(bool running) {
   if (!puzzle_) {
     return;
   }
 
-  puzzle_->getTimer().running = !puzzle_->getTimer().running;
-  timerWidget_->setRunning(puzzle_->getTimer().running);
+  puzzle_->getTimer().running = running;
+  timerWidget_->setRunning(running);
 }
+
+void MainWindow::toggleTimer() { setTimerStatus(!puzzle_->getTimer().running); }
+
 } // namespace cygnus

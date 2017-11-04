@@ -32,6 +32,10 @@ private slots:
   void revealClue();
   void revealAll();
 
+  void checkCurrent();
+  void checkClue();
+  void checkAll();
+
   void setCursor(uint8_t row, uint8_t col, Direction dir);
   void puzzleClicked(uint8_t row, uint8_t col);
   void puzzleRightClicked();
@@ -58,6 +62,10 @@ private:
   QAction *revealCurrentAct_;
   QAction *revealClueAct_;
   QAction *revealAllAct_;
+  QMenu *checkMenu_;
+  QAction *checkCurrentAct_;
+  QAction *checkClueAct_;
+  QAction *checkAllAct_;
 
   QLabel *titleLabel_;
   QLabel *authorLabel_;
@@ -88,6 +96,14 @@ private:
   void clearLetter(uint8_t row, uint8_t col);
 
   void reveal(uint8_t row, uint8_t col);
+  bool check(uint8_t row, uint8_t col);
+  bool checkAndMark(uint8_t row, uint8_t col);
+
+  /// Check whole puzzle and show message if completely correct.
+  /// Else, do nothing.
+  void checkSuccess();
+
+  void setTimerStatus(bool running);
 };
 
 } // namespace cygnus

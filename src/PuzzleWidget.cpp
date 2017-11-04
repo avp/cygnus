@@ -66,19 +66,32 @@ void CellWidget::deselect() {
   setPalette(pal);
 }
 
-void CellWidget::setLetter(char letter) {
+void CellWidget::setLetter(QChar letter) {
   auto pal = palette();
   if (letter == EMPTY) {
     entryLabel_->setText("");
   } else if ('A' <= letter && letter <= 'Z') {
-    entryLabel_->setText(QString("%1").arg(static_cast<char>(letter)));
+    entryLabel_->setText(QString("%1").arg(letter));
     pal.setColor(QPalette::Foreground, Qt::black);
   } else if ('a' <= letter && letter <= 'z') {
     // Convert to uppercase by turning off the 5th bit.
-    entryLabel_->setText(QString("%1").arg(static_cast<char>(letter & ~32)));
+    entryLabel_->setText(
+        QString("%1").arg(static_cast<char>(letter.toLatin1() & ~32)));
     pal.setColor(QPalette::Foreground, Colors::PENCIL);
   }
+
+  if (markup_ & Puzzle::IncorrectTag) {
+    pal.setColor(QPalette::Foreground, Qt::red);
+  }
+
   setPalette(pal);
+}
+
+void CellWidget::setMarkup(Puzzle::Markup markup) {
+  markup_ = markup;
+  if (!entryLabel_->text().isEmpty()) {
+    setLetter(entryLabel_->text().at(0));
+  }
 }
 
 void CellWidget::mousePressEvent(QMouseEvent *event) {
@@ -108,6 +121,12 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
     center.setX(center.x() + 1);
     center.setY(center.y() + 1);
     painter.drawEllipse(center, radius, radius);
+  }
+
+  if (markup_ & Puzzle::IncorrectTag) {
+    auto pal = palette();
+    pal.setColor(QPalette::Foreground, Qt::red);
+    setPalette(pal);
   }
 }
 
@@ -163,8 +182,12 @@ void PuzzleWidget::deselectPosition(uint8_t row, uint8_t col) {
   cells_[row][col]->deselect();
 }
 
-void PuzzleWidget::setLetter(uint8_t row, uint8_t col, char letter) {
+void PuzzleWidget::setLetter(uint8_t row, uint8_t col, QChar letter) {
   cells_[row][col]->setLetter(letter);
+}
+
+void PuzzleWidget::setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup) {
+  cells_[row][col]->setMarkup(markup);
 }
 
 } // namespace cygnus

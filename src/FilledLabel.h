@@ -7,6 +7,7 @@
 namespace cygnus {
 
 class FilledLabel : public QLabel {
+  Q_OBJECT
 public:
   explicit FilledLabel(QWidget *parent = nullptr) : QLabel(parent) {}
 
