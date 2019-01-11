@@ -8,6 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
 add_compile_options(-std=c++14)
@@ -29,11 +30,12 @@ if (APPLE)
   set(BUNDLE_TYPE MACOSX_BUNDLE)
 endif()
 
-add_executable(${PROJECT_NAME} WIN32
+add_executable(${PROJECT_NAME}
 ${BUNDLE_TYPE} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
   Qt5::Core
+  Qt5::Gui
   Qt5::Widgets
 )
 

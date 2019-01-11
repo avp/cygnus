@@ -2,10 +2,24 @@
 
 #include "Colors.h"
 
+#include <QDebug>
+
 namespace cygnus {
+
+static constexpr int kPixelDelta = 5;
 
 ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {
   setMinimumWidth(200);
+}
+
+void ClueWidget::modifySize(int delta) {
+  qDebug() << "Changing size by" << delta;
+  for (uint32_t i = 0, e = count(); i < e; ++i) {
+    QFont font = item(i)->font();
+    font.setPointSize(font.pointSize() + delta);
+    item(i)->setFont(font);
+  }
+  qApp->processEvents();
 }
 
 void ClueWidget::mousePressEvent(QMouseEvent *event) {

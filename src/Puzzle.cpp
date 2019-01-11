@@ -444,10 +444,9 @@ Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
                Grid<CellData> data, QByteArray text, Grid<Markup> markup,
                Timer timer)
     : version_(version), height_(height), width_(width),
-      puzzleType_(puzzleType),
-      solutionState_(solutionState), clues_{clues[0], clues[1]},
-      solution_(solution), grid_(grid), data_(data), text_(text),
-      markup_(markup), timer_(timer) {
+      puzzleType_(puzzleType), solutionState_(solutionState),
+      clues_{clues[0], clues[1]}, solution_(solution), grid_(grid), data_(data),
+      text_(text), markup_(markup), timer_(timer) {
   QByteArray::const_iterator it = text.begin();
   title_ = readString(it);
   author_ = readString(it);
