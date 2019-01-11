@@ -41,11 +41,20 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   layout->setContentsMargins(0, 0, 0, 0);
 
   layout->setSpacing(0);
+
+  setMouseTracking(true);
 }
 
 void CellWidget::resizeEvent(QResizeEvent *event) {
   QFrame::resizeEvent(event);
 }
+
+void CellWidget::enterEvent(QEvent *event) {
+  if (displayText_.size() > 3)
+    QToolTip::showText(this->mapToGlobal(QPoint(0, 0)), displayText_);
+}
+
+void CellWidget::leaveEvent(QEvent *event) { QToolTip::hideText(); }
 
 void CellWidget::selectCursor() {
   auto pal = palette();
@@ -68,18 +77,18 @@ void CellWidget::deselect() {
 }
 
 void CellWidget::setCell(const QString &text) {
-  qDebug() << "Setting cell to" << text;
   if (isBlack_)
     return;
+
   auto pal = palette();
   if (text == "-" || text.isEmpty()) {
-    entryLabel_->setText("");
+    displayText_ = "";
   } else if (text.at(0).isUpper()) {
-    entryLabel_->setText(text);
+    displayText_ = text;
     pal.setColor(QPalette::Foreground, Qt::black);
     isPencil_ = false;
   } else {
-    entryLabel_->setText(QString("%1").arg(text.toUpper()));
+    displayText_ = QString("%1").arg(text.toUpper());
     pal.setColor(QPalette::Foreground, Colors::PENCIL);
     isPencil_ = true;
   }
@@ -89,6 +98,8 @@ void CellWidget::setCell(const QString &text) {
     isPencil_ = false;
   }
 
+  entryLabel_->setText(displayText_.left(3) +
+                       (displayText_.size() > 3 ? "..." : ""));
   setPalette(pal);
 }
 
@@ -145,13 +156,18 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   auto &grid = puzzle->getGrid();
   auto &markup = puzzle->getMarkup();
   auto &cellData = puzzle->getCellData();
+  auto &rebusFill = puzzle->getRebusFill();
   for (uint8_t r = 0; r < puzzle->getHeight(); ++r) {
     std::vector<CellWidget *> cellRow{};
     cellRow.reserve(puzzle->getHeight());
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
       auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c],
                                  markup[r][c]);
-      cell->setCell(QString("%1").arg(grid[r][c]));
+      if (!rebusFill[r][c].isEmpty()) {
+        cell->setCell(rebusFill[r][c]);
+      } else {
+        cell->setCell(QString("%1").arg(grid[r][c]));
+      }
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);
