@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   vLayout->addLayout(hLayout);
 
   window->setLayout(vLayout);
+  window->setWindowTitle(tr("Cygnus Crosswords"));
 
   cursor_.row = 0;
   cursor_.col = 0;
@@ -277,7 +278,7 @@ void MainWindow::createActions() {
 
 void MainWindow::open() {
   auto fileName =
-      QFileDialog::getOpenFileName(this, tr("Open puzzle_"), QDir::homePath(),
+      QFileDialog::getOpenFileName(this, tr("Open puzzle"), QDir::homePath(),
                                    tr("Across Lite File (*.puz)"));
 
   if (!fileName.isEmpty()) {
@@ -625,9 +626,9 @@ void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
 }
 
 void MainWindow::puzzleRightClicked() {
-  setCursor(cursor_.row, cursor_.col,
-            cursor_.dir == Direction::ACROSS ? Direction::DOWN
-                                             : Direction::ACROSS);
+  setCursor(cursor_.row, cursor_.col, cursor_.dir == Direction::ACROSS
+                                          ? Direction::DOWN
+                                          : Direction::ACROSS);
 }
 
 void MainWindow::acrossClueClicked(const QListWidgetItem *item) {
