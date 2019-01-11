@@ -289,7 +289,7 @@ void MainWindow::open() {
       return;
     }
     QByteArray puzFile = file.readAll();
-    puzzle_.reset(Puzzle::loadFromFile(puzFile));
+    puzzle_ = std::move(Puzzle::loadFromFile(puzFile));
     if (puzzle_) {
       reloadPuzzle();
     } else {
@@ -329,7 +329,7 @@ void MainWindow::reveal(uint8_t row, uint8_t col) {
     return;
   }
   if (current == EMPTY || current != solution) {
-    setLetter(row, col, solution);
+    setCell(row, col, QString("%1").arg(solution));
   }
   checkSuccess();
 }
@@ -515,7 +515,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
       // Convert to lowercase if shift is being held.
       char letter = event->modifiers() == Qt::ShiftModifier ? event->key() | 32
                                                             : event->key();
-      setLetter(cursor_.row, cursor_.col, letter);
+      setCell(cursor_.row, cursor_.col, QString("%1").arg(letter));
       checkSuccess();
 
       if (cursor_.dir == Direction::ACROSS) {
@@ -609,12 +609,12 @@ void MainWindow::keyTab(bool reverse) {
   setCursor(newClue.row, newClue.col, dir);
 }
 
-void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
-  if (puzzle_->getGrid()[row][col] == letter) {
+void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
+  if (puzzle_->getGrid()[row][col] == text.at(0).toLatin1()) {
     return;
   }
-  puzzle_->getGrid()[row][col] = letter;
-  puzzleWidget_->setLetter(row, col, letter);
+  puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
+  puzzleWidget_->setCell(row, col, text);
   Puzzle::Markup &markup = puzzle_->getMarkup()[row][col];
   if (markup & Puzzle::IncorrectTag) {
     markup &= ~Puzzle::IncorrectTag;
@@ -624,7 +624,7 @@ void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
 }
 
 void MainWindow::clearLetter(uint8_t row, uint8_t col) {
-  setLetter(row, col, EMPTY);
+  setCell(row, col, "");
 }
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {

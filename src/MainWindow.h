@@ -92,7 +92,7 @@ private:
   void keyRight();
   void keyTab(bool reverse);
 
-  void setLetter(uint8_t row, uint8_t col, char letter);
+  void setCell(uint8_t row, uint8_t col, QString letter);
   void clearLetter(uint8_t row, uint8_t col);
 
   void reveal(uint8_t row, uint8_t col);
