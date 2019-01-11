@@ -513,9 +513,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (event->modifiers() == Qt::NoModifier ||
         event->modifiers() == Qt::ShiftModifier) {
       // Convert to lowercase if shift is being held.
-      char letter = event->modifiers() == Qt::ShiftModifier ? event->key() | 32
-                                                            : event->key();
-      setCell(cursor_.row, cursor_.col, QString("%1").arg(letter));
+      QChar letter = event->key();
+      setCell(cursor_.row, cursor_.col,
+              QString("%1").arg(event->modifiers() == Qt::ShiftModifier
+                                    ? letter.toLower()
+                                    : letter));
       checkSuccess();
 
       if (cursor_.dir == Direction::ACROSS) {

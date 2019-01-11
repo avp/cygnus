@@ -67,7 +67,8 @@ void CellWidget::deselect() {
   setPalette(pal);
 }
 
-void CellWidget::setCell(QString text) {
+void CellWidget::setCell(const QString &text) {
+  qDebug() << "Setting cell to" << text;
   if (isBlack_)
     return;
   auto pal = palette();
@@ -76,13 +77,16 @@ void CellWidget::setCell(QString text) {
   } else if (text.at(0).isUpper()) {
     entryLabel_->setText(text);
     pal.setColor(QPalette::Foreground, Qt::black);
+    isPencil_ = false;
   } else {
     entryLabel_->setText(QString("%1").arg(text.toUpper()));
     pal.setColor(QPalette::Foreground, Colors::PENCIL);
+    isPencil_ = true;
   }
 
   if (markup_ & Puzzle::IncorrectTag) {
     pal.setColor(QPalette::Foreground, Qt::red);
+    isPencil_ = false;
   }
 
   setPalette(pal);
@@ -91,7 +95,8 @@ void CellWidget::setCell(QString text) {
 void CellWidget::setMarkup(Puzzle::Markup markup) {
   markup_ = markup;
   if (!entryLabel_->text().isEmpty()) {
-    setCell(entryLabel_->text().at(0));
+    setCell(isPencil_ ? entryLabel_->text().at(0).toLower()
+                      : entryLabel_->text().at(0));
   }
 }
 
@@ -183,7 +188,7 @@ void PuzzleWidget::deselectPosition(uint8_t row, uint8_t col) {
   cells_[row][col]->deselect();
 }
 
-void PuzzleWidget::setCell(uint8_t row, uint8_t col, QString text) {
+void PuzzleWidget::setCell(uint8_t row, uint8_t col, const QString &text) {
   cells_[row][col]->setCell(text);
 }
 
