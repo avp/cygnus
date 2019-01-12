@@ -556,21 +556,29 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     break;
   }
 
-  if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
-    if (event->modifiers() == Qt::NoModifier ||
-        event->modifiers() == Qt::ShiftModifier) {
-      // Convert to lowercase if shift is being held.
-      QChar letter = event->key();
-      setCell(cursor_.row, cursor_.col,
-              QString("%1").arg(event->modifiers() == Qt::ShiftModifier
-                                    ? letter.toLower()
-                                    : letter.toUpper()));
-      checkSuccess();
+  if (puzzle_) {
+    if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
+      if (event->modifiers() == Qt::NoModifier ||
+          event->modifiers() == Qt::ShiftModifier) {
+        // Convert to lowercase if shift is being held.
+        QChar letter = event->key();
+        setCell(cursor_.row, cursor_.col,
+                QString("%1").arg(event->modifiers() == Qt::ShiftModifier
+                                      ? letter.toLower()
+                                      : letter.toUpper()));
+        checkSuccess();
 
-      if (cursor_.dir == Direction::ACROSS) {
-        keyRight();
-      } else {
-        keyDown();
+        if (cursor_.dir == Direction::ACROSS) {
+          if (cursor_.col + 1 < puzzle_->getWidth() &&
+              puzzle_->getGrid()[cursor_.row][cursor_.col + 1] != BLACK) {
+            keyRight();
+          }
+        } else {
+          if (cursor_.row + 1 < puzzle_->getHeight() &&
+              puzzle_->getGrid()[cursor_.row + 1][cursor_.col] != BLACK) {
+            keyDown();
+          }
+        }
       }
     }
   }

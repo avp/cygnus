@@ -125,7 +125,7 @@ public:
   /// \return the clue in direction \p dir at index \p idx.
   const Clue &getClueByIdx(Direction dir, uint32_t idx) const;
 
-  std::pair<uint32_t, uint32_t> getClueEnd(const Clue &clue) const {
+  inline std::pair<uint32_t, uint32_t> getClueEnd(const Clue &clue) const {
     uint32_t r = clue.row;
     uint32_t c = clue.col;
     if (clue.dir == Direction::ACROSS) {
