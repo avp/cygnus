@@ -19,7 +19,6 @@ void ClueWidget::modifySize(int delta) {
     font.setPointSize(font.pointSize() + delta);
     item(i)->setFont(font);
   }
-  qApp->processEvents();
 }
 
 void ClueWidget::mousePressEvent(QMouseEvent *event) {
