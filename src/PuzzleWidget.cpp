@@ -2,6 +2,7 @@
 
 #include "Colors.h"
 #include "FilledLabel.h"
+#include "LabelStretcher.h"
 #include "Puzzle.h"
 
 namespace cygnus {
@@ -17,7 +18,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   setAutoFillBackground(true);
   setPalette(pal);
 
-  FilledLabel *numLabel = new FilledLabel{};
+  auto *numLabel = new FilledLabel{};
   numLabel->setContentsMargins(0, 0, 0, 0);
   numLabel->setMargin(0);
   numLabel->setAlignment(Qt::AlignCenter);
@@ -35,6 +36,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   entryLabel_->setContentsMargins(0, 0, 0, 0);
   entryLabel_->setMargin(0);
   entryLabel_->setAlignment(Qt::AlignCenter);
+  entryLabel_->setStyleSheet("QLabel { padding: 0; }");
 
   layout->addWidget(numLabel, 0, 0, 1, 1);
   layout->addWidget(entryLabel_, 1, 0, 3, 4);

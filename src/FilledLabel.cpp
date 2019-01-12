@@ -11,12 +11,17 @@ void FilledLabel::resizeEvent(QResizeEvent *event) {
   uint32_t fontSize = 1;
 
   QFont font = this->font();
-  font.setPixelSize(fontSize);
-  QRect r = QFontMetrics(font).boundingRect(text);
-  uint32_t factor = cRect.height() / r.height();
-  font.setPixelSize(factor + 2);
-  setFont(font);
-  return;
+  while (1) {
+    font.setPixelSize(fontSize);
+    QRect r = QFontMetrics(font).boundingRect(text);
+    if (r.height() < cRect.height() && r.width() < cRect.width()) {
+      fontSize++;
+    } else {
+      font.setPixelSize(fontSize - 1);
+      setFont(font);
+      return;
+    }
+  }
 }
 
 } // namespace cygnus

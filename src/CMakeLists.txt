@@ -22,6 +22,7 @@ set(SOURCES
   TimerWidget.cpp
 
   FilledLabel.cpp
+  LabelStretcher.cpp
 
   Puzzle.cpp
 )
