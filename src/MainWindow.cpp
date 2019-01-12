@@ -185,13 +185,6 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
       puzzle_->getNumByPosition(cursor_.row, cursor_.col, flip(cursor_.dir));
   int curClue = puzzle_->getClueIdxByNum(cursor_.dir, curNum);
   int flipClue = puzzle_->getClueIdxByNum(flip(cursor_.dir), flipNum);
-  if (cursor_.dir == Direction::ACROSS) {
-    acrossWidget_->item(curClue)->setBackground(Qt::white);
-    downWidget_->item(flipClue)->setBackground(Qt::white);
-  } else {
-    downWidget_->item(curClue)->setBackground(Qt::white);
-    acrossWidget_->item(flipClue)->setBackground(Qt::white);
-  }
 
   curNum = puzzle_->getNumByPosition(row, col, dir);
   flipNum = puzzle_->getNumByPosition(row, col, flip(dir));

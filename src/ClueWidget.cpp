@@ -44,13 +44,13 @@ void ClueWidget::mouseReleaseEvent(QMouseEvent *event) {
 
 void ClueWidget::setPrimary() {
   setStyleSheet(
-      QString("QListView::item:selected { background: %1; foreground: black }")
+      QString("QListView::item:selected { background: %1; color: black }")
           .arg(Colors::colorToString(Colors::PRIMARY_HIGHLIGHT)));
 }
 
 void ClueWidget::setSecondary() {
   setStyleSheet(
-      QString("QListView::item:selected { background: %1; foreground: black }")
+      QString("QListView::item:selected { background: %1; color: black }")
           .arg(Colors::colorToString(Colors::SECONDARY_HIGHLIGHT)));
 }
 
