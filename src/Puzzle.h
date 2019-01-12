@@ -113,6 +113,8 @@ public:
   inline const QString &getAuthor() const { return author_; }
   inline const QString &getCopyright() const { return copyright_; }
   inline Timer &getTimer() { return timer_; }
+  inline Grid<QString> &getRebusFill() { return rebusFill_; }
+  inline const Grid<QString> &getRebusFill() const { return rebusFill_; }
 
   /// \return the clue index of clue number \p num in direction \p dir.
   int getClueIdxByNum(Direction dir, uint32_t num) const;

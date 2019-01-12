@@ -24,6 +24,8 @@ protected:
   void paintEvent(QPaintEvent *pe) override;
   void mousePressEvent(QMouseEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
+  void enterEvent(QEvent *event) override;
+  void leaveEvent(QEvent *event) override;
 
 public slots:
   void selectCursor();
@@ -44,6 +46,8 @@ private:
   bool isBlack_;
   Puzzle::Markup markup_;
   bool isPencil_;
+
+  QString displayText_{""};
 
   FilledLabel *entryLabel_;
 };

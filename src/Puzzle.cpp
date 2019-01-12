@@ -366,8 +366,6 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
       qDebug() << "Read extension:    Markup";
       // Account for the NUL character.
       ++it;
-      qDebug() << "IT = " << (it - puzFile.begin()) << (void *)(it + 4)
-               << (void *)puzFile.end();
     } else if (::strncmp(it, "LTIM", 4) == 0) {
       qDebug() << "Reading extension: Timer";
       it += 4;
@@ -402,10 +400,12 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
       qDebug() << "Reading extension: Rebus Fill";
       it += 4;
       uint16_t len = readUInt16LE(it);
+      (void)len;
       it += 2;
       uint16_t cksum = readUInt16LE(it);
       // TODO: Check checksum.
       (void)cksum;
+      it += 2;
       for (uint32_t r = 0; r < height; ++r) {
         std::vector<QString> row;
         for (uint32_t c = 0; c < width; ++c) {
