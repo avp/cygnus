@@ -106,8 +106,7 @@ void CellWidget::setCell(const QString &text) {
 void CellWidget::setMarkup(Puzzle::Markup markup) {
   markup_ = markup;
   if (!entryLabel_->text().isEmpty()) {
-    setCell(isPencil_ ? entryLabel_->text().at(0).toLower()
-                      : entryLabel_->text().at(0));
+    setCell(isPencil_ ? displayText_.toLower() : displayText_.toUpper());
   }
 }
 
