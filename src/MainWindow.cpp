@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QtWidgets>
+
 #include <memory>
 
 namespace cygnus {
@@ -493,6 +494,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     break;
   case Qt::Key_Delete:
     clearLetter(cursor_.row, cursor_.col);
+    break;
+  case Qt::Key_Plus:
+    if (event->modifiers() & Qt::ControlModifier) {
+      acrossWidget_->modifySize(1);
+      downWidget_->modifySize(1);
+    }
+    break;
+  case Qt::Key_Minus:
+    if (event->modifiers() & Qt::ControlModifier) {
+      acrossWidget_->modifySize(-1);
+      downWidget_->modifySize(-1);
+    }
     break;
   }
 

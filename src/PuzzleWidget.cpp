@@ -2,6 +2,7 @@
 
 #include "Colors.h"
 #include "FilledLabel.h"
+#include "Puzzle.h"
 
 namespace cygnus {
 

@@ -10,6 +10,8 @@ class ClueWidget : public QListWidget {
 public:
   explicit ClueWidget(QWidget *parent = nullptr);
 
+  void modifySize(int delta);
+
 public slots:
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
