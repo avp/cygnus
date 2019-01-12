@@ -350,6 +350,13 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
   Timer timer{};
 
   Grid<QString> rebusFill{};
+  for (uint32_t r = 0; r < height; ++r) {
+    std::vector<QString> row;
+    for (uint32_t c = 0; c < width; ++c) {
+      row.push_back("");
+    }
+    rebusFill.push_back(std::move(row));
+  }
 
   // Try and read extensions.
   while (it < puzFile.end() - 8) {
@@ -410,11 +417,9 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
       (void)cksum;
       it += 2;
       for (uint32_t r = 0; r < height; ++r) {
-        std::vector<QString> row;
         for (uint32_t c = 0; c < width; ++c) {
-          row.push_back(readString(it));
+          rebusFill[r][c] = readString(it);
         }
-        rebusFill.push_back(std::move(row));
       }
       qDebug() << "Read extension:    Rebus Fill";
     } else {
