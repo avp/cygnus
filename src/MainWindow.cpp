@@ -11,7 +11,8 @@
 
 namespace cygnus {
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+MainWindow::MainWindow(const char *fileName, QWidget *parent)
+    : QMainWindow(parent) {
   auto *vLayout = new QVBoxLayout{};
 
   auto *infoLayout = new QHBoxLayout{};
@@ -75,13 +76,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   timer->start(1000);
   connect(timer, &QTimer::timeout, this, &MainWindow::tickTimer);
   connect(timerWidget_, &TimerWidget::clicked, this, &MainWindow::toggleTimer);
+
+  if (fileName) {
+    fileName_ = fileName;
+  }
 }
 
 void MainWindow::showMaximized() {
   QMainWindow::showMaximized();
+  if (fileName_.isEmpty()) {
+    // Show the open dialog.
+    open();
+  } else {
+    loadFile(fileName_);
+  }
+}
 
-  // Show the open dialog.
-  open();
+void MainWindow::resizeEvent(QResizeEvent *event) {
+  QMainWindow::resizeEvent(event);
+  if (puzzleWidget_) {
+    auto puzzleSize = std::min(height(), width()) - 200;
+    puzzleWidget_->setFixedSize(puzzleSize, puzzleSize);
+  }
 }
 
 void MainWindow::reloadPuzzle() {
@@ -270,26 +286,31 @@ void MainWindow::createActions() {
   connect(checkAllAct_, &QAction::triggered, this, &MainWindow::checkAll);
 }
 
+void MainWindow::loadFile(const QString &fileName) {
+  qDebug() << "Opening file:" << fileName;
+  QFile file{fileName};
+  if (!file.open(QIODevice::ReadOnly)) {
+    return;
+  }
+  QByteArray puzFile = file.readAll();
+  puzzle_ = std::move(Puzzle::loadFromFile(puzFile));
+  if (puzzle_) {
+    reloadPuzzle();
+  } else {
+    QMessageBox::warning(
+        this, QString("Corrupted File"),
+        QString("The file %1 isn't a valid puzzle file.").arg(fileName));
+  }
+}
+
 void MainWindow::open() {
-  auto fileName =
+  const auto fileName =
       QFileDialog::getOpenFileName(this, tr("Open puzzle"), QDir::homePath(),
                                    tr("Across Lite File (*.puz)"));
 
   if (!fileName.isEmpty()) {
-    qDebug() << "Opening file:" << fileName;
-    QFile file{fileName};
-    if (!file.open(QIODevice::ReadOnly)) {
-      return;
-    }
-    QByteArray puzFile = file.readAll();
-    puzzle_ = std::move(Puzzle::loadFromFile(puzFile));
-    if (puzzle_) {
-      reloadPuzzle();
-    } else {
-      QMessageBox::warning(
-          this, QString("Corrupted File"),
-          QString("The file %1 isn't a valid puzzle file.").arg(fileName));
-    }
+    fileName_ = fileName;
+    loadFile(fileName_);
   }
 }
 

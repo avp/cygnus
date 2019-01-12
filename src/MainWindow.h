@@ -20,7 +20,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(const char *filename, QWidget *parent = nullptr);
   void showMaximized();
 
 private slots:
@@ -46,10 +46,15 @@ private slots:
   void tickTimer();
   void toggleTimer();
 
+protected:
+  void resizeEvent(QResizeEvent *event) override;
+
 private:
+  QString fileName_;
   std::unique_ptr<Puzzle> puzzle_;
   Cursor cursor_;
 
+  void loadFile(const QString &fileName);
   void reloadPuzzle();
 
   QMenu *fileMenu_;
