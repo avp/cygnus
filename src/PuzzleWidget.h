@@ -31,7 +31,7 @@ public slots:
 
   void deselect();
 
-  void setCell(QString text);
+  void setCell(const QString &text);
   void setMarkup(Puzzle::Markup markup);
 
 signals:
@@ -43,6 +43,7 @@ private:
   uint8_t col_;
   bool isBlack_;
   Puzzle::Markup markup_;
+  bool isPencil_;
 
   FilledLabel *entryLabel_;
 };
@@ -65,7 +66,7 @@ public slots:
   void cellClicked(uint8_t row, uint8_t col) { return clicked(row, col); }
   void cellRightClicked() { return rightClicked(); }
 
-  void setCell(uint8_t row, uint8_t col, QString text);
+  void setCell(uint8_t row, uint8_t col, const QString &text);
   void setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup);
 
 signals:
