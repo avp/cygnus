@@ -110,14 +110,10 @@ section "uninstall"
 	# Remove files
 	delete $INSTDIR\cygnus.exe
 	delete $INSTDIR\logo.ico
-	delete $INSTDIR\Qt5Widgets.dll
-	delete $INSTDIR\Qt5Gui.dll
-	delete $INSTDIR\Qt5Core.dll
-	delete $INSTDIR\libstdc++-6.dll
-	delete $INSTDIR\libgcc_s_dw2-1.dll
-	delete $INSTDIR\libwinpthread-1.dll
-	delete $INSTDIR\libEGL.dll
-	delete $INSTDIR\platforms\qwindows.dll
+	delete $INSTDIR\*.dll
+	rmDir /r $INSTDIR\platforms
+	rmDir /r $INSTDIR\iconengines	
+	rmDir /r $INSTDIR\imageformats		
  
 	# Always delete uninstaller as the last action
 	delete $INSTDIR\uninstall.exe
