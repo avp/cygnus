@@ -74,6 +74,7 @@ void CellWidget::deselect() {
 }
 
 void CellWidget::setCell(const QString &text) {
+  qDebug() << "Setting cell:" << text;
   if (isBlack_)
     return;
 
@@ -97,7 +98,7 @@ void CellWidget::setCell(const QString &text) {
 
   entryLabel_->setText(displayText_.left(3) +
                        (displayText_.size() > 3 ? "…" : ""));
-  setPalette(pal);
+  entryLabel_->setPalette(pal);
 }
 
 void CellWidget::setMarkup(Puzzle::Markup markup) {
