@@ -12,10 +12,10 @@
 namespace cygnus {
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-  QVBoxLayout *vLayout = new QVBoxLayout{};
+  auto *vLayout = new QVBoxLayout{};
 
-  QHBoxLayout *infoLayout = new QHBoxLayout{};
-  QHBoxLayout *hLayout = new QHBoxLayout{};
+  auto *infoLayout = new QHBoxLayout{};
+  auto *hLayout = new QHBoxLayout{};
 
   createActions();
   createMenus();
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   puzzleContainerLayout_->addWidget(curClueLabel_);
   puzzleContainerLayout_->addStretch();
   auto clueFont = curClueLabel_->font();
-  clueFont.setPointSize(clueFont.pointSize() + 3);
+  clueFont.setPointSize(clueFont.pointSize() + 6);
   curClueLabel_->setFont(clueFont);
 
   titleLabel_ = new QLabel{};

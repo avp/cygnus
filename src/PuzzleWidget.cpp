@@ -2,7 +2,6 @@
 
 #include "Colors.h"
 #include "FilledLabel.h"
-#include "LabelStretcher.h"
 #include "Puzzle.h"
 
 namespace cygnus {
@@ -18,7 +17,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   setAutoFillBackground(true);
   setPalette(pal);
 
-  auto *numLabel = new FilledLabel{};
+  auto *numLabel = new QLabel{};
   numLabel->setContentsMargins(0, 0, 0, 0);
   numLabel->setMargin(0);
   numLabel->setAlignment(Qt::AlignCenter);
@@ -45,10 +44,6 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   layout->setSpacing(0);
 
   setMouseTracking(true);
-}
-
-void CellWidget::resizeEvent(QResizeEvent *event) {
-  QFrame::resizeEvent(event);
 }
 
 void CellWidget::enterEvent(QEvent *event) {
@@ -101,7 +96,7 @@ void CellWidget::setCell(const QString &text) {
   }
 
   entryLabel_->setText(displayText_.left(3) +
-                       (displayText_.size() > 3 ? "..." : ""));
+                       (displayText_.size() > 3 ? "…" : ""));
   setPalette(pal);
 }
 
@@ -182,6 +177,14 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
 
   gridLayout_->setSpacing(0);
   gridLayout_->setContentsMargins(1, 1, 1, 1);
+
+  for (uint8_t r = 0; r < puzzle->getHeight(); ++r) {
+    gridLayout_->setRowStretch(r, 0);
+  }
+
+  for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
+    gridLayout_->setColumnStretch(c, 0);
+  }
 
   setLayout(gridLayout_);
 }

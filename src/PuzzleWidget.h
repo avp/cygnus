@@ -23,7 +23,6 @@ public:
 protected:
   void paintEvent(QPaintEvent *pe) override;
   void mousePressEvent(QMouseEvent *event) override;
-  void resizeEvent(QResizeEvent *event) override;
   void enterEvent(QEvent *event) override;
   void leaveEvent(QEvent *event) override;
 
