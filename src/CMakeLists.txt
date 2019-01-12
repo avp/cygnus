@@ -30,7 +30,7 @@ if (APPLE)
   set(BUNDLE_TYPE MACOSX_BUNDLE)
 endif()
 
-add_executable(${PROJECT_NAME}
+add_executable(${PROJECT_NAME} WIN32
 ${BUNDLE_TYPE} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
