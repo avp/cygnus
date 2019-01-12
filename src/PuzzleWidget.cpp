@@ -37,7 +37,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   entryLabel_->setAlignment(Qt::AlignCenter);
 
   layout->addWidget(numLabel, 0, 0, 1, 1);
-  layout->addWidget(entryLabel_, 1, 0, 2, 3);
+  layout->addWidget(entryLabel_, 1, 0, 3, 4);
   layout->setContentsMargins(0, 0, 0, 0);
 
   layout->setSpacing(0);
