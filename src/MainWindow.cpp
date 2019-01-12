@@ -113,12 +113,12 @@ void MainWindow::reloadPuzzle() {
 
   acrossWidget_->clear();
   for (const auto &clue : puzzle_->getClues(Direction::ACROSS)) {
-    acrossWidget_->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
+    acrossWidget_->addClue(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
 
   downWidget_->clear();
   for (const auto &clue : puzzle_->getClues(Direction::DOWN)) {
-    downWidget_->addItem(QString("%1. %2").arg(clue.num).arg(clue.clue));
+    downWidget_->addClue(QString("%1. %2").arg(clue.num).arg(clue.clue));
   }
 
   if (puzzleWidget_) {

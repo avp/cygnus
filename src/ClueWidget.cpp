@@ -6,18 +6,34 @@
 
 namespace cygnus {
 
-static constexpr int kPixelDelta = 5;
-
 ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {
   setMinimumWidth(200);
+  QSettings settings;
+  pointSize_ = settings.value("clues/fontSize").toInt();
 }
 
 void ClueWidget::modifySize(int delta) {
   qDebug() << "Changing size by" << delta;
+  pointSize_ += delta;
   for (uint32_t i = 0, e = count(); i < e; ++i) {
     QFont font = item(i)->font();
-    font.setPointSize(font.pointSize() + delta);
+    font.setPointSize(pointSize_);
     item(i)->setFont(font);
+  }
+  QSettings settings;
+  settings.setValue("clues/fontSize", pointSize_);
+}
+
+void ClueWidget::addClue(const QString &text) {
+  this->addItem(text);
+  if (pointSize_ == 0) {
+    pointSize_ = item(count() - 1)->font().pointSize();
+    QSettings settings;
+    settings.setValue("clues/fontSize", pointSize_);
+  } else {
+    QFont font = item(count() - 1)->font();
+    font.setPointSize(pointSize_);
+    item(count() - 1)->setFont(font);
   }
 }
 
