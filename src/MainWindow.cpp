@@ -507,6 +507,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
       downWidget_->modifySize(-1);
     }
     break;
+  case Qt::Key_Insert:
+    QString rebusInput =
+        QInputDialog::getText(this, tr("Enter rebus input:"), tr("Letters"));
+    if (!rebusInput.isEmpty()) {
+      setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
+      checkSuccess();
+    }
+    break;
   }
 
   if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
@@ -517,7 +525,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
       setCell(cursor_.row, cursor_.col,
               QString("%1").arg(event->modifiers() == Qt::ShiftModifier
                                     ? letter.toLower()
-                                    : letter));
+                                    : letter.toUpper()));
       checkSuccess();
 
       if (cursor_.dir == Direction::ACROSS) {
@@ -616,6 +624,7 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
     return;
   }
   puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
+  puzzle_->getRebusFill()[row][col] = text;
   puzzleWidget_->setCell(row, col, text);
   Puzzle::Markup &markup = puzzle_->getMarkup()[row][col];
   if (markup & Puzzle::IncorrectTag) {
