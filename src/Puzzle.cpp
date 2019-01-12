@@ -337,6 +337,9 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
   qDebug() << "Text end offset:" << (it - puzFile.begin());
   const auto textEnd = it;
 
+  // Null byte between clues and extensions.
+  ++it;
+
   Grid<Markup> markup{};
   markup.resize(height);
   for (uint8_t i = 0; i < height; ++i) {
@@ -349,9 +352,9 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
   Grid<QString> rebusFill{};
 
   // Try and read extensions.
-  while (it + 4 < puzFile.end()) {
-    qDebug() << "Attempting to read extension at" << (it - puzFile.begin())
-             << strncmp(it, "RUSR", 4);
+  while (it < puzFile.end() - 8) {
+    qDebug() << "Attempting to read extension at" << (it - puzFile.begin());
+    qDebug() << "End offset:" << (puzFile.end() - puzFile.begin());
     if (::strncmp(it, "GEXT", 4) == 0) {
       // Read the markup.
       qDebug() << "Reading extension: Markup";
@@ -415,7 +418,16 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
       }
       qDebug() << "Read extension:    Rebus Fill";
     } else {
-      ++it;
+      qDebug() << "Unable to read extension";
+      it += 4;
+      uint16_t len = readUInt16LE(it);
+      (void)len;
+      it += 2;
+      uint16_t cksum = readUInt16LE(it);
+      // TODO: Check checksum.
+      (void)cksum;
+      it += 2;
+      it += len;
     }
   }
 
