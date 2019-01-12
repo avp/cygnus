@@ -510,23 +510,48 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     clearLetter(cursor_.row, cursor_.col);
     break;
   case Qt::Key_Plus:
-    if (event->modifiers() & Qt::ControlModifier) {
-      acrossWidget_->modifySize(1);
-      downWidget_->modifySize(1);
+    if (puzzle_) {
+      if (event->modifiers() & Qt::ControlModifier) {
+        acrossWidget_->modifySize(1);
+        downWidget_->modifySize(1);
+      }
     }
     break;
   case Qt::Key_Minus:
-    if (event->modifiers() & Qt::ControlModifier) {
-      acrossWidget_->modifySize(-1);
-      downWidget_->modifySize(-1);
+    if (puzzle_) {
+      if (event->modifiers() & Qt::ControlModifier) {
+        acrossWidget_->modifySize(-1);
+        downWidget_->modifySize(-1);
+      }
     }
     break;
-  case Qt::Key_Insert:
-    QString rebusInput =
-        QInputDialog::getText(this, tr("Enter rebus input:"), tr("Letters"));
-    if (!rebusInput.isEmpty()) {
-      setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
-      checkSuccess();
+  case Qt::Key_Insert: {
+    if (puzzle_) {
+      QString rebusInput =
+          QInputDialog::getText(this, tr("Enter rebus input:"), tr("Letters"));
+      if (!rebusInput.isEmpty()) {
+        setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
+        checkSuccess();
+      }
+      break;
+    }
+  }
+
+  case Qt::Key_Home:
+    if (puzzle_) {
+      const Clue &clue = puzzle_->getClueByNum(
+          cursor_.dir,
+          puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir));
+      setCursor(clue.row, clue.col, clue.dir);
+    }
+    break;
+  case Qt::Key_End:
+    if (puzzle_) {
+      const Clue &clue = puzzle_->getClueByNum(
+          cursor_.dir,
+          puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir));
+      auto end = puzzle_->getClueEnd(clue);
+      setCursor(end.first, end.second, clue.dir);
     }
     break;
   }
