@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QString>
 
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -70,8 +71,8 @@ private:
   Puzzle(QByteArray version, uint8_t height, uint8_t width,
          PuzzleType puzzleType, SolutionState solutionState,
          std::vector<Clue> clues[2], Grid<char> solution, Grid<char> grid,
-         Grid<CellData> data, QByteArray text, Grid<Markup> markup,
-         Timer timer);
+         Grid<CellData> data, QByteArray text, Grid<Markup> markup, Timer timer,
+         Grid<QString> rebusFill);
   QByteArray version_;
 
   uint8_t height_;
@@ -85,13 +86,14 @@ private:
   QByteArray text_;
   Grid<Markup> markup_;
   Timer timer_;
+  Grid<QString> rebusFill_{};
 
   QString title_;
   QString author_;
   QString copyright_;
 
 public:
-  static Puzzle *loadFromFile(const QByteArray &puzFile);
+  static std::unique_ptr<Puzzle> loadFromFile(const QByteArray &puzFile);
 
   inline uint8_t getHeight() const { return height_; }
   inline uint8_t getWidth() const { return width_; }
@@ -111,6 +113,8 @@ public:
   inline const QString &getAuthor() const { return author_; }
   inline const QString &getCopyright() const { return copyright_; }
   inline Timer &getTimer() { return timer_; }
+  inline Grid<QString> &getRebusFill() { return rebusFill_; }
+  inline const Grid<QString> &getRebusFill() const { return rebusFill_; }
 
   /// \return the clue index of clue number \p num in direction \p dir.
   int getClueIdxByNum(Direction dir, uint32_t num) const;

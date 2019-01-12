@@ -72,10 +72,9 @@ static Grid<T> readGrid(QByteArray::const_iterator &start, const uint8_t height,
     std::vector<T> row;
     row.reserve(width);
     for (uint8_t c = 0; c < width; ++c) {
-      T cell = static_cast<T>(*start++);
-      row.push_back(cell);
+      row.emplace_back(*start++);
     }
-    grid.push_back(row);
+    grid.push_back(std::move(row));
   }
 
   return grid;
@@ -267,7 +266,7 @@ bool Puzzle::validatePuzzle(const QByteArray &puzFile) {
   return true;
 }
 
-Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
+std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
   if (!validatePuzzle(puzFile)) {
     qCritical() << "Failed to validate puzzle";
     return nullptr;
@@ -338,6 +337,9 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
   qDebug() << "Text end offset:" << (it - puzFile.begin());
   const auto textEnd = it;
 
+  // Null byte between clues and extensions.
+  ++it;
+
   Grid<Markup> markup{};
   markup.resize(height);
   for (uint8_t i = 0; i < height; ++i) {
@@ -347,15 +349,22 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   Timer timer{};
 
+  Grid<QString> rebusFill{};
+
   // Try and read extensions.
   while (it < puzFile.end() - 8) {
+    qDebug() << "Attempting to read extension at" << (it - puzFile.begin());
+    qDebug() << "End offset:" << (puzFile.end() - puzFile.begin());
     if (::strncmp(it, "GEXT", 4) == 0) {
       // Read the markup.
       qDebug() << "Reading extension: Markup";
       it += 4;
       uint16_t len = readUInt16LE(it);
       (void)len;
-      it += 4;
+      it += 2;
+      uint16_t cksum = readUInt16LE(it);
+      (void)cksum;
+      it += 2;
       markup = readGrid<Markup>(it, height, width);
       qDebug() << "Read extension:    Markup";
       // Account for the NUL character.
@@ -389,8 +398,36 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
       qDebug() << "Read extension:    Timer";
       qDebug() << "Time:" << timer.current << "s";
       qDebug() << "Running:" << timer.running;
+    } else if (::strncmp(it, "RUSR", 4) == 0) {
+      // User rebus fill
+      qDebug() << "Reading extension: Rebus Fill";
+      it += 4;
+      uint16_t len = readUInt16LE(it);
+      (void)len;
+      it += 2;
+      uint16_t cksum = readUInt16LE(it);
+      // TODO: Check checksum.
+      (void)cksum;
+      it += 2;
+      for (uint32_t r = 0; r < height; ++r) {
+        std::vector<QString> row;
+        for (uint32_t c = 0; c < width; ++c) {
+          row.push_back(readString(it));
+        }
+        rebusFill.push_back(std::move(row));
+      }
+      qDebug() << "Read extension:    Rebus Fill";
     } else {
-      ++it;
+      qDebug() << "Unable to read extension";
+      it += 4;
+      uint16_t len = readUInt16LE(it);
+      (void)len;
+      it += 2;
+      uint16_t cksum = readUInt16LE(it);
+      // TODO: Check checksum.
+      (void)cksum;
+      it += 2;
+      it += len;
     }
   }
 
@@ -423,30 +460,21 @@ Puzzle *Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   std::vector<Clue> clues[2]{across, down};
   QByteArray version = puzFile.mid(0x18, 4);
-  return new Puzzle{
-      version,
-      height,
-      width,
-      puzzleType,
-      solutionState,
-      clues,
-      solution,
-      grid,
-      data,
-      puzFile.mid(textStart - puzFile.begin(), textEnd - textStart),
-      markup,
-      timer};
+  return std::unique_ptr<Puzzle>(new Puzzle(
+      version, height, width, puzzleType, solutionState, clues, solution, grid,
+      data, puzFile.mid(textStart - puzFile.begin(), textEnd - textStart),
+      markup, timer, rebusFill));
 }
 
 Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
                PuzzleType puzzleType, SolutionState solutionState,
                std::vector<Clue> clues[2], Grid<char> solution, Grid<char> grid,
                Grid<CellData> data, QByteArray text, Grid<Markup> markup,
-               Timer timer)
+               Timer timer, Grid<QString> rebusFill)
     : version_(version), height_(height), width_(width),
       puzzleType_(puzzleType), solutionState_(solutionState),
       clues_{clues[0], clues[1]}, solution_(solution), grid_(grid), data_(data),
-      text_(text), markup_(markup), timer_(timer) {
+      text_(text), markup_(markup), timer_(timer), rebusFill_(rebusFill) {
   QByteArray::const_iterator it = text.begin();
   title_ = readString(it);
   author_ = readString(it);

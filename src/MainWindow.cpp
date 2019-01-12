@@ -289,7 +289,7 @@ void MainWindow::open() {
       return;
     }
     QByteArray puzFile = file.readAll();
-    puzzle_.reset(Puzzle::loadFromFile(puzFile));
+    puzzle_ = std::move(Puzzle::loadFromFile(puzFile));
     if (puzzle_) {
       reloadPuzzle();
     } else {
@@ -329,7 +329,7 @@ void MainWindow::reveal(uint8_t row, uint8_t col) {
     return;
   }
   if (current == EMPTY || current != solution) {
-    setLetter(row, col, solution);
+    setCell(row, col, QString("%1").arg(solution));
   }
   checkSuccess();
 }
@@ -408,7 +408,7 @@ void MainWindow::checkSuccess() {
   // Puzzle is complete.
   setTimerStatus(false);
   QMessageBox::information(this, "Congratulations!",
-                           "You completeed the puzzle correctly.");
+                           "You completed the puzzle correctly.");
 }
 
 void MainWindow::checkCurrent() { checkAndMark(cursor_.row, cursor_.col); }
@@ -507,15 +507,25 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
       downWidget_->modifySize(-1);
     }
     break;
+  case Qt::Key_Insert:
+    QString rebusInput =
+        QInputDialog::getText(this, tr("Enter rebus input:"), tr("Letters"));
+    if (!rebusInput.isEmpty()) {
+      setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
+      checkSuccess();
+    }
+    break;
   }
 
   if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
     if (event->modifiers() == Qt::NoModifier ||
         event->modifiers() == Qt::ShiftModifier) {
       // Convert to lowercase if shift is being held.
-      char letter = event->modifiers() == Qt::ShiftModifier ? event->key() | 32
-                                                            : event->key();
-      setLetter(cursor_.row, cursor_.col, letter);
+      QChar letter = event->key();
+      setCell(cursor_.row, cursor_.col,
+              QString("%1").arg(event->modifiers() == Qt::ShiftModifier
+                                    ? letter.toLower()
+                                    : letter.toUpper()));
       checkSuccess();
 
       if (cursor_.dir == Direction::ACROSS) {
@@ -609,12 +619,13 @@ void MainWindow::keyTab(bool reverse) {
   setCursor(newClue.row, newClue.col, dir);
 }
 
-void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
-  if (puzzle_->getGrid()[row][col] == letter) {
+void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
+  if (puzzle_->getGrid()[row][col] == text.at(0).toLatin1()) {
     return;
   }
-  puzzle_->getGrid()[row][col] = letter;
-  puzzleWidget_->setLetter(row, col, letter);
+  puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
+  puzzle_->getRebusFill()[row][col] = text;
+  puzzleWidget_->setCell(row, col, text);
   Puzzle::Markup &markup = puzzle_->getMarkup()[row][col];
   if (markup & Puzzle::IncorrectTag) {
     markup &= ~Puzzle::IncorrectTag;
@@ -624,7 +635,7 @@ void MainWindow::setLetter(uint8_t row, uint8_t col, char letter) {
 }
 
 void MainWindow::clearLetter(uint8_t row, uint8_t col) {
-  setLetter(row, col, EMPTY);
+  setCell(row, col, "");
 }
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {

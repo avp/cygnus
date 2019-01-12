@@ -41,11 +41,20 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   layout->setContentsMargins(0, 0, 0, 0);
 
   layout->setSpacing(0);
+
+  setMouseTracking(true);
 }
 
 void CellWidget::resizeEvent(QResizeEvent *event) {
   QFrame::resizeEvent(event);
 }
+
+void CellWidget::enterEvent(QEvent *event) {
+  if (displayText_.size() > 3)
+    QToolTip::showText(this->mapToGlobal(QPoint(0, 0)), displayText_);
+}
+
+void CellWidget::leaveEvent(QEvent *event) { QToolTip::hideText(); }
 
 void CellWidget::selectCursor() {
   auto pal = palette();
@@ -67,31 +76,37 @@ void CellWidget::deselect() {
   setPalette(pal);
 }
 
-void CellWidget::setLetter(QChar letter) {
+void CellWidget::setCell(const QString &text) {
+  if (isBlack_)
+    return;
+
   auto pal = palette();
-  if (letter == EMPTY) {
-    entryLabel_->setText("");
-  } else if ('A' <= letter && letter <= 'Z') {
-    entryLabel_->setText(QString("%1").arg(letter));
+  if (text == "-" || text.isEmpty()) {
+    displayText_ = "";
+  } else if (text.at(0).isUpper()) {
+    displayText_ = text;
     pal.setColor(QPalette::Foreground, Qt::black);
-  } else if ('a' <= letter && letter <= 'z') {
-    // Convert to uppercase by turning off the 5th bit.
-    entryLabel_->setText(
-        QString("%1").arg(static_cast<char>(letter.toLatin1() & ~32)));
+    isPencil_ = false;
+  } else {
+    displayText_ = QString("%1").arg(text.toUpper());
     pal.setColor(QPalette::Foreground, Colors::PENCIL);
+    isPencil_ = true;
   }
 
   if (markup_ & Puzzle::IncorrectTag) {
     pal.setColor(QPalette::Foreground, Qt::red);
+    isPencil_ = false;
   }
 
+  entryLabel_->setText(displayText_.left(3) +
+                       (displayText_.size() > 3 ? "..." : ""));
   setPalette(pal);
 }
 
 void CellWidget::setMarkup(Puzzle::Markup markup) {
   markup_ = markup;
   if (!entryLabel_->text().isEmpty()) {
-    setLetter(entryLabel_->text().at(0));
+    setCell(isPencil_ ? displayText_.toLower() : displayText_.toUpper());
   }
 }
 
@@ -140,13 +155,18 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   auto &grid = puzzle->getGrid();
   auto &markup = puzzle->getMarkup();
   auto &cellData = puzzle->getCellData();
+  auto &rebusFill = puzzle->getRebusFill();
   for (uint8_t r = 0; r < puzzle->getHeight(); ++r) {
     std::vector<CellWidget *> cellRow{};
     cellRow.reserve(puzzle->getHeight());
     for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
       auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c],
                                  markup[r][c]);
-      cell->setLetter(grid[r][c]);
+      if (!rebusFill[r][c].isEmpty()) {
+        cell->setCell(rebusFill[r][c]);
+      } else {
+        cell->setCell(QString("%1").arg(grid[r][c]));
+      }
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
       gridLayout_->addWidget(cell, r, c, 1, 1);
@@ -183,8 +203,8 @@ void PuzzleWidget::deselectPosition(uint8_t row, uint8_t col) {
   cells_[row][col]->deselect();
 }
 
-void PuzzleWidget::setLetter(uint8_t row, uint8_t col, QChar letter) {
-  cells_[row][col]->setLetter(letter);
+void PuzzleWidget::setCell(uint8_t row, uint8_t col, const QString &text) {
+  cells_[row][col]->setCell(text);
 }
 
 void PuzzleWidget::setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup) {

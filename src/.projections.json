@@ -1,0 +1,4 @@
+{
+  "*.cpp": {"alternate": "{}.h"},
+  "*.h": {"alternate": "{}.cpp"}
+}

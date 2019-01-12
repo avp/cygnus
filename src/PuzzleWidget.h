@@ -24,6 +24,8 @@ protected:
   void paintEvent(QPaintEvent *pe) override;
   void mousePressEvent(QMouseEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
+  void enterEvent(QEvent *event) override;
+  void leaveEvent(QEvent *event) override;
 
 public slots:
   void selectCursor();
@@ -31,7 +33,7 @@ public slots:
 
   void deselect();
 
-  void setLetter(QChar letter);
+  void setCell(const QString &text);
   void setMarkup(Puzzle::Markup markup);
 
 signals:
@@ -43,6 +45,9 @@ private:
   uint8_t col_;
   bool isBlack_;
   Puzzle::Markup markup_;
+  bool isPencil_;
+
+  QString displayText_{""};
 
   FilledLabel *entryLabel_;
 };
@@ -65,7 +70,7 @@ public slots:
   void cellClicked(uint8_t row, uint8_t col) { return clicked(row, col); }
   void cellRightClicked() { return rightClicked(); }
 
-  void setLetter(uint8_t row, uint8_t col, QChar letter);
+  void setCell(uint8_t row, uint8_t col, const QString &text);
   void setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup);
 
 signals:
