@@ -408,7 +408,7 @@ void MainWindow::checkSuccess() {
   // Puzzle is complete.
   setTimerStatus(false);
   QMessageBox::information(this, "Congratulations!",
-                           "You completeed the puzzle correctly.");
+                           "You completed the puzzle correctly.");
 }
 
 void MainWindow::checkCurrent() { checkAndMark(cursor_.row, cursor_.col); }
