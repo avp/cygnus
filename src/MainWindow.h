@@ -46,6 +46,8 @@ private slots:
   void tickTimer();
   void toggleTimer();
 
+  void loadFile(const QString &fileName);
+
 protected:
   void resizeEvent(QResizeEvent *event) override;
 
@@ -54,7 +56,6 @@ private:
   std::unique_ptr<Puzzle> puzzle_;
   Cursor cursor_;
 
-  void loadFile(const QString &fileName);
   void reloadPuzzle();
 
   QMenu *fileMenu_;
