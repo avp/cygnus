@@ -13,6 +13,8 @@ namespace cygnus {
 
 MainWindow::MainWindow(const char *fileName, QWidget *parent)
     : QMainWindow(parent) {
+  this->setWindowTitle(tr("Cygnus Crosswords"));
+
   auto *vLayout = new QVBoxLayout{};
 
   auto *infoLayout = new QHBoxLayout{};
@@ -61,7 +63,6 @@ MainWindow::MainWindow(const char *fileName, QWidget *parent)
   vLayout->addLayout(hLayout);
 
   window->setLayout(vLayout);
-  window->setWindowTitle(tr("Cygnus Crosswords"));
 
   cursor_.row = 0;
   cursor_.col = 0;
@@ -239,7 +240,7 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
 }
 
 ClueWidget *MainWindow::createClueWidget() {
-  auto result = new ClueWidget{};
+  auto result = new ClueWidget{this};
   QSizePolicy cluesSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
   cluesSize.setHorizontalStretch(1);
   result->setSizePolicy(cluesSize);
@@ -295,6 +296,7 @@ void MainWindow::loadFile(const QString &fileName) {
   qDebug() << "Opening file:" << fileName;
   QFile file{fileName};
   if (!file.open(QIODevice::ReadOnly)) {
+    fileName_ = nullptr;
     return;
   }
   QByteArray puzFile = file.readAll();
