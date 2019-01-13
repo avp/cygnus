@@ -480,16 +480,16 @@ void MainWindow::createMenus() {
 void MainWindow::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
   case Qt::Key_Up:
-    keyUp();
+    keyUp(event->modifiers() & Qt::ShiftModifier);
     break;
   case Qt::Key_Down:
-    keyDown();
+    keyDown(event->modifiers() & Qt::ShiftModifier);
     break;
   case Qt::Key_Left:
-    keyLeft();
+    keyLeft(event->modifiers() & Qt::ShiftModifier);
     break;
   case Qt::Key_Right:
-    keyRight();
+    keyRight(event->modifiers() & Qt::ShiftModifier);
     break;
   case Qt::Key_Tab:
     keyTab(false);
@@ -594,9 +594,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   }
 }
 
-void MainWindow::keyUp() {
+void MainWindow::keyUp(bool shift) {
   const auto &grid = puzzle_->getGrid();
-  if (cursor_.dir == Direction::ACROSS) {
+  if (!shift && cursor_.dir == Direction::ACROSS) {
     setCursor(cursor_.row, cursor_.col, Direction::DOWN);
     return;
   }
@@ -608,12 +608,12 @@ void MainWindow::keyUp() {
       return;
     }
   } while (grid[row][cursor_.col] == BLACK);
-  setCursor(row, cursor_.col, Direction::DOWN);
+  setCursor(row, cursor_.col, shift ? cursor_.dir : Direction::DOWN);
 }
 
-void MainWindow::keyDown() {
+void MainWindow::keyDown(bool shift) {
   const auto &grid = puzzle_->getGrid();
-  if (cursor_.dir == Direction::ACROSS) {
+  if (!shift && cursor_.dir == Direction::ACROSS) {
     setCursor(cursor_.row, cursor_.col, Direction::DOWN);
     return;
   }
@@ -625,12 +625,12 @@ void MainWindow::keyDown() {
       return;
     }
   } while (grid[row][cursor_.col] == BLACK);
-  setCursor(row, cursor_.col, Direction::DOWN);
+  setCursor(row, cursor_.col, shift ? cursor_.dir : Direction::DOWN);
 }
 
-void MainWindow::keyLeft() {
+void MainWindow::keyLeft(bool shift) {
   const auto &grid = puzzle_->getGrid();
-  if (cursor_.dir == Direction::DOWN) {
+  if (!shift && cursor_.dir == Direction::DOWN) {
     setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
     return;
   }
@@ -642,12 +642,12 @@ void MainWindow::keyLeft() {
       return;
     }
   } while (grid[cursor_.row][col] == BLACK);
-  setCursor(cursor_.row, col, Direction::ACROSS);
+  setCursor(cursor_.row, col, shift ? cursor_.dir : Direction::ACROSS);
 }
 
-void MainWindow::keyRight() {
+void MainWindow::keyRight(bool shift) {
   const auto &grid = puzzle_->getGrid();
-  if (cursor_.dir == Direction::DOWN) {
+  if (!shift && cursor_.dir == Direction::DOWN) {
     setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
     return;
   }
@@ -659,7 +659,7 @@ void MainWindow::keyRight() {
       return;
     }
   } while (grid[cursor_.row][col] == BLACK);
-  setCursor(cursor_.row, col, Direction::ACROSS);
+  setCursor(cursor_.row, col, shift ? cursor_.dir : Direction::ACROSS);
 }
 
 void MainWindow::keyTab(bool reverse) {
@@ -704,9 +704,9 @@ void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
 }
 
 void MainWindow::puzzleRightClicked() {
-  setCursor(cursor_.row, cursor_.col,
-            cursor_.dir == Direction::ACROSS ? Direction::DOWN
-                                             : Direction::ACROSS);
+  setCursor(cursor_.row, cursor_.col, cursor_.dir == Direction::ACROSS
+                                          ? Direction::DOWN
+                                          : Direction::ACROSS);
 }
 
 void MainWindow::acrossClueClicked(const QListWidgetItem *item) {

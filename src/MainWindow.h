@@ -92,10 +92,10 @@ private:
   ClueWidget *createClueWidget();
 
   void keyPressEvent(QKeyEvent *event) override;
-  void keyUp();
-  void keyDown();
-  void keyLeft();
-  void keyRight();
+  void keyUp(bool shift = false);
+  void keyDown(bool shift = false);
+  void keyLeft(bool shift = false);
+  void keyRight(bool shift = false);
   void keyTab(bool reverse);
 
   void setCell(uint8_t row, uint8_t col, QString letter);
