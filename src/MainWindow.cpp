@@ -88,8 +88,12 @@ void MainWindow::showMaximized() {
     // Show the open dialog.
     open();
   } else {
+#ifdef _WIN32
     QMetaObject::invokeMethod(this, "loadFile", Qt::QueuedConnection,
                               Q_ARG(QString, fileName_));
+#else
+    loadFile(fileName_);
+#endif
   }
 }
 
