@@ -496,14 +496,22 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Space:
     setCursor(cursor_.row, cursor_.col, flip(cursor_.dir));
     break;
-  case Qt::Key_Backspace:
+  case Qt::Key_Backspace: {
     clearLetter(cursor_.row, cursor_.col);
+    const Clue &clue = puzzle_->getClueByNum(
+        cursor_.dir,
+        puzzle_->getNumByPosition(cursor_.row, cursor_.col, cursor_.dir));
     if (cursor_.dir == Direction::ACROSS) {
-      keyLeft();
+      if (cursor_.col != clue.col) {
+        keyLeft();
+      }
     } else {
-      keyUp();
+      if (cursor_.row != clue.row) {
+        keyUp();
+      }
     }
     break;
+  }
   case Qt::Key_Delete:
     clearLetter(cursor_.row, cursor_.col);
     break;
@@ -665,9 +673,6 @@ void MainWindow::keyTab(bool reverse) {
 }
 
 void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
-  if (puzzle_->getGrid()[row][col] == text.at(0).toLatin1()) {
-    return;
-  }
   puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = text;
   puzzleWidget_->setCell(row, col, text);
@@ -680,7 +685,7 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
 }
 
 void MainWindow::clearLetter(uint8_t row, uint8_t col) {
-  setCell(row, col, "");
+  setCell(row, col, QString(EMPTY));
 }
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
