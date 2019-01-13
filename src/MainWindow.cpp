@@ -337,16 +337,17 @@ void MainWindow::saveAs() {
   }
 }
 
-void MainWindow::reveal(uint8_t row, uint8_t col) {
-  char solution = puzzle_->getSolution()[row][col];
+void MainWindow::reveal(uint8_t row, uint8_t col, bool check) {
   char current = puzzle_->getGrid()[row][col];
   if (current == BLACK) {
     return;
   }
+  char solution = puzzle_->getSolution()[row][col];
   if (current == EMPTY || current != solution) {
     setCell(row, col, QString("%1").arg(solution));
   }
-  checkSuccess();
+  if (check)
+    checkSuccess();
 }
 
 void MainWindow::revealCurrent() { reveal(cursor_.row, cursor_.col); }
@@ -374,28 +375,24 @@ void MainWindow::revealClue() {
 void MainWindow::revealAll() {
   for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
     for (uint8_t c = 0; c < puzzle_->getWidth(); ++c) {
-      reveal(r, c);
+      reveal(r, c, false);
     }
   }
+  checkSuccess();
 }
 
 bool MainWindow::check(uint8_t row, uint8_t col) {
   qDebug() << "Checking" << row << ',' << col;
   const char solution = puzzle_->getSolution()[row][col];
   const char current = puzzle_->getGrid()[row][col];
-  qDebug() << "Current" << current;
-  qDebug() << "Solution" << solution;
   if (current == BLACK || current == EMPTY) {
     // Black or empty squares are always considered correct.
-    qDebug() << "Result: black or empty";
     return true;
   }
   if ((current == solution) || (current == (solution | 32))) {
-    qDebug() << "Result: correct";
     return true;
   }
   // Otherwise, it's incorrect. Mark it as such.
-  qDebug() << "Result: incorrect";
   return false;
 }
 
@@ -698,9 +695,9 @@ void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
 }
 
 void MainWindow::puzzleRightClicked() {
-  setCursor(cursor_.row, cursor_.col, cursor_.dir == Direction::ACROSS
-                                          ? Direction::DOWN
-                                          : Direction::ACROSS);
+  setCursor(cursor_.row, cursor_.col,
+            cursor_.dir == Direction::ACROSS ? Direction::DOWN
+                                             : Direction::ACROSS);
 }
 
 void MainWindow::acrossClueClicked(const QListWidgetItem *item) {

@@ -101,7 +101,7 @@ private:
   void setCell(uint8_t row, uint8_t col, QString letter);
   void clearLetter(uint8_t row, uint8_t col);
 
-  void reveal(uint8_t row, uint8_t col);
+  void reveal(uint8_t row, uint8_t col, bool check = true);
   bool check(uint8_t row, uint8_t col);
   bool checkAndMark(uint8_t row, uint8_t col);
 

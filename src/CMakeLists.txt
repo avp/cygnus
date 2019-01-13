@@ -26,6 +26,10 @@ set(SOURCES
   Puzzle.cpp
 )
 
+if (CMAKE_BUILD_TYPE EQUAL "RELEASE")
+  add_compile_definitions(QT_NO_DEBUG_OUTPUT)
+endif()
+
 if (APPLE)
   set(BUNDLE_TYPE MACOSX_BUNDLE)
 endif()
