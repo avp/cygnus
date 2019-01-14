@@ -16,7 +16,9 @@ void FilledLabel::resizeEvent(QResizeEvent *event) {
     if (r.height() < cRect.height() && r.width() < cRect.width()) {
       fontSize++;
     } else {
-      font.setPixelSize(text().size() > 1 ? fontSize / 2 : fontSize - 1);
+      uint32_t newSize = std::max(
+          text().size() > 1 ? fontSize / 2 : fontSize - 1, (uint32_t)1);
+      font.setPixelSize(newSize);
       setFont(font);
       return;
     }
