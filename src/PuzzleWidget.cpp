@@ -20,8 +20,8 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   auto *numLabel = new QLabel{};
   numLabel->setContentsMargins(0, 0, 0, 0);
   numLabel->setMargin(0);
-  numLabel->setAlignment(Qt::AlignCenter);
-  numLabel->setStyleSheet("QLabel { padding: 0; }");
+  numLabel->setAlignment(Qt::AlignLeft);
+  numLabel->setStyleSheet("QLabel { padding: 1px }");
 
   if (cellData.acrossStart) {
     numLabel->setText(QString("%1").arg(cellData.acrossNum));
@@ -37,7 +37,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   entryLabel_->setAlignment(Qt::AlignCenter);
   entryLabel_->setStyleSheet("QLabel { padding: 0; }");
 
-  layout->addWidget(numLabel, 0, 0, 1, 1);
+  layout->addWidget(numLabel, 0, 0, 1, 4);
   layout->addWidget(entryLabel_, 1, 0, 3, 4);
   layout->setContentsMargins(0, 0, 0, 0);
 
