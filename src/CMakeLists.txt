@@ -25,13 +25,6 @@ set(SOURCES
   Puzzle.cpp
 )
 
-add_compile_options("$<$<CONFIG:RELEASE>:-O3>")
-add_compile_options("$<$<CONFIG:DEBUG>:-O0)>")
-
-if (CMAKE_BUILD_TYPE EQUAL "RELEASE")
-  add_compile_definitions(QT_NO_DEBUG_OUTPUT)
-endif()
-
 if (APPLE)
   set(BUNDLE_TYPE MACOSX_BUNDLE)
 endif()
@@ -47,6 +40,19 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
+
+if (CMAKE_BUILD_TYPE STREQUAL RELEASE)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC
+    QT_NO_DEBUG_OUTPUT
+  )
+  target_compile_options(${PROJECT_NAME} PUBLIC
+    "-O3"
+  )
+else()
+  target_compile_options(${PROJECT_NAME} PUBLIC
+    "-Og"
+  )
+endif()
 
 if (APPLE)
   set_target_properties(
