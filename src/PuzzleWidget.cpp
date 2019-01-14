@@ -17,11 +17,10 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   setAutoFillBackground(true);
   setPalette(pal);
 
-  auto *numLabel = new QLabel{};
-  numLabel->setContentsMargins(0, 0, 0, 0);
-  numLabel->setMargin(0);
-  numLabel->setAlignment(Qt::AlignLeft);
-  numLabel->setStyleSheet("QLabel { padding: 1px }");
+  auto *numLabel = new QLabel{this};
+  numLabel->move(0, 0);
+  numLabel->setStyleSheet("QLabel { padding: 1px 0 0 1px; }");
+  numLabel->show();
 
   if (cellData.acrossStart) {
     numLabel->setText(QString("%1").arg(cellData.acrossNum));
@@ -30,16 +29,16 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   } else {
     numLabel->setText("");
   }
+  numLabel->adjustSize();
 
-  entryLabel_ = new FilledLabel{};
+  entryLabel_ = new FilledLabel{this};
   entryLabel_->setContentsMargins(0, 0, 0, 0);
   entryLabel_->setMargin(0);
   entryLabel_->setAlignment(Qt::AlignCenter);
   entryLabel_->setStyleSheet("QLabel { padding: 0; }");
 
-  layout->addWidget(numLabel, 0, 0, 1, 4);
-  layout->addWidget(entryLabel_, 1, 0, 3, 4);
-  layout->setContentsMargins(0, 0, 0, 0);
+  layout->addWidget(entryLabel_, 1, 1, 4, 4);
+  layout->setContentsMargins(5, 5, 0, 0);
 
   layout->setSpacing(0);
 
