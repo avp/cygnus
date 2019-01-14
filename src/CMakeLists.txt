@@ -41,7 +41,7 @@ target_link_libraries(${PROJECT_NAME}
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
 
-if (CMAKE_BUILD_TYPE STREQUAL RELEASE)
+if(${CMAKE_BUILD_TYPE} STREQUAL Release)
   target_compile_definitions(${PROJECT_NAME} PUBLIC
     QT_NO_DEBUG_OUTPUT
   )
