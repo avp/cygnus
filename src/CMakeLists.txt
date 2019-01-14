@@ -12,8 +12,6 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
-add_compile_options(-std=c++14)
-
 set(SOURCES
   main.cpp
   MainWindow.cpp
@@ -26,6 +24,9 @@ set(SOURCES
 
   Puzzle.cpp
 )
+
+add_compile_options("$<$<CONFIG:RELEASE>:-O3>")
+add_compile_options("$<$<CONFIG:DEBUG>:-O0)>")
 
 if (CMAKE_BUILD_TYPE EQUAL "RELEASE")
   add_compile_definitions(QT_NO_DEBUG_OUTPUT)
@@ -44,6 +45,8 @@ target_link_libraries(${PROJECT_NAME}
   Qt5::Gui
   Qt5::Widgets
 )
+
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
 
 if (APPLE)
   set_target_properties(

@@ -304,7 +304,7 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
     dataRow.reserve(width);
     for (uint8_t c = 0; c < width; ++c) {
       if (grid[r][c] == BLACK) {
-        dataRow.push_back(CellData{});
+        dataRow.emplace_back();
         continue;
       }
       bool a = c == 0 || grid[r][c - 1] == BLACK;
@@ -313,14 +313,14 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
         CellData data{};
         if (a) {
           Clue clue{readString(it), r, c, num, Direction::ACROSS};
-          across.push_back(clue);
+          across.emplace_back(std::move(clue));
           data.acrossNum = num;
           data.acrossStart = true;
           data.acrossIdx = acrossIdx++;
         }
         if (d) {
           Clue clue{readString(it), r, c, num, Direction::DOWN};
-          down.push_back(clue);
+          down.push_back(std::move(clue));
           data.downNum = num;
           data.downStart = true;
           data.downIdx = downIdx++;
@@ -328,7 +328,7 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
         dataRow.push_back(data);
         ++num;
       } else {
-        dataRow.push_back(CellData{});
+        dataRow.emplace_back();
       }
     }
     data.push_back(dataRow);
