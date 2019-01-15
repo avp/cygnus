@@ -31,8 +31,13 @@ MainWindow::MainWindow(const char *fileName, QWidget *parent)
                                   QSizePolicy::MinimumExpanding};
   puzzleContainerSize.setHorizontalStretch(2);
 
-  acrossWidget_ = createClueWidget();
-  downWidget_ = createClueWidget();
+  auto res = createClueWidget("ACROSS");
+  QWidget *acrossContainer = res.first;
+  acrossWidget_ = res.second;
+
+  res = createClueWidget("DOWN");
+  QWidget *downContainer = res.first;
+  downWidget_ = res.second;
 
   puzzleContainer_ = new QWidget{};
   puzzleContainerLayout_ = new QVBoxLayout{};
@@ -60,9 +65,9 @@ MainWindow::MainWindow(const char *fileName, QWidget *parent)
   timerWidget_ = new TimerWidget{};
   infoLayout->addWidget(timerWidget_);
 
-  hLayout->addWidget(acrossWidget_);
+  hLayout->addWidget(acrossContainer);
   hLayout->addWidget(puzzleContainer_);
-  hLayout->addWidget(downWidget_);
+  hLayout->addWidget(downContainer);
 
   vLayout->addLayout(infoLayout);
   vLayout->addLayout(hLayout);
@@ -247,14 +252,32 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   curClueLabel_->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
 }
 
-ClueWidget *MainWindow::createClueWidget() {
-  auto result = new ClueWidget{this};
-  QSizePolicy cluesSize{QSizePolicy::Preferred, QSizePolicy::Preferred};
-  cluesSize.setHorizontalStretch(1);
-  result->setSizePolicy(cluesSize);
-  result->setWordWrap(true);
-  result->setFocusPolicy(Qt::NoFocus);
-  return result;
+std::pair<QWidget *, ClueWidget *>
+MainWindow::createClueWidget(const QString &title) {
+  auto *container = new QWidget{this};
+  auto *vbox = new QVBoxLayout{};
+  container->setLayout(vbox);
+
+  QSizePolicy containerSize(QSizePolicy::MinimumExpanding,
+                            QSizePolicy::MinimumExpanding);
+  containerSize.setHorizontalStretch(1);
+  container->setSizePolicy(containerSize);
+
+  auto *label = new QLabel{};
+  label->setText(title);
+  label->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+  label->setAlignment(Qt::AlignCenter);
+  label->setMargin(0);
+  vbox->addWidget(label);
+
+  auto *clueWidget = new ClueWidget{container};
+  clueWidget->setSizePolicy(QSizePolicy::MinimumExpanding,
+                            QSizePolicy::MinimumExpanding);
+  clueWidget->setWordWrap(true);
+  clueWidget->setFocusPolicy(Qt::NoFocus);
+  vbox->addWidget(clueWidget);
+
+  return {container, clueWidget};
 }
 
 void MainWindow::createActions() {

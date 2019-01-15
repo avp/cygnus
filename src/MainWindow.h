@@ -89,7 +89,7 @@ private:
   void createActions();
   void createMenus();
 
-  ClueWidget *createClueWidget();
+  std::pair<QWidget *, ClueWidget *> createClueWidget(const QString &title);
 
   void keyPressEvent(QKeyEvent *event) override;
   void keyUp(bool shift = false);
