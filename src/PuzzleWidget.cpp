@@ -19,7 +19,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
 
   auto *numLabel = new QLabel{this};
   numLabel->move(0, 0);
-  numLabel->setStyleSheet("QLabel { padding: 1px 0 0 1px; }");
+  numLabel->setStyleSheet("QLabel { padding: 1px 0 0 1px; color: black; }");
   numLabel->show();
 
   if (cellData.acrossStart) {
