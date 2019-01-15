@@ -43,8 +43,13 @@ MainWindow::MainWindow(const char *fileName, QWidget *parent)
   puzzleContainerLayout_->addWidget(curClueLabel_);
   puzzleContainerLayout_->addStretch();
   auto clueFont = curClueLabel_->font();
-  clueFont.setPointSize(clueFont.pointSize() + 6);
+  clueFont.setPointSize(clueFont.pointSize() * 2);
   curClueLabel_->setFont(clueFont);
+  curClueLabel_->setStyleSheet("QLabel {"
+                               "background: white;"
+                               "padding: 2px;"
+                               "border: 1px solid black;"
+                               "}");
 
   titleLabel_ = new QLabel{};
   infoLayout->addWidget(titleLabel_);
@@ -103,6 +108,7 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   if (puzzleWidget_) {
     auto puzzleSize = std::min(height(), width()) - 200;
     puzzleWidget_->setFixedSize(puzzleSize, puzzleSize);
+    curClueLabel_->setFixedWidth(puzzleSize);
   }
 }
 
@@ -133,6 +139,8 @@ void MainWindow::reloadPuzzle() {
   puzzleWidget_ = new PuzzleWidget{puzzle_};
   puzzleContainerLayout_->insertWidget(1, puzzleWidget_);
   puzzleContainerLayout_->setAlignment(puzzleWidget_,
+                                       Qt::AlignHCenter | Qt::AlignTop);
+  puzzleContainerLayout_->setAlignment(curClueLabel_,
                                        Qt::AlignHCenter | Qt::AlignTop);
 
   auto puzzleSize = std::min(this->height(), this->width()) - 200;

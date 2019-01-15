@@ -15,7 +15,7 @@ void FilledLabel::resizeEvent(QResizeEvent *event) {
   qreal scaleH = (qreal)cRect.height() / (qreal)r.height();
 
   qreal scale = std::min(scaleW, scaleH);
-  font.setPointSize(font.pointSizeF() * scale);
+  font.setPointSize(std::max(1.0, font.pointSizeF() * scale));
   setFont(font);
 }
 
