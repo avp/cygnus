@@ -150,6 +150,7 @@ void MainWindow::reloadPuzzle() {
 
   auto puzzleSize = std::min(this->height(), this->width()) - 200;
   puzzleWidget_->setFixedSize(puzzleSize, puzzleSize);
+  curClueLabel_->setFixedWidth(puzzleSize);
 
   // Set cursor_ to first non-blank square.
   const auto &across = puzzle_->getClues(Direction::ACROSS);
