@@ -37,7 +37,6 @@ MainWindow::MainWindow(const char *fileName, QWidget *parent)
 
   puzzleContainer_ = new QFrame{};
   puzzleContainer_->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-  auto *puzzleContainerCentering = new QHBoxLayout{};
   puzzleContainerLayout_ = new QVBoxLayout{};
 
   auto puzzleContainerSize = puzzleContainer_->sizePolicy();
@@ -140,7 +139,7 @@ void MainWindow::reloadPuzzle() {
     delete puzzleWidget_;
   }
   puzzleWidget_ = new PuzzleWidget{puzzle_, puzzleContainer_};
-  puzzleContainerLayout_->insertWidget(1, puzzleWidget_, 7);
+  puzzleContainerLayout_->insertWidget(1, puzzleWidget_, 100);
   puzzleContainer_->setLayout(puzzleContainerLayout_);
 
   // Set cursor_ to first non-blank square.
@@ -503,16 +502,6 @@ void MainWindow::createMenus() {
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-  qDebug() << "CONTAINER" << puzzleContainer_->sizePolicy()
-           << puzzleContainer_->size() << puzzleContainer_->sizeHint();
-  qDebug() << "LAYOUT" << puzzleContainerLayout_->direction();
-  qDebug() << "WIDGET" << puzzleWidget_->sizePolicy() << puzzleWidget_->size()
-           << puzzleWidget_->sizeHint();
-  qDebug() << "CELL" << puzzleWidget_->getCell()->sizePolicy()
-           << puzzleWidget_->getCell()->sizePolicy().hasHeightForWidth()
-           << puzzleWidget_->getCell()->size()
-           << puzzleWidget_->getCell()->sizeHint();
-
   switch (event->key()) {
   case Qt::Key_Up:
     keyUp(event->modifiers() & Qt::ShiftModifier);

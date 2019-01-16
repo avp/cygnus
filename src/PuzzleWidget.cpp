@@ -149,8 +149,12 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                            QWidget *parent)
     : QWidget(parent) {
   gridLayout_ = new QGridLayout{};
+  resizer_ = new PuzzleResizer{this, gridLayout_};
+  resizer_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  setLayout(gridLayout_);
+  auto *hbox = new QHBoxLayout{};
+  hbox->addWidget(resizer_, 1);
+  setLayout(hbox);
 
   cells_.clear();
   auto &grid = puzzle->getGrid();
@@ -189,30 +193,6 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
     gridLayout_->setColumnStretch(c, 0);
   }
-
-  auto *vspacer = new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Expanding);
-  auto *vspacer2 =
-      new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Expanding);
-  gridLayout_->addItem(vspacer, puzzle->getHeight(), 0, 1, -1);
-  gridLayout_->addItem(vspacer2, 0, 0, 1, -1);
-
-  auto *hspacer = new QSpacerItem(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  auto *hspacer2 =
-      new QSpacerItem(QSizePolicy::Expanding, QSizePolicy::Minimum);
-  gridLayout_->addItem(hspacer, 0, puzzle->getWidth(), -1, 1);
-  gridLayout_->addItem(hspacer2, 0, 0, -1, -1);
-
-  // auto size = sizePolicy();
-  // size.setVerticalPolicy(QSizePolicy::MinimumExpanding);
-  // size.setHorizontalPolicy(QSizePolicy::MinimumExpanding);
-  // setSizePolicy(size);
-}
-
-void PuzzleWidget::paintEvent(QPaintEvent *pe) {
-  QWidget::paintEvent(pe);
-  // QPainter painter(this);
-  // painter.setPen({Qt::black, 2});
-  // painter.drawRect(0, 0, width(), height());
 }
 
 void PuzzleWidget::selectCursorPosition(uint8_t row, uint8_t col) {

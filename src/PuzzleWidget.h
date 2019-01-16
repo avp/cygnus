@@ -4,10 +4,13 @@
 #include "Puzzle.h"
 
 #include <QtWidgets>
+
+#include <cassert>
 #include <memory>
 
 namespace cygnus {
 
+class PuzzleResizer;
 class FilledLabel;
 
 class CellWidget : public QWidget {
@@ -19,8 +22,6 @@ public:
 
   inline uint8_t getRow() const { return row_; }
   inline uint8_t getCol() const { return col_; }
-
-  int heightForWidth(int w) const { return w; }
 
 protected:
   void paintEvent(QPaintEvent *pe) override;
@@ -55,33 +56,18 @@ private:
 
 class PuzzleWidget : public QWidget {
   Q_OBJECT
+
+  friend class PuzzleResizer;
+
 public:
   explicit PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                         QWidget *parent = nullptr);
 
   CellWidget *getCell() { return cells_[0][0]; };
 
-  void resizeEvent(QResizeEvent *event) override {
-    int h = event->size().height();
-    int w = event->size().width();
-    int rows = cells_.size();
-    int cols = cells_[0].size();
-    int cellSize = std::min(h / rows, w / cols);
-    // int size = h < w ? cellSize * rows : cellSize * cols;
-    // bool resize = h < w ? size < h : size < w;
-    // for (auto &row : cells_) {
-    //   for (auto *cell : row) {
-    //     cell->setMinimumSize(cellSize, cellSize);
-    //   }
-    // }
-    // if (resize) {
-    this->resize(rows * cellSize, cols * cellSize);
-    // }
-  }
+  PuzzleResizer *resizer_;
 
 protected:
-  void paintEvent(QPaintEvent *pe) override;
-
 public slots:
   void selectCursorPosition(uint8_t row, uint8_t col);
   void selectPosition(uint8_t row, uint8_t col);
@@ -101,6 +87,41 @@ signals:
 private:
   QGridLayout *gridLayout_;
   Grid<CellWidget *> cells_;
+};
+
+class PuzzleResizer : public QWidget {
+  Q_OBJECT
+public:
+  explicit PuzzleResizer(PuzzleWidget *puzzle, QGridLayout *layout,
+                         QWidget *parent = nullptr)
+      : QWidget(parent), puzzle_(puzzle), grid_(new QWidget(this)) {
+    assert(puzzle && layout && "must provide puzzle and layout");
+
+    auto *hbox = new QHBoxLayout{};
+    setLayout(hbox);
+
+    grid_->setLayout(layout);
+    hbox->addWidget(grid_, 1, Qt::AlignTop);
+  }
+
+  void resizeEvent(QResizeEvent *event) override {
+    int h = event->size().height();
+    int w = event->size().width();
+    int rows = puzzle_->cells_.size();
+    int cols = puzzle_->cells_[0].size();
+    int cellSize = std::max(30, std::min(h / rows, w / cols));
+    grid_->setFixedSize(rows * cellSize, cols * cellSize);
+  }
+
+  QSize minimumSizeHint() const override {
+    int rows = puzzle_->cells_.size();
+    int cols = puzzle_->cells_[0].size();
+    return QSize(rows * 30, cols * 30);
+  }
+
+private:
+  PuzzleWidget *puzzle_;
+  QWidget *grid_;
 };
 
 } // namespace cygnus
