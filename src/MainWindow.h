@@ -81,7 +81,7 @@ private:
   ClueWidget *acrossWidget_;
   ClueWidget *downWidget_;
 
-  QWidget *puzzleContainer_;
+  QFrame *puzzleContainer_;
   QVBoxLayout *puzzleContainerLayout_;
   QLabel *curClueLabel_;
   PuzzleWidget *puzzleWidget_{nullptr};

@@ -9,9 +9,11 @@ namespace cygnus {
 CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
                        const Puzzle::CellData &cellData,
                        const Puzzle::Markup markup, QWidget *parent)
-    : QFrame(parent), row_(row), col_(col), isBlack_(isBlack), markup_(markup) {
+    : QWidget(parent), row_(row), col_(col), isBlack_(isBlack),
+      markup_(markup) {
   QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
+
   auto pal = palette();
   pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
   setAutoFillBackground(true);
@@ -38,7 +40,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   entryLabel_->setStyleSheet("QLabel { padding: 0; }");
 
   layout->addWidget(entryLabel_, 1, 1, 4, 4);
-  layout->setContentsMargins(5, 5, 0, 0);
+  layout->setContentsMargins(5, 5, 3, 3);
 
   layout->setSpacing(0);
 
@@ -73,7 +75,7 @@ void CellWidget::deselect() {
 }
 
 void CellWidget::setCell(const QString &text) {
-  qDebug() << "Setting cell:" << text;
+  // qDebug() << "Setting cell:" << text;
   if (isBlack_)
     return;
 
@@ -119,7 +121,7 @@ void CellWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void CellWidget::paintEvent(QPaintEvent *pe) {
-  QFrame::paintEvent(pe);
+  QWidget::paintEvent(pe);
 
   QPainter painter(this);
   painter.setPen({Qt::black, 2});
@@ -145,8 +147,10 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
 
 PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                            QWidget *parent)
-    : QFrame(parent) {
+    : QWidget(parent) {
   gridLayout_ = new QGridLayout{};
+
+  setLayout(gridLayout_);
 
   cells_.clear();
   auto &grid = puzzle->getGrid();
@@ -176,7 +180,7 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   }
 
   gridLayout_->setSpacing(0);
-  gridLayout_->setContentsMargins(1, 1, 1, 1);
+  gridLayout_->setContentsMargins(0, 0, 0, 0);
 
   for (uint8_t r = 0; r < puzzle->getHeight(); ++r) {
     gridLayout_->setRowStretch(r, 0);
@@ -186,14 +190,29 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
     gridLayout_->setColumnStretch(c, 0);
   }
 
-  setLayout(gridLayout_);
+  auto *vspacer = new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Expanding);
+  auto *vspacer2 =
+      new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Expanding);
+  gridLayout_->addItem(vspacer, puzzle->getHeight(), 0, 1, -1);
+  gridLayout_->addItem(vspacer2, 0, 0, 1, -1);
+
+  auto *hspacer = new QSpacerItem(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  auto *hspacer2 =
+      new QSpacerItem(QSizePolicy::Expanding, QSizePolicy::Minimum);
+  gridLayout_->addItem(hspacer, 0, puzzle->getWidth(), -1, 1);
+  gridLayout_->addItem(hspacer2, 0, 0, -1, -1);
+
+  // auto size = sizePolicy();
+  // size.setVerticalPolicy(QSizePolicy::MinimumExpanding);
+  // size.setHorizontalPolicy(QSizePolicy::MinimumExpanding);
+  // setSizePolicy(size);
 }
 
 void PuzzleWidget::paintEvent(QPaintEvent *pe) {
-  QFrame::paintEvent(pe);
-  QPainter painter(this);
-  painter.setPen({Qt::black, 2});
-  painter.drawRect(0, 0, width(), height());
+  QWidget::paintEvent(pe);
+  // QPainter painter(this);
+  // painter.setPen({Qt::black, 2});
+  // painter.drawRect(0, 0, width(), height());
 }
 
 void PuzzleWidget::selectCursorPosition(uint8_t row, uint8_t col) {

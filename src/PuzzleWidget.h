@@ -10,7 +10,7 @@ namespace cygnus {
 
 class FilledLabel;
 
-class CellWidget : public QFrame {
+class CellWidget : public QWidget {
   Q_OBJECT
 public:
   explicit CellWidget(bool isBlack, uint8_t row, uint8_t col,
@@ -19,6 +19,8 @@ public:
 
   inline uint8_t getRow() const { return row_; }
   inline uint8_t getCol() const { return col_; }
+
+  int heightForWidth(int w) const { return w; }
 
 protected:
   void paintEvent(QPaintEvent *pe) override;
@@ -51,11 +53,31 @@ private:
   FilledLabel *entryLabel_;
 };
 
-class PuzzleWidget : public QFrame {
+class PuzzleWidget : public QWidget {
   Q_OBJECT
 public:
   explicit PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                         QWidget *parent = nullptr);
+
+  CellWidget *getCell() { return cells_[0][0]; };
+
+  void resizeEvent(QResizeEvent *event) override {
+    int h = event->size().height();
+    int w = event->size().width();
+    int rows = cells_.size();
+    int cols = cells_[0].size();
+    int cellSize = std::min(h / rows, w / cols);
+    // int size = h < w ? cellSize * rows : cellSize * cols;
+    // bool resize = h < w ? size < h : size < w;
+    // for (auto &row : cells_) {
+    //   for (auto *cell : row) {
+    //     cell->setMinimumSize(cellSize, cellSize);
+    //   }
+    // }
+    // if (resize) {
+    this->resize(rows * cellSize, cols * cellSize);
+    // }
+  }
 
 protected:
   void paintEvent(QPaintEvent *pe) override;
