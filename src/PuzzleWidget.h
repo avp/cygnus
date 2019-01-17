@@ -109,8 +109,8 @@ public:
     int w = event->size().width();
     int rows = puzzle_->cells_.size();
     int cols = puzzle_->cells_[0].size();
-    int cellSize =
-        std::max(CellWidget::kMinimumSize, std::min(h / rows, w / cols));
+    int minSize = CellWidget::kMinimumSize;
+    int cellSize = std::max(minSize, std::min(h / rows, w / cols));
     grid_->setFixedSize(rows * cellSize, cols * cellSize);
   }
 

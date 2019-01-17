@@ -141,6 +141,46 @@ public:
     }
   }
 
+  /// \return true if the grid entry at (row,col) is correct.
+  inline bool check(uint8_t row, uint8_t col) const {
+    qDebug() << "Checking" << row << ',' << col;
+    const char solution = getSolution()[row][col];
+    const char current = getGrid()[row][col];
+    if (current == BLACK || current == EMPTY) {
+      // Black or empty squares are always considered correct.
+      return true;
+    }
+    if (current == solution || current == (solution | 32)) {
+      return true;
+    }
+    // Otherwise, it's incorrect. Mark it as such.
+    return false;
+  }
+
+  /// \return true if every cell has an entry in it.
+  inline bool completelyFilled() const {
+    for (uint8_t r = 0; r < getHeight(); ++r) {
+      for (uint8_t c = 0; c < getWidth(); ++c) {
+        if (getGrid()[r][c] == EMPTY) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  /// \return true if every cell is filled and correct.
+  inline bool allCorrect() const {
+    for (uint8_t r = 0; r < getHeight(); ++r) {
+      for (uint8_t c = 0; c < getWidth(); ++c) {
+        if (getGrid()[r][c] == EMPTY || !check(r, c)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   /// \return the number of the clue at position (\p row, \p col),
   /// in direction \p dir.
   uint32_t getNumByPosition(uint8_t row, uint8_t col, Direction dir) const;

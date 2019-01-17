@@ -409,23 +409,8 @@ void MainWindow::revealAll() {
   checkSuccess();
 }
 
-bool MainWindow::check(uint8_t row, uint8_t col) {
-  qDebug() << "Checking" << row << ',' << col;
-  const char solution = puzzle_->getSolution()[row][col];
-  const char current = puzzle_->getGrid()[row][col];
-  if (current == BLACK || current == EMPTY) {
-    // Black or empty squares are always considered correct.
-    return true;
-  }
-  if ((current == solution) || (current == (solution | 32))) {
-    return true;
-  }
-  // Otherwise, it's incorrect. Mark it as such.
-  return false;
-}
-
 bool MainWindow::checkAndMark(uint8_t row, uint8_t col) {
-  if (check(row, col)) {
+  if (puzzle_->check(row, col)) {
     return true;
   }
   puzzle_->getMarkup()[row][col] |= Puzzle::IncorrectTag;
@@ -435,14 +420,8 @@ bool MainWindow::checkAndMark(uint8_t row, uint8_t col) {
 
 void MainWindow::checkSuccess() {
   // See if the puzzle's complete.
-  for (uint8_t r = 0; r < puzzle_->getHeight(); ++r) {
-    for (uint8_t c = 0; c < puzzle_->getWidth(); ++c) {
-      if (puzzle_->getGrid()[r][c] == EMPTY) {
-        return;
-      } else if (!check(r, c)) {
-        return;
-      }
-    }
+  if (!puzzle_->allCorrect()) {
+    return;
   }
 
   // Puzzle is complete.
