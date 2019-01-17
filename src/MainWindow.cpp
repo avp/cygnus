@@ -373,9 +373,12 @@ void MainWindow::reveal(uint8_t row, uint8_t col, bool check) {
   char solution = puzzle_->getSolution()[row][col];
   if (current == EMPTY || current != solution) {
     setCell(row, col, QString("%1").arg(solution));
+    puzzle_->getMarkup()[row][col] |= Puzzle::RevealedTag;
+    puzzleWidget_->setMarkup(row, col, puzzle_->getMarkup()[row][col]);
   }
-  if (check)
+  if (check) {
     checkSuccess();
+  }
 }
 
 void MainWindow::revealCurrent() { reveal(cursor_.row, cursor_.col); }
@@ -680,6 +683,10 @@ void MainWindow::keyTab(bool reverse) {
 }
 
 void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
+  if (puzzle_->getMarkup()[row][col] & Puzzle::RevealedTag) {
+    // If the letter was revealed, don't allow editing it.
+    return;
+  }
   puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = text;
   puzzleWidget_->setCell(row, col, text);

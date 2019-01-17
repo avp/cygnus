@@ -144,7 +144,15 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
     setPalette(pal);
   }
 
-  if (markup_ & Puzzle::PreviousIncorrectTag) {
+  if (markup_ & Puzzle::RevealedTag) {
+    painter.setPen({Qt::red, 5});
+    painter.setRenderHint(QPainter::Antialiasing);
+    auto radius = 2;
+    auto center = QPoint{};
+    center.setX(rect().left() + 8);
+    center.setY(rect().bottom() - 8);
+    painter.drawEllipse(center, radius, radius);
+  } else if (markup_ & Puzzle::PreviousIncorrectTag) {
     painter.setPen({Qt::black, 5});
     painter.setRenderHint(QPainter::Antialiasing);
     auto radius = 2;
