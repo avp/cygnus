@@ -143,6 +143,16 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
     pal.setColor(QPalette::Foreground, Qt::red);
     setPalette(pal);
   }
+
+  if (markup_ & Puzzle::PreviousIncorrectTag) {
+    painter.setPen({Qt::black, 5});
+    painter.setRenderHint(QPainter::Antialiasing);
+    auto radius = 2;
+    auto center = QPoint{};
+    center.setX(rect().left() + 8);
+    center.setY(rect().bottom() - 8);
+    painter.drawEllipse(center, radius, radius);
+  }
 }
 
 PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
