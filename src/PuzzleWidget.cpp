@@ -40,7 +40,7 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   entryLabel_->setStyleSheet("QLabel { padding: 0; }");
 
   layout->addWidget(entryLabel_, 1, 1, 4, 4);
-  layout->setContentsMargins(5, 5, 3, 3);
+  layout->setContentsMargins(7, 5, 1, 1);
 
   layout->setSpacing(0);
 
@@ -186,13 +186,7 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
   gridLayout_->setSpacing(0);
   gridLayout_->setContentsMargins(0, 0, 0, 0);
 
-  for (uint8_t r = 0; r < puzzle->getHeight(); ++r) {
-    gridLayout_->setRowStretch(r, 0);
-  }
-
-  for (uint8_t c = 0; c < puzzle->getWidth(); ++c) {
-    gridLayout_->setColumnStretch(c, 0);
-  }
+  resizer_->setContentsMargins(0, 0, 0, 0);
 }
 
 void PuzzleWidget::selectCursorPosition(uint8_t row, uint8_t col) {

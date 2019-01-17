@@ -16,6 +16,8 @@ class FilledLabel;
 class CellWidget : public QWidget {
   Q_OBJECT
 public:
+  static constexpr int kMinimumSize = 33;
+
   explicit CellWidget(bool isBlack, uint8_t row, uint8_t col,
                       const Puzzle::CellData &cellData,
                       const Puzzle::Markup markup, QWidget *parent = nullptr);
@@ -63,11 +65,6 @@ public:
   explicit PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
                         QWidget *parent = nullptr);
 
-  CellWidget *getCell() { return cells_[0][0]; };
-
-  PuzzleResizer *resizer_;
-
-protected:
 public slots:
   void selectCursorPosition(uint8_t row, uint8_t col);
   void selectPosition(uint8_t row, uint8_t col);
@@ -87,6 +84,8 @@ signals:
 private:
   QGridLayout *gridLayout_;
   Grid<CellWidget *> cells_;
+
+  PuzzleResizer *resizer_;
 };
 
 class PuzzleResizer : public QWidget {
@@ -98,10 +97,11 @@ public:
     assert(puzzle && layout && "must provide puzzle and layout");
 
     auto *hbox = new QHBoxLayout{};
+    hbox->setContentsMargins(0, 0, 0, 0);
     setLayout(hbox);
 
     grid_->setLayout(layout);
-    hbox->addWidget(grid_, 1, Qt::AlignTop);
+    hbox->addWidget(grid_, 0, Qt::AlignTop);
   }
 
   void resizeEvent(QResizeEvent *event) override {
@@ -109,14 +109,16 @@ public:
     int w = event->size().width();
     int rows = puzzle_->cells_.size();
     int cols = puzzle_->cells_[0].size();
-    int cellSize = std::max(30, std::min(h / rows, w / cols));
+    int cellSize =
+        std::max(CellWidget::kMinimumSize, std::min(h / rows, w / cols));
     grid_->setFixedSize(rows * cellSize, cols * cellSize);
   }
 
   QSize minimumSizeHint() const override {
     int rows = puzzle_->cells_.size();
     int cols = puzzle_->cells_[0].size();
-    return QSize(rows * 30, cols * 30);
+    int cellSize = CellWidget::kMinimumSize;
+    return QSize(rows * 35, cols * 35);
   }
 
 private:
