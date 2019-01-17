@@ -71,8 +71,14 @@ public slots:
 
   void deselectPosition(uint8_t row, uint8_t col);
 
-  void cellClicked(uint8_t row, uint8_t col) { return clicked(row, col); }
-  void cellRightClicked() { return rightClicked(); }
+  void cellClicked(uint8_t row, uint8_t col) {
+    setFocus();
+    return clicked(row, col);
+  }
+  void cellRightClicked() {
+    setFocus();
+    return rightClicked();
+  }
 
   void setCell(uint8_t row, uint8_t col, const QString &text);
   void setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup);
