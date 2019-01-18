@@ -141,6 +141,27 @@ public:
     }
   }
 
+  /// \return the first blank space in this clue, and return the start of the
+  /// clue if there are none.
+  inline std::pair<uint32_t, uint32_t> getFirstBlank(const Clue &clue) const {
+    uint32_t r = clue.row;
+    uint32_t c = clue.col;
+    if (clue.dir == Direction::ACROSS) {
+      for (; c < width_ && getGrid()[r][c] != BLACK; ++c) {
+        if (getGrid()[r][c] == EMPTY) {
+          return {r, c};
+        }
+      }
+    } else {
+      for (; r < height_ && getGrid()[r][c] != BLACK; ++r) {
+        if (getGrid()[r][c] == EMPTY) {
+          return {r, c};
+        }
+      }
+    }
+    return {clue.row, clue.col};
+  }
+
   /// \return true if the grid entry at (row,col) is correct.
   inline bool check(uint8_t row, uint8_t col) const {
     qDebug() << "Checking" << row << ',' << col;

@@ -679,7 +679,8 @@ void MainWindow::keyTab(bool reverse) {
     newIdx = (curIdx + (reverse ? -1 : +1)) % puzzle_->getClues(dir).size();
   }
   const Clue &newClue = puzzle_->getClueByIdx(dir, newIdx);
-  setCursor(newClue.row, newClue.col, dir);
+  auto newPos = puzzle_->getFirstBlank(newClue);
+  setCursor(newPos.first, newPos.second, dir);
 }
 
 void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
