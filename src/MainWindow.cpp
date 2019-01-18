@@ -102,10 +102,9 @@ void MainWindow::showMaximized() {
     open();
   } else {
 #ifdef _WIN32
-    QMetaObject::invokeMethod(this, "loadFile", Qt::QueuedConnection,
-                              Q_ARG(QString, fileName_));
+    QMetaObject::invokeMethod(this, "loadFile", Qt::QueuedConnection);
 #else
-    loadFile(fileName_);
+    loadFile();
 #endif
   }
 }
@@ -314,9 +313,9 @@ void MainWindow::createActions() {
   connect(checkAllAct_, &QAction::triggered, this, &MainWindow::checkAll);
 }
 
-void MainWindow::loadFile(const QString &fileName) {
-  qDebug() << "Opening file:" << fileName;
-  QFile file{fileName};
+void MainWindow::loadFile() {
+  qDebug() << "Opening file:" << fileName_;
+  QFile file{fileName_};
   if (!file.open(QIODevice::ReadOnly)) {
     fileName_ = nullptr;
     return;
@@ -328,7 +327,7 @@ void MainWindow::loadFile(const QString &fileName) {
   } else {
     QMessageBox::warning(
         this, QString("Corrupted File"),
-        QString("The file %1 isn't a valid puzzle file.").arg(fileName));
+        QString("The file %1 isn't a valid puzzle file.").arg(fileName_));
   }
 }
 
@@ -339,16 +338,17 @@ void MainWindow::open() {
 
   if (!fileName.isEmpty()) {
     fileName_ = fileName;
-    loadFile(fileName_);
+    loadFile();
   }
 }
 
 void MainWindow::save() {
-  QFile file{QDir::home().absoluteFilePath("test.puz")};
+  QFile file{fileName_};
   qDebug() << "Saving to:" << file.fileName();
   if (file.open(QIODevice::WriteOnly)) {
     QByteArray bytes = puzzle_->serialize();
     file.write(bytes);
+    file.close();
   }
 }
 

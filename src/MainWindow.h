@@ -46,7 +46,7 @@ private slots:
   void tickTimer();
   void toggleTimer();
 
-  void loadFile(const QString &fileName);
+  void loadFile();
 
 protected:
   void resizeEvent(QResizeEvent *event) override;
