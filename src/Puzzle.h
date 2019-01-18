@@ -120,47 +120,22 @@ public:
   int getClueIdxByNum(Direction dir, uint32_t num) const;
 
   /// \return the clue in direction \p dir with number \p num.
-  const Clue &getClueByNum(Direction dir, uint32_t num) const;
+  const Clue &getClueByNum(Direction dir, uint32_t num) const {
+    int idx = getClueIdxByNum(dir, num);
+    return clues_[size_t(dir)][idx];
+  }
 
   /// \return the clue in direction \p dir at index \p idx.
-  const Clue &getClueByIdx(Direction dir, uint32_t idx) const;
-
-  inline std::pair<uint32_t, uint32_t> getClueEnd(const Clue &clue) const {
-    uint32_t r = clue.row;
-    uint32_t c = clue.col;
-    if (clue.dir == Direction::ACROSS) {
-      while (c + 1 < width_ && getGrid()[r][c + 1] != BLACK) {
-        ++c;
-      }
-      return {r, c};
-    } else {
-      while (r + 1 < height_ && getGrid()[r + 1][c] != BLACK) {
-        ++r;
-      }
-      return {r, c};
-    }
+  inline const Clue &getClueByIdx(Direction dir, uint32_t idx) const {
+    return clues_[size_t(dir)][idx];
   }
 
-  /// \return the first blank space in this clue, and return the start of the
+  /// \return the coordinate of the last cell in \p clue.
+  std::pair<uint32_t, uint32_t> getClueEnd(const Clue &clue) const;
+
+  /// \return the first blank space in \p clue, and return the start of the
   /// clue if there are none.
-  inline std::pair<uint32_t, uint32_t> getFirstBlank(const Clue &clue) const {
-    uint32_t r = clue.row;
-    uint32_t c = clue.col;
-    if (clue.dir == Direction::ACROSS) {
-      for (; c < width_ && getGrid()[r][c] != BLACK; ++c) {
-        if (getGrid()[r][c] == EMPTY) {
-          return {r, c};
-        }
-      }
-    } else {
-      for (; r < height_ && getGrid()[r][c] != BLACK; ++r) {
-        if (getGrid()[r][c] == EMPTY) {
-          return {r, c};
-        }
-      }
-    }
-    return {clue.row, clue.col};
-  }
+  std::pair<uint32_t, uint32_t> getFirstBlank(const Clue &clue) const;
 
   /// \return true if the grid entry at (row,col) is correct.
   inline bool check(uint8_t row, uint8_t col) const {
@@ -180,9 +155,9 @@ public:
 
   /// \return true if every cell has an entry in it.
   inline bool completelyFilled() const {
-    for (uint8_t r = 0; r < getHeight(); ++r) {
-      for (uint8_t c = 0; c < getWidth(); ++c) {
-        if (getGrid()[r][c] == EMPTY) {
+    for (const auto &row : grid_) {
+      for (const auto &c : row) {
+        if (c == EMPTY) {
           return false;
         }
       }
@@ -204,7 +179,11 @@ public:
 
   /// \return the number of the clue at position (\p row, \p col),
   /// in direction \p dir.
-  uint32_t getNumByPosition(uint8_t row, uint8_t col, Direction dir) const;
+  inline uint32_t getNumByPosition(uint8_t row, uint8_t col,
+                                   Direction dir) const {
+    return dir == Direction::ACROSS ? data_[row][col].acrossNum
+                                    : data_[row][col].downNum;
+  }
 
   QByteArray serialize() const;
 

@@ -478,21 +478,20 @@ Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
                Grid<CellData> data, QByteArray text, Grid<Markup> markup,
                Timer timer, Grid<QString> rebusFill)
     : version_(version), height_(height), width_(width),
-      puzzleType_(puzzleType),
-      solutionState_(solutionState), clues_{clues[0], clues[1]},
-      solution_(solution), grid_(grid), data_(data), text_(text),
-      markup_(markup), timer_(timer), rebusFill_(rebusFill) {
+      puzzleType_(puzzleType), solutionState_(solutionState),
+      clues_{clues[0], clues[1]}, solution_(solution), grid_(grid), data_(data),
+      text_(text), markup_(markup), timer_(timer), rebusFill_(rebusFill) {
   QByteArray::const_iterator it = text.begin();
   title_ = readString(it);
   author_ = readString(it);
   copyright_ = readString(it);
 }
 
-static bool compareForNum(const Clue &a, const Clue &b) {
-  return a.num < b.num;
-}
-
 int Puzzle::getClueIdxByNum(Direction dir, uint32_t num) const {
+  static auto compareForNum = [](const Clue &a, const Clue &b) {
+    return a.num < b.num;
+  };
+
   Clue clue{};
   clue.num = num;
   auto clues = clues_[static_cast<int>(dir)];
@@ -504,19 +503,41 @@ int Puzzle::getClueIdxByNum(Direction dir, uint32_t num) const {
   return result - clues.begin();
 }
 
-const Clue &Puzzle::getClueByNum(Direction dir, uint32_t num) const {
-  int idx = getClueIdxByNum(dir, num);
-  return clues_[size_t(dir)][idx];
+std::pair<uint32_t, uint32_t> Puzzle::getClueEnd(const Clue &clue) const {
+  uint32_t r = clue.row;
+  uint32_t c = clue.col;
+  if (clue.dir == Direction::ACROSS) {
+    while (c + 1 < width_ && getGrid()[r][c + 1] != BLACK) {
+      ++c;
+    }
+    return {r, c};
+  } else {
+    while (r + 1 < height_ && getGrid()[r + 1][c] != BLACK) {
+      ++r;
+    }
+    return {r, c};
+  }
 }
 
-uint32_t Puzzle::getNumByPosition(uint8_t row, uint8_t col,
-                                  Direction dir) const {
-  return dir == Direction::ACROSS ? data_[row][col].acrossNum
-                                  : data_[row][col].downNum;
-}
-
-const Clue &Puzzle::getClueByIdx(Direction dir, uint32_t idx) const {
-  return clues_[size_t(dir)][idx];
+/// \return the first blank space in this clue, and return the start of the
+/// clue if there are none.
+std::pair<uint32_t, uint32_t> Puzzle::getFirstBlank(const Clue &clue) const {
+  uint32_t r = clue.row;
+  uint32_t c = clue.col;
+  if (clue.dir == Direction::ACROSS) {
+    for (; c < width_ && getGrid()[r][c] != BLACK; ++c) {
+      if (getGrid()[r][c] == EMPTY) {
+        return {r, c};
+      }
+    }
+  } else {
+    for (; r < height_ && getGrid()[r][c] != BLACK; ++r) {
+      if (getGrid()[r][c] == EMPTY) {
+        return {r, c};
+      }
+    }
+  }
+  return {clue.row, clue.col};
 }
 
 QByteArray Puzzle::serialize() const {
