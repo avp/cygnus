@@ -600,6 +600,9 @@ void MainWindow::keyUp(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::ACROSS) {
     setCursor(cursor_.row, cursor_.col, Direction::DOWN);
+    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+      keyUp();
+    }
     return;
   }
   uint8_t row = cursor_.row;
@@ -617,6 +620,9 @@ void MainWindow::keyDown(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::ACROSS) {
     setCursor(cursor_.row, cursor_.col, Direction::DOWN);
+    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+      keyDown();
+    }
     return;
   }
   uint8_t row = cursor_.row;
@@ -634,6 +640,9 @@ void MainWindow::keyLeft(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::DOWN) {
     setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
+    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+      keyLeft();
+    }
     return;
   }
   uint8_t col = cursor_.col;
@@ -651,6 +660,9 @@ void MainWindow::keyRight(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::DOWN) {
     setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
+    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+      keyRight();
+    }
     return;
   }
   uint8_t col = cursor_.col;
