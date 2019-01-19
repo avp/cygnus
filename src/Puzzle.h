@@ -139,7 +139,6 @@ public:
 
   /// \return true if the grid entry at (row,col) is correct.
   inline bool check(uint8_t row, uint8_t col) const {
-    qDebug() << "Checking" << row << ',' << col;
     const char solution = getSolution()[row][col];
     const char current = getGrid()[row][col];
     if (current == BLACK || current == EMPTY) {

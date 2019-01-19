@@ -13,6 +13,7 @@ namespace cygnus {
 class PuzzleResizer;
 class FilledLabel;
 
+/// Represent a cell in the crossword widget.
 class CellWidget : public QWidget {
   Q_OBJECT
 public:
@@ -27,8 +28,14 @@ public:
 
 protected:
   void paintEvent(QPaintEvent *pe) override;
+
+  /// Click on the puzzle.
   void mousePressEvent(QMouseEvent *event) override;
+
+  /// Mouseover shows the rebus in a tooltip.
   void enterEvent(QEvent *event) override;
+
+  /// Mouse leave hides the rebus in a tooltip.
   void leaveEvent(QEvent *event) override;
 
 public slots:
@@ -56,6 +63,7 @@ private:
   FilledLabel *entryLabel_;
 };
 
+/// Visual representation of the crossword puzzle.
 class PuzzleWidget : public QWidget {
   Q_OBJECT
 
@@ -94,6 +102,10 @@ private:
   PuzzleResizer *resizer_;
 };
 
+/// Resizes the grid owned by a given PuzzleWidget.
+/// This is necessary because we cannot increase the size of the grid by a
+/// single pixel without increasing the size of every cell widget in both
+/// directions. The PuzzleResizer provides the centering and resizing mechanism.
 class PuzzleResizer : public QWidget {
   Q_OBJECT
 public:
