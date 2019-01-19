@@ -19,19 +19,19 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   setAutoFillBackground(true);
   setPalette(pal);
 
-  auto *numLabel = new QLabel{this};
-  numLabel->move(0, 0);
-  numLabel->setStyleSheet("QLabel { padding: 1px 0 0 1px; color: black; }");
-  numLabel->show();
+  numLabel_ = new QLabel{this};
+  numLabel_->move(0, 0);
+  numLabel_->setStyleSheet("QLabel { padding: 2px 0 0 1px; color: black; }");
+  numLabel_->show();
 
   if (cellData.acrossStart) {
-    numLabel->setText(QString("%1").arg(cellData.acrossNum));
+    numLabel_->setText(QString("%1").arg(cellData.acrossNum));
   } else if (cellData.downStart) {
-    numLabel->setText(QString("%1").arg(cellData.downNum));
+    numLabel_->setText(QString("%1").arg(cellData.downNum));
   } else {
-    numLabel->setText("");
+    numLabel_->setText("");
   }
-  numLabel->adjustSize();
+  numLabel_->adjustSize();
 
   entryLabel_ = new FilledLabel{this};
   entryLabel_->setContentsMargins(0, 0, 0, 0);
@@ -53,6 +53,18 @@ void CellWidget::enterEvent(QEvent *event) {
 }
 
 void CellWidget::leaveEvent(QEvent *event) { QToolTip::hideText(); }
+
+void CellWidget::resizeEvent(QResizeEvent *event) {
+  constexpr int kMaxNumSize = 15;
+  constexpr int kMinNumSize = 10;
+  int h = height();
+
+  auto f = numLabel_->font();
+  f.setPixelSize(std::max(kMinNumSize, std::min(kMaxNumSize, h / 5)));
+  numLabel_->setFont(f);
+
+  numLabel_->move(0, 0);
+}
 
 void CellWidget::selectCursor() {
   auto pal = palette();

@@ -38,6 +38,8 @@ protected:
   /// Mouse leave hides the rebus in a tooltip.
   void leaveEvent(QEvent *event) override;
 
+  void resizeEvent(QResizeEvent *event) override;
+
 public slots:
   void selectCursor();
   void select();
@@ -61,6 +63,7 @@ private:
   QString displayText_{""};
 
   FilledLabel *entryLabel_;
+  QLabel *numLabel_;
 };
 
 /// Visual representation of the crossword puzzle.
