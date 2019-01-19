@@ -58,14 +58,11 @@ MainWindow::MainWindow(const char *fileName, QWidget *parent)
                                "color: black;"
                                "}");
 
-  titleLabel_ = new QLabel{};
-  infoLayout->addWidget(titleLabel_);
-  authorLabel_ = new QLabel{};
-  infoLayout->addWidget(authorLabel_);
-  copyrightLabel_ = new QLabel{};
-  infoLayout->addWidget(copyrightLabel_);
+  titleLabel_ = new FilledLabel{};
   timerWidget_ = new TimerWidget{};
-  infoLayout->addWidget(timerWidget_);
+
+  infoLayout->addWidget(titleLabel_, 3);
+  infoLayout->addWidget(timerWidget_, 1);
 
   hLayout->addWidget(acrossContainer);
   hLayout->addWidget(puzzleContainer_);
@@ -118,9 +115,8 @@ void MainWindow::reloadPuzzle() {
   saveAsAct_->setEnabled(true);
   puzzleMenu_->setEnabled(true);
 
-  titleLabel_->setText(puzzle_->getTitle());
-  authorLabel_->setText(puzzle_->getAuthor());
-  copyrightLabel_->setText(puzzle_->getCopyright());
+  titleLabel_->setText(
+      QString("%1 \t %2").arg(puzzle_->getTitle()).arg(puzzle_->getAuthor()));
   timerWidget_->setCurrent(puzzle_->getTimer().current);
   timerWidget_->setRunning(puzzle_->getTimer().running);
 

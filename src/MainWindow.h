@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "ClueWidget.h"
+#include "FilledLabel.h"
 #include "Puzzle.h"
 #include "PuzzleWidget.h"
 #include "TimerWidget.h"
@@ -73,9 +74,7 @@ private:
   QAction *checkClueAct_;
   QAction *checkAllAct_;
 
-  QLabel *titleLabel_;
-  QLabel *authorLabel_;
-  QLabel *copyrightLabel_;
+  FilledLabel *titleLabel_;
   TimerWidget *timerWidget_;
 
   ClueWidget *acrossWidget_;

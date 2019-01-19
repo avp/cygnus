@@ -4,6 +4,10 @@ namespace cygnus {
 
 TimerWidget::TimerWidget(QWidget *parent) : QLabel(parent) {
   setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+  auto f = font();
+  f.setPointSize(12);
+  setFont(f);
 }
 
 void TimerWidget::mousePressEvent(QMouseEvent *event) { clicked(); }
@@ -18,9 +22,11 @@ void TimerWidget::setCurrent(uint64_t current) {
 
 void TimerWidget::setRunning(bool running) {
   if (running) {
-    setStyleSheet("QLabel { background-color : black; color : #00ff00; }");
+    setStyleSheet(
+        "QLabel { background: black; color : #00ff00; padding: 1px }");
   } else {
-    setStyleSheet("QLabel { background-color : black; color : #ff0000; }");
+    setStyleSheet(
+        "QLabel { background: black; color : #ff0000; padding: 1px }");
   }
 }
 
