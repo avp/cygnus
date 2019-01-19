@@ -62,6 +62,7 @@ void CellWidget::resizeEvent(QResizeEvent *event) {
   auto f = numLabel_->font();
   f.setPixelSize(std::max(kMinNumSize, std::min(kMaxNumSize, h / 5)));
   numLabel_->setFont(f);
+  numLabel_->adjustSize();
 
   numLabel_->move(0, 0);
 }
