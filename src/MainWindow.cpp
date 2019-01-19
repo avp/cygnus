@@ -115,8 +115,9 @@ void MainWindow::reloadPuzzle() {
   saveAsAct_->setEnabled(true);
   puzzleMenu_->setEnabled(true);
 
-  titleLabel_->setText(
-      QString("%1 \t %2").arg(puzzle_->getTitle()).arg(puzzle_->getAuthor()));
+  titleLabel_->setText(QString("<b>%1</b> &nbsp;&nbsp; %2")
+                           .arg(puzzle_->getTitle())
+                           .arg(puzzle_->getAuthor()));
   timerWidget_->setCurrent(puzzle_->getTimer().current);
   timerWidget_->setRunning(puzzle_->getTimer().running);
 
