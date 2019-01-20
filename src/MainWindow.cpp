@@ -569,6 +569,23 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     break;
   }
 
+  if (event->modifiers() & Qt::ControlModifier) {
+    switch (event->key()) {
+    case Qt::Key_J:
+      keyDown(event->modifiers() & Qt::ShiftModifier);
+      break;
+    case Qt::Key_K:
+      keyUp(event->modifiers() & Qt::ShiftModifier);
+      break;
+    case Qt::Key_H:
+      keyLeft(event->modifiers() & Qt::ShiftModifier);
+      break;
+    case Qt::Key_L:
+      keyRight(event->modifiers() & Qt::ShiftModifier);
+      break;
+    }
+  }
+
   if (puzzle_) {
     if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
       if (event->modifiers() == Qt::NoModifier ||
