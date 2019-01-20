@@ -52,6 +52,8 @@ private slots:
 protected:
   void resizeEvent(QResizeEvent *event) override;
 
+  void closeEvent(QCloseEvent *event) override;
+
 private:
   QString fileName_;
   std::unique_ptr<Puzzle> puzzle_;

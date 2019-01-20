@@ -110,6 +110,31 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+  if (!puzzle_) {
+    return event->accept();
+  }
+
+  if (!puzzle_->isDirty()) {
+    return event->accept();
+  }
+
+  QMessageBox::StandardButton result = QMessageBox::question(
+      this, "Save", tr("You have unsaved changes. Save before closing?"),
+      QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+      QMessageBox::Cancel);
+
+  switch (result) {
+  case QMessageBox::Yes:
+    save();
+  // Fallthrough to closing the program.
+  case QMessageBox::No:
+    return event->accept();
+  case QMessageBox::Cancel:
+    return event->ignore();
+  }
+}
+
 void MainWindow::reloadPuzzle() {
   saveAct_->setEnabled(true);
   saveAsAct_->setEnabled(true);
@@ -360,6 +385,7 @@ void MainWindow::save() {
     QByteArray bytes = puzzle_->serialize();
     file.write(bytes);
     file.close();
+    puzzle_->setDirty(false);
   }
 }
 
@@ -446,6 +472,7 @@ void MainWindow::undo() {
                     ? QString(QChar(puzzle_->getGrid()[row][col]))
                     : puzzle_->getRebusFill()[row][col]});
 
+  puzzle_->setDirty(true);
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
   puzzleWidget_->setCell(row, col, entry.text);
@@ -473,6 +500,7 @@ void MainWindow::redo() {
                     ? QString(QChar(puzzle_->getGrid()[row][col]))
                     : puzzle_->getRebusFill()[row][col]});
 
+  puzzle_->setDirty(true);
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
   puzzleWidget_->setCell(row, col, entry.text);
@@ -796,6 +824,7 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
                     : puzzle_->getRebusFill()[row][col]});
   redoStack_.clear();
 
+  puzzle_->setDirty(true);
   puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = text;
   puzzleWidget_->setCell(row, col, text);
