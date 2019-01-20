@@ -115,8 +115,6 @@ void MainWindow::reloadPuzzle() {
   saveAsAct_->setEnabled(true);
   puzzleMenu_->setEnabled(true);
 
-  undoAct_->setEnabled(true);
-  redoAct_->setEnabled(true);
   editMenu_->setEnabled(true);
 
   undoStack_.clear();
@@ -807,6 +805,9 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
     markup |= Puzzle::PreviousIncorrectTag;
   }
   puzzleWidget_->setMarkup(row, col, markup);
+
+  undoAct_->setEnabled(!undoStack_.empty());
+  redoAct_->setEnabled(!redoStack_.empty());
 }
 
 void MainWindow::clearLetter(uint8_t row, uint8_t col) {
