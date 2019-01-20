@@ -64,6 +64,7 @@ private:
     QString text;
   };
   std::vector<UndoEntry> undoStack_{};
+  std::vector<UndoEntry> redoStack_{};
 
   void reloadPuzzle();
 
@@ -74,6 +75,7 @@ private:
 
   QMenu *editMenu_;
   QAction *undoAct_;
+  QAction *redoAct_;
 
   QMenu *puzzleMenu_;
   QMenu *revealMenu_;
@@ -116,6 +118,7 @@ private:
   bool checkAndMark(uint8_t row, uint8_t col);
 
   void undo();
+  void redo();
 
   /// Check whole puzzle and show message if completely correct.
   /// Else, do nothing.

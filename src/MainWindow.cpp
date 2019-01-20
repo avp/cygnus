@@ -116,6 +116,7 @@ void MainWindow::reloadPuzzle() {
   puzzleMenu_->setEnabled(true);
 
   undoAct_->setEnabled(true);
+  redoAct_->setEnabled(true);
   editMenu_->setEnabled(true);
 
   undoStack_.clear();
@@ -293,6 +294,11 @@ void MainWindow::createActions() {
   undoAct_->setStatusTip(tr("Undo the last action"));
   connect(undoAct_, &QAction::triggered, this, &MainWindow::undo);
 
+  redoAct_ = new QAction(tr("&Redo"), this);
+  redoAct_->setShortcuts(QKeySequence::Redo);
+  redoAct_->setStatusTip(tr("Redo the last undone action"));
+  connect(redoAct_, &QAction::triggered, this, &MainWindow::redo);
+
   revealCurrentAct_ = new QAction(tr("Current Letter"), this);
   revealCurrentAct_->setStatusTip(tr("Reveal the current letter"));
   connect(revealCurrentAct_, &QAction::triggered, this,
@@ -436,6 +442,12 @@ void MainWindow::undo() {
   uint32_t row = entry.row;
   uint32_t col = entry.col;
 
+  redoStack_.emplace_back(
+      UndoEntry{row, col, puzzle_->getMarkup()[row][col],
+                puzzle_->getRebusFill()[row][col].isEmpty()
+                    ? QString(QChar(puzzle_->getGrid()[row][col]))
+                    : puzzle_->getRebusFill()[row][col]});
+
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
   puzzleWidget_->setCell(row, col, entry.text);
@@ -444,6 +456,36 @@ void MainWindow::undo() {
   puzzleWidget_->setMarkup(row, col, entry.markup);
 
   undoStack_.pop_back();
+
+  undoAct_->setEnabled(!undoStack_.empty());
+  redoAct_->setEnabled(!redoStack_.empty());
+}
+
+void MainWindow::redo() {
+  if (redoStack_.empty()) {
+    return;
+  }
+  const auto &entry = redoStack_.back();
+  uint32_t row = entry.row;
+  uint32_t col = entry.col;
+
+  undoStack_.emplace_back(
+      UndoEntry{row, col, puzzle_->getMarkup()[row][col],
+                puzzle_->getRebusFill()[row][col].isEmpty()
+                    ? QString(QChar(puzzle_->getGrid()[row][col]))
+                    : puzzle_->getRebusFill()[row][col]});
+
+  puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
+  puzzle_->getRebusFill()[row][col] = entry.text;
+  puzzleWidget_->setCell(row, col, entry.text);
+
+  puzzle_->getMarkup()[row][col] = entry.markup;
+  puzzleWidget_->setMarkup(row, col, entry.markup);
+
+  redoStack_.pop_back();
+
+  undoAct_->setEnabled(!undoStack_.empty());
+  redoAct_->setEnabled(!redoStack_.empty());
 }
 
 void MainWindow::checkSuccess() {
@@ -499,6 +541,8 @@ void MainWindow::createMenus() {
   editMenu_ = menuBar()->addMenu(tr("&Edit"));
   editMenu_->addAction(undoAct_);
   undoAct_->setEnabled(false);
+  editMenu_->addAction(redoAct_);
+  redoAct_->setEnabled(false);
 
   puzzleMenu_ = menuBar()->addMenu(tr("&Puzzle"));
   puzzleMenu_->setEnabled(false);
