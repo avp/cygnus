@@ -796,6 +796,7 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
                 puzzle_->getRebusFill()[row][col].isEmpty()
                     ? QString(QChar(puzzle_->getGrid()[row][col]))
                     : puzzle_->getRebusFill()[row][col]});
+  redoStack_.clear();
 
   puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = text;
