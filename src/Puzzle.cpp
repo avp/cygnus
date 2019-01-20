@@ -569,25 +569,39 @@ QByteArray Puzzle::serialize() const {
   result += text_;
   result += '\0';
 
+  auto serializeExtension = [](const QByteArray &extTag,
+                               const QByteArray &data) {
+    return extTag + makeUInt16LE(data.size()) +
+           makeUInt16LE(checksum(data.begin(), data.end())) + data + '\0';
+  };
+
   // Serialize markup.
   QByteArray markupString{width_ * height_, '\0'};
   writeGrid(markupString.begin(), markup_);
-
-  result += QByteArray("GEXT", 4) + makeUInt16LE(width_ * height_) +
-            makeUInt16LE(checksum(markupString.begin(), markupString.end())) +
-            markupString + '\0';
+  result += serializeExtension(QByteArray("GEXT", 4), markupString);
 
   // Serialize timer.
   QByteArray timeString = QString("%1,%2")
                               .arg(timer_.current)
                               .arg(timer_.running ? '1' : '0')
                               .toLocal8Bit();
-  uint16_t timerChecksum = checksum(timeString.begin(), timeString.end());
-  uint16_t timerLen = timeString.size();
-  QByteArray timerExtension = QByteArray("LTIM", 4) + makeUInt16LE(timerLen) +
-                              makeUInt16LE(timerChecksum) + timeString + '\0';
+  result += serializeExtension(QByteArray("LTIM", 4), timeString);
 
-  result += timerExtension;
+  // Serialize rebus fill.
+  bool serializeRebusFill = false;
+  QByteArray rebusFillString{};
+  for (const auto &row : rebusFill_) {
+    for (const auto &s : row) {
+      if (s.size() > 1) {
+        rebusFillString.append(s);
+        serializeRebusFill = true;
+      }
+      rebusFillString.append('\0');
+    }
+  }
+  if (serializeRebusFill) {
+    result += serializeExtension(QByteArray("RUSR", 4), rebusFillString);
+  }
 
   return result;
 }
