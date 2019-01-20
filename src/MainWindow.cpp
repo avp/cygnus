@@ -115,6 +115,11 @@ void MainWindow::reloadPuzzle() {
   saveAsAct_->setEnabled(true);
   puzzleMenu_->setEnabled(true);
 
+  undoAct_->setEnabled(true);
+  editMenu_->setEnabled(true);
+
+  undoStack_.clear();
+
   titleLabel_->setText(QString("<b>%1</b> &nbsp;&nbsp; %2")
                            .arg(puzzle_->getTitle())
                            .arg(puzzle_->getAuthor()));
@@ -283,6 +288,11 @@ void MainWindow::createActions() {
   saveAsAct_->setStatusTip(tr("Save the current puzzle as"));
   connect(saveAsAct_, &QAction::triggered, this, &MainWindow::saveAs);
 
+  undoAct_ = new QAction(tr("&Undo"), this);
+  undoAct_->setShortcuts(QKeySequence::Undo);
+  undoAct_->setStatusTip(tr("Undo the last action"));
+  connect(undoAct_, &QAction::triggered, this, &MainWindow::undo);
+
   revealCurrentAct_ = new QAction(tr("Current Letter"), this);
   revealCurrentAct_->setStatusTip(tr("Reveal the current letter"));
   connect(revealCurrentAct_, &QAction::triggered, this,
@@ -418,6 +428,24 @@ bool MainWindow::checkAndMark(uint8_t row, uint8_t col) {
   return false;
 }
 
+void MainWindow::undo() {
+  if (undoStack_.empty()) {
+    return;
+  }
+  const auto &entry = undoStack_.back();
+  uint32_t row = entry.row;
+  uint32_t col = entry.col;
+
+  puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
+  puzzle_->getRebusFill()[row][col] = entry.text;
+  puzzleWidget_->setCell(row, col, entry.text);
+
+  puzzle_->getMarkup()[row][col] = entry.markup;
+  puzzleWidget_->setMarkup(row, col, entry.markup);
+
+  undoStack_.pop_back();
+}
+
 void MainWindow::checkSuccess() {
   // See if the puzzle's complete.
   if (!puzzle_->allCorrect()) {
@@ -467,6 +495,10 @@ void MainWindow::createMenus() {
   saveAct_->setEnabled(false);
   fileMenu_->addAction(saveAsAct_);
   saveAsAct_->setEnabled(false);
+
+  editMenu_ = menuBar()->addMenu(tr("&Edit"));
+  editMenu_->addAction(undoAct_);
+  undoAct_->setEnabled(false);
 
   puzzleMenu_ = menuBar()->addMenu(tr("&Puzzle"));
   puzzleMenu_->setEnabled(false);
@@ -714,6 +746,13 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
     // If the letter was revealed, don't allow editing it.
     return;
   }
+
+  undoStack_.emplace_back(
+      UndoEntry{row, col, puzzle_->getMarkup()[row][col],
+                puzzle_->getRebusFill()[row][col].isEmpty()
+                    ? QString(QChar(puzzle_->getGrid()[row][col]))
+                    : puzzle_->getRebusFill()[row][col]});
+
   puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = text;
   puzzleWidget_->setCell(row, col, text);

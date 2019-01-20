@@ -57,12 +57,23 @@ private:
   std::unique_ptr<Puzzle> puzzle_;
   Cursor cursor_;
 
+  struct UndoEntry {
+    uint32_t row;
+    uint32_t col;
+    Puzzle::Markup markup;
+    QString text;
+  };
+  std::vector<UndoEntry> undoStack_{};
+
   void reloadPuzzle();
 
   QMenu *fileMenu_;
   QAction *openAct_;
   QAction *saveAct_;
   QAction *saveAsAct_;
+
+  QMenu *editMenu_;
+  QAction *undoAct_;
 
   QMenu *puzzleMenu_;
   QMenu *revealMenu_;
@@ -103,6 +114,8 @@ private:
   void reveal(uint8_t row, uint8_t col, bool check = true);
   bool check(uint8_t row, uint8_t col);
   bool checkAndMark(uint8_t row, uint8_t col);
+
+  void undo();
 
   /// Check whole puzzle and show message if completely correct.
   /// Else, do nothing.
