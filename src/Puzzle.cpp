@@ -433,7 +433,10 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
       // TODO: Check checksum.
       (void)cksum;
       it += 2;
+      // Skip the extension data.
       it += len;
+      // Skip the null terminator.
+      ++it;
     }
   }
 
