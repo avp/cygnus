@@ -14,6 +14,10 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   QGridLayout *layout = new QGridLayout{};
   setLayout(layout);
 
+  auto size = sizePolicy();
+  size.setHeightForWidth(true);
+  setSizePolicy(size);
+
   auto pal = palette();
   pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
   setAutoFillBackground(true);
@@ -94,7 +98,7 @@ void CellWidget::setCell(const QString &text) {
 
   auto pal = palette();
   if (text == "-" || text.isEmpty()) {
-    displayText_ = "";
+    displayText_ = " ";
   } else if (text.at(0).isUpper()) {
     displayText_ = text;
     pal.setColor(QPalette::Foreground, Qt::black);

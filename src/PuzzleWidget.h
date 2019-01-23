@@ -23,6 +23,8 @@ public:
                       const Puzzle::CellData &cellData,
                       const Puzzle::Markup markup, QWidget *parent = nullptr);
 
+  int heightForWidth(int w) const override { return w; }
+
   inline uint8_t getRow() const { return row_; }
   inline uint8_t getCol() const { return col_; }
 
@@ -39,6 +41,7 @@ protected:
   void leaveEvent(QEvent *event) override;
 
   void resizeEvent(QResizeEvent *event) override;
+  void resizeEvent(int height, int width);
 
 public slots:
   void selectCursor();
@@ -133,6 +136,11 @@ public:
     int minSize = CellWidget::kMinimumSize;
     int cellSize = std::max(minSize, std::min(h / rows, w / cols));
     grid_->setFixedSize(rows * cellSize, cols * cellSize);
+    for (auto &row : puzzle_->cells_) {
+      for (auto &cell : row) {
+        cell->setFixedSize(cellSize, cellSize);
+      }
+    }
   }
 
   QSize minimumSizeHint() const override {
