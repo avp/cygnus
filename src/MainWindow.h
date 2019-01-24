@@ -21,11 +21,19 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(const char *filename, QWidget *parent = nullptr);
+  explicit MainWindow(QWidget *parent = nullptr);
   void showMaximized();
 
-private slots:
+  void setFileName(QString fileName) { fileName_ = fileName; }
+
+  /// Load the file at the internally set fileName_;
+  void loadFile();
+
+public slots:
+  /// Show open file dialog.
   void open();
+
+private slots:
   void save();
   void saveAs();
 
@@ -46,8 +54,6 @@ private slots:
 
   void tickTimer();
   void toggleTimer();
-
-  void loadFile();
 
 protected:
   void resizeEvent(QResizeEvent *event) override;

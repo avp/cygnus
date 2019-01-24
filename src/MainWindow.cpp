@@ -11,8 +11,7 @@
 
 namespace cygnus {
 
-MainWindow::MainWindow(const char *fileName, QWidget *parent)
-    : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   this->setWindowTitle(tr("Cygnus Crosswords"));
 
   auto *vLayout = new QVBoxLayout{};
@@ -86,25 +85,9 @@ MainWindow::MainWindow(const char *fileName, QWidget *parent)
   timer->start(1000);
   connect(timer, &QTimer::timeout, this, &MainWindow::tickTimer);
   connect(timerWidget_, &TimerWidget::clicked, this, &MainWindow::toggleTimer);
-
-  if (fileName) {
-    fileName_ = fileName;
-  }
 }
 
-void MainWindow::showMaximized() {
-  QMainWindow::showMaximized();
-  if (fileName_.isEmpty()) {
-    // Show the open dialog.
-    open();
-  } else {
-#ifdef _WIN32
-    QMetaObject::invokeMethod(this, "loadFile", Qt::QueuedConnection);
-#else
-    loadFile();
-#endif
-  }
-}
+void MainWindow::showMaximized() { QMainWindow::showMaximized(); }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
