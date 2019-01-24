@@ -12,6 +12,7 @@ public:
   MainApp(int argc, char *argv[])
       : QApplication(argc, argv), mainWindow_(new MainWindow()) {
     mainWindow_->showMaximized();
+    QApplication::processEvents();
 
     if (argc > 1 && argv[1]) {
       fileName_ = argv[1];
@@ -46,12 +47,12 @@ protected:
     return QApplication::event(event);
   }
 };
-}
+
+} // namespace cygnus
 
 int main(int argc, char *argv[]) {
   QCoreApplication::setOrganizationName("Cygnus Crosswords");
 
   cygnus::MainApp a(argc, argv);
-  QApplication::processEvents();
   return a.exec();
 }
