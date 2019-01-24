@@ -132,6 +132,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     return event->accept();
   case QMessageBox::Cancel:
     return event->ignore();
+  default:
+    return;
   }
 }
 
@@ -671,7 +673,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     break;
   }
 
+#ifdef Q_OS_MACOS
+  // Use the "Meta" modifier on OSX because we don't want the Command key.
+  if (event->modifiers() & Qt::MetaModifier) {
+#else
   if (event->modifiers() & Qt::ControlModifier) {
+#endif
     switch (event->key()) {
     case Qt::Key_J:
       keyDown(event->modifiers() & Qt::ShiftModifier);
