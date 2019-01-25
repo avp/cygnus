@@ -123,9 +123,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::reloadPuzzle() {
   saveAct_->setEnabled(true);
   saveAsAct_->setEnabled(true);
-  puzzleMenu_->setEnabled(true);
 
   editMenu_->setEnabled(true);
+  viewMenu_->setEnabled(true);
+  puzzleMenu_->setEnabled(true);
 
   undoStack_.clear();
 
@@ -306,6 +307,16 @@ void MainWindow::createActions() {
   redoAct_->setShortcuts(QKeySequence::Redo);
   redoAct_->setStatusTip(tr("Redo the last undone action"));
   connect(redoAct_, &QAction::triggered, this, &MainWindow::redo);
+
+  increaseSizeAct_ = new QAction(tr("&Increase clue size"), this);
+  increaseSizeAct_->setShortcuts(QKeySequence::ZoomIn);
+  connect(increaseSizeAct_, &QAction::triggered, this,
+          &MainWindow::increaseSize);
+
+  decreaseSizeAct_ = new QAction(tr("&Decrease clue size"), this);
+  decreaseSizeAct_->setShortcuts(QKeySequence::ZoomOut);
+  connect(decreaseSizeAct_, &QAction::triggered, this,
+          &MainWindow::decreaseSize);
 
   revealCurrentAct_ = new QAction(tr("Current Letter"), this);
   revealCurrentAct_->setStatusTip(tr("Reveal the current letter"));
@@ -503,6 +514,20 @@ void MainWindow::redo() {
   redoAct_->setEnabled(!redoStack_.empty());
 }
 
+void MainWindow::increaseSize() {
+  if (puzzle_) {
+    acrossWidget_->modifySize(1);
+    downWidget_->modifySize(1);
+  }
+}
+
+void MainWindow::decreaseSize() {
+  if (puzzle_) {
+    acrossWidget_->modifySize(-1);
+    downWidget_->modifySize(-1);
+  }
+}
+
 void MainWindow::checkSuccess() {
   // See if the puzzle's complete.
   if (!puzzle_->allCorrect()) {
@@ -558,6 +583,12 @@ void MainWindow::createMenus() {
   undoAct_->setEnabled(false);
   editMenu_->addAction(redoAct_);
   redoAct_->setEnabled(false);
+  editMenu_->setEnabled(false);
+
+  viewMenu_ = menuBar()->addMenu(tr("&View"));
+  viewMenu_->addAction(increaseSizeAct_);
+  viewMenu_->addAction(decreaseSizeAct_);
+  viewMenu_->setEnabled(false);
 
   puzzleMenu_ = menuBar()->addMenu(tr("&Puzzle"));
   puzzleMenu_->setEnabled(false);
@@ -612,22 +643,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   }
   case Qt::Key_Delete:
     clearLetter(cursor_.row, cursor_.col);
-    break;
-  case Qt::Key_Plus:
-    if (puzzle_) {
-      if (event->modifiers() & Qt::ControlModifier) {
-        acrossWidget_->modifySize(1);
-        downWidget_->modifySize(1);
-      }
-    }
-    break;
-  case Qt::Key_Minus:
-    if (puzzle_) {
-      if (event->modifiers() & Qt::ControlModifier) {
-        acrossWidget_->modifySize(-1);
-        downWidget_->modifySize(-1);
-      }
-    }
     break;
   case Qt::Key_Insert: {
     if (puzzle_) {

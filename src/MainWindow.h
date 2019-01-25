@@ -45,6 +45,9 @@ private slots:
   void checkClue();
   void checkAll();
 
+  void increaseSize();
+  void decreaseSize();
+
   void setCursor(uint8_t row, uint8_t col, Direction dir);
   void puzzleClicked(uint8_t row, uint8_t col);
   void puzzleRightClicked();
@@ -84,6 +87,10 @@ private:
   QMenu *editMenu_;
   QAction *undoAct_;
   QAction *redoAct_;
+
+  QMenu *viewMenu_;
+  QAction *increaseSizeAct_;
+  QAction *decreaseSizeAct_;
 
   QMenu *puzzleMenu_;
   QMenu *revealMenu_;
