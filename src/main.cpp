@@ -4,29 +4,43 @@
 namespace cygnus {
 
 class MainApp : public QApplication {
-  QString fileName_{};
+  std::vector<MainWindow *> windows_{};
 
-  MainWindow *mainWindow_;
+#ifdef Q_OS_MACOS
+  MainWindow *firstWindow_{};
+  QString fileName_;
+#endif
 
 public:
-  MainApp(int argc, char *argv[])
-      : QApplication(argc, argv), mainWindow_(new MainWindow()) {
-    mainWindow_->showMaximized();
-    QApplication::processEvents();
+  MainApp(int argc, char *argv[]) : QApplication(argc, argv) {
+#ifdef Q_OS_MACOS
+    firstWindow_ = createWindow();
+#else
+    auto *window = createWindow();
+
+    QString fileName{};
 
     if (argc > 1 && argv[1]) {
-      fileName_ = argv[1];
+      fileName = argv[1];
     }
 
-    if (!fileName_.isEmpty()) {
-      mainWindow_->setFileName(fileName_);
-      mainWindow_->loadFile();
+    if (!fileName.isEmpty()) {
+      window->setFileName(fileName);
+      window->loadFile();
     } else {
-      mainWindow_->open();
+      window->open();
+    }
+#endif
+  }
+
+  ~MainApp() {
+    for (auto *w : windows_) {
+      delete w;
     }
   }
 
 protected:
+#ifdef Q_OS_MACOS
   bool event(QEvent *event) override {
     switch (event->type()) {
     case QEvent::FileOpen: {
@@ -34,9 +48,11 @@ protected:
       if (fileOpenEvent) {
         fileName_ = fileOpenEvent->file();
         if (!fileName_.isEmpty()) {
-          if (mainWindow_) {
-            mainWindow_->setFileName(fileName_);
-          }
+          MainWindow *window = firstWindow_ && !firstWindow_->isLoaded()
+                                   ? firstWindow_
+                                   : window = createWindow();
+          window->setFileName(fileName_);
+          window->loadFile();
           return true;
         }
       }
@@ -45,6 +61,15 @@ protected:
       break;
     }
     return QApplication::event(event);
+  }
+#endif
+
+private:
+  MainWindow *createWindow() {
+    windows_.emplace_back(new MainWindow());
+    windows_.back()->showMaximized();
+    QApplication::processEvents();
+    return windows_.back();
   }
 };
 
