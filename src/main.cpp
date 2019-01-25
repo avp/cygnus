@@ -17,6 +17,7 @@ public:
     firstWindow_ = createWindow();
 #else
     auto *window = createWindow();
+    QApplication::processEvents();
 
     QString fileName{};
 

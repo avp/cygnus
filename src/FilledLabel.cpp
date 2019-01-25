@@ -3,9 +3,7 @@
 
 namespace cygnus {
 
-void FilledLabel::resizeEvent(QResizeEvent *event) {
-  QLabel::resizeEvent(event);
-
+void FilledLabel::resizeText() {
   QFont font = this->font();
   QRect r = QFontMetrics(font).boundingRect(text().isEmpty() ? "A" : text());
 
