@@ -464,6 +464,7 @@ void MainWindow::undo() {
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
   puzzleWidget_->setCell(row, col, entry.text);
+  setCursor(row, col, cursor_.dir);
 
   puzzle_->getMarkup()[row][col] = entry.markup;
   puzzleWidget_->setMarkup(row, col, entry.markup);
