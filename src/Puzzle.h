@@ -92,9 +92,6 @@ private:
   QString author_;
   QString copyright_;
 
-  /// Set to true if the puzzle has been modified since it was last saved.
-  bool dirty_{false};
-
 public:
   static std::unique_ptr<Puzzle> loadFromFile(const QByteArray &puzFile);
 
@@ -118,8 +115,6 @@ public:
   inline Timer &getTimer() { return timer_; }
   inline Grid<QString> &getRebusFill() { return rebusFill_; }
   inline const Grid<QString> &getRebusFill() const { return rebusFill_; }
-  inline void setDirty(bool dirty) { dirty_ = dirty; }
-  inline bool isDirty() { return dirty_; }
 
   /// \return the clue index of clue number \p num in direction \p dir.
   int getClueIdxByNum(Direction dir, uint32_t num) const;

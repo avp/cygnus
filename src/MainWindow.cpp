@@ -98,7 +98,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     return event->accept();
   }
 
-  if (!puzzle_->isDirty()) {
+  if (!isWindowModified()) {
     return event->accept();
   }
 
@@ -344,6 +344,9 @@ void MainWindow::loadFile() {
   QByteArray puzFile = file.readAll();
   puzzle_ = std::move(Puzzle::loadFromFile(puzFile));
   if (puzzle_) {
+    QFileInfo info{fileName_};
+    this->setWindowTitle(
+        QString("[*]%1 - Cygnus Crosswords").arg(info.fileName()));
     reloadPuzzle();
   } else {
     QMessageBox::warning(
@@ -370,7 +373,7 @@ void MainWindow::save() {
     QByteArray bytes = puzzle_->serialize();
     file.write(bytes);
     file.close();
-    puzzle_->setDirty(false);
+    setWindowModified(false);
   }
 }
 
@@ -457,7 +460,7 @@ void MainWindow::undo() {
                     ? QString(QChar(puzzle_->getGrid()[row][col]))
                     : puzzle_->getRebusFill()[row][col]});
 
-  puzzle_->setDirty(true);
+  setWindowModified(true);
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
   puzzleWidget_->setCell(row, col, entry.text);
@@ -485,7 +488,7 @@ void MainWindow::redo() {
                     ? QString(QChar(puzzle_->getGrid()[row][col]))
                     : puzzle_->getRebusFill()[row][col]});
 
-  puzzle_->setDirty(true);
+  setWindowModified(true);
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
   puzzleWidget_->setCell(row, col, entry.text);
@@ -814,7 +817,7 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
                     : puzzle_->getRebusFill()[row][col]});
   redoStack_.clear();
 
-  puzzle_->setDirty(true);
+  setWindowModified(true);
   puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = text;
   puzzleWidget_->setCell(row, col, text);
