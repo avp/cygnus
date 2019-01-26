@@ -576,8 +576,10 @@ void MainWindow::checkAll() {
 
 void MainWindow::about() {
   QMessageBox::about(
-      this, "About Cygnus Crosswords",
-      QString("Cygnus Crosswords %1\n").arg(VER_PRODUCTVERSION_STR));
+      this, "About",
+      QString("<p>Cygnus Crosswords %1</p>"
+              "<p><a href=\"//github.com/avp/cygnus\">GitHub</a></p>")
+          .arg(VER_PRODUCTVERSION_STR));
 }
 
 void MainWindow::createMenus() {
