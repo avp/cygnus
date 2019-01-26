@@ -4,7 +4,7 @@
 namespace cygnus {
 
 class MainApp : public QApplication {
-  std::vector<MainWindow *> windows_{};
+  std::vector<std::unique_ptr<MainWindow>> windows_{};
 
 #ifdef Q_OS_MACOS
   MainWindow *firstWindow_{};
@@ -34,12 +34,6 @@ public:
 #endif
   }
 
-  ~MainApp() {
-    for (auto *w : windows_) {
-      delete w;
-    }
-  }
-
 protected:
 #ifdef Q_OS_MACOS
   bool event(QEvent *event) override {
@@ -67,10 +61,10 @@ protected:
 
 private:
   MainWindow *createWindow() {
-    windows_.emplace_back(new MainWindow());
+    windows_.emplace_back(std::make_unique<MainWindow>());
     windows_.back()->showMaximized();
     QApplication::processEvents();
-    return windows_.back();
+    return windows_.back().get();
   }
 };
 
