@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 
 #include "Colors.h"
+#include "Version.h"
 
 #include <QDebug>
 #include <QDir>
@@ -343,6 +344,9 @@ void MainWindow::createActions() {
   checkAllAct_ = new QAction(tr("Whole Puzzle"), this);
   checkAllAct_->setStatusTip(tr("Check the whole puzzle"));
   connect(checkAllAct_, &QAction::triggered, this, &MainWindow::checkAll);
+
+  aboutAct_ = new QAction(tr("&About"), this);
+  connect(aboutAct_, &QAction::triggered, this, &MainWindow::about);
 }
 
 void MainWindow::loadFile() {
@@ -570,6 +574,12 @@ void MainWindow::checkAll() {
   }
 }
 
+void MainWindow::about() {
+  QMessageBox::about(
+      this, "About Cygnus Crosswords",
+      QString("Cygnus Crosswords %1\n").arg(VER_PRODUCTVERSION_STR));
+}
+
 void MainWindow::createMenus() {
   fileMenu_ = menuBar()->addMenu(tr("&File"));
   fileMenu_->addAction(openAct_);
@@ -600,6 +610,9 @@ void MainWindow::createMenus() {
   checkMenu_->addAction(checkCurrentAct_);
   checkMenu_->addAction(checkClueAct_);
   checkMenu_->addAction(checkAllAct_);
+
+  helpMenu_ = menuBar()->addMenu(tr("&Help"));
+  helpMenu_->addAction(aboutAct_);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {

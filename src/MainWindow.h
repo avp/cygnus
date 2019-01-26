@@ -45,6 +45,8 @@ private slots:
   void checkClue();
   void checkAll();
 
+  void about();
+
   void increaseSize();
   void decreaseSize();
 
@@ -101,6 +103,9 @@ private:
   QAction *checkCurrentAct_;
   QAction *checkClueAct_;
   QAction *checkAllAct_;
+
+  QMenu *helpMenu_;
+  QAction *aboutAct_;
 
   FilledLabel *titleLabel_;
   TimerWidget *timerWidget_;
