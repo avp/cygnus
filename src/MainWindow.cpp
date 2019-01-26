@@ -575,11 +575,14 @@ void MainWindow::checkAll() {
 }
 
 void MainWindow::about() {
-  QMessageBox::about(
-      this, "About",
+  QMessageBox box(this);
+  box.setWindowTitle("About");
+  box.setTextFormat(Qt::RichText); // this is what makes the links clickable
+  box.setText(
       QString("<p>Cygnus Crosswords %1</p>"
-              "<p><a href=\"//github.com/avp/cygnus\">GitHub</a></p>")
+              "<p><a href=\"https://github.com/avp/cygnus\">GitHub</a></p>")
           .arg(VER_PRODUCTVERSION_STR));
+  box.exec();
 }
 
 void MainWindow::createMenus() {
