@@ -29,6 +29,9 @@ public:
   /// Load the file at the internally set fileName_;
   void loadFile();
 
+  /// \return true if the window is displaying a puzzle.
+  bool isLoaded() const { return puzzle_ != nullptr; }
+
 public slots:
   /// Show open file dialog.
   void open();

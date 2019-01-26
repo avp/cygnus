@@ -602,7 +602,6 @@ void MainWindow::about() {
 // should perhaps be a style hint
 #ifdef Q_OS_MAC
   oldMsgBox = box;
-  box->d_func()->buttonBox->setCenterButtons(true);
   box->show();
 #else
   box->exec();
