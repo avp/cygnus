@@ -575,14 +575,38 @@ void MainWindow::checkAll() {
 }
 
 void MainWindow::about() {
-  QMessageBox box(this);
-  box.setWindowTitle("About");
-  box.setTextFormat(Qt::RichText); // this is what makes the links clickable
-  box.setText(
-      QString("<p>Cygnus Crosswords %1</p>"
-              "<p><a href=\"https://github.com/avp/cygnus\">GitHub</a></p>")
-          .arg(VER_PRODUCTVERSION_STR));
-  box.exec();
+  static QString title(QStringLiteral("About"));
+  static QString text(QStringLiteral(
+      "<p>Cygnus Crosswords " VER_PRODUCTVERSION_STR "</p>"
+      "<p><a href=\"https://github.com/avp/cygnus\">GitHub</a></p>"));
+
+  QWidget *parent = this;
+
+#ifdef Q_OS_MAC
+  static QPointer<QMessageBox> oldMsgBox;
+  if (oldMsgBox && oldMsgBox->text() == text) {
+    oldMsgBox->show();
+    oldMsgBox->raise();
+    oldMsgBox->activateWindow();
+    return;
+  }
+#endif
+  QMessageBox *box =
+      new QMessageBox(QMessageBox::Information, title, text, QMessageBox::Ok,
+                      parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+  box->setAttribute(Qt::WA_DeleteOnClose);
+  box->setTextFormat(Qt::RichText);
+  QIcon icon = box->windowIcon();
+  QSize size = icon.actualSize(QSize(64, 64));
+  box->setIconPixmap(icon.pixmap(size));
+// should perhaps be a style hint
+#ifdef Q_OS_MAC
+  oldMsgBox = box;
+  box->d_func()->buttonBox->setCenterButtons(true);
+  box->show();
+#else
+  box->exec();
+#endif
 }
 
 void MainWindow::createMenus() {
