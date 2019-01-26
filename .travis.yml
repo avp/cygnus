@@ -1,0 +1,23 @@
+os:
+  - osx
+language: cpp
+compiler:
+  - clang
+addons:
+  homebrew:
+    packages:
+      - cmake
+      - qt
+      - ninja
+matrix:
+  include:
+    - name: "OSX Release"
+      env: QT_PREFIX=$(brew --prefix qt)
+before_script:
+  - mkdir "build/"
+  - cd "build/"
+  - cmake "-DCMAKE_PREFIX_PATH=$QT_PREFIX" -GNinja ../src
+script:
+  - ninja
+after_script:
+  - "$QT_PREFIX/macdeployqt" "Cygnus.app" -dmg
