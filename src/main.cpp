@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include <QApplication>
 
+#include <memory>
+
 namespace cygnus {
 
 class MainApp : public QApplication {
