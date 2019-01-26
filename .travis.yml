@@ -1,6 +1,3 @@
-os:
-  - osx
-  - linux
 language: cpp
 compiler:
   - clang
@@ -17,9 +14,11 @@ addons:
       - ninja-build
 matrix:
   include:
-    - os: osx
+    - name: "OSX Release"
+      os: osx
       env: QT_PREFIX=$(brew --prefix qt)
-    - os: linux
+    - name: "Linux Release"
+      os: linux
       env: QT_PREFIX=""
 before_script:
   - mkdir "build/"
