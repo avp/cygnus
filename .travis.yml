@@ -17,12 +17,10 @@ addons:
       - ninja-build
 matrix:
   include:
-    - name: "OSX Release"
+    - os: osx
       env: QT_PREFIX=$(brew --prefix qt)
-      os: osx
-    - name: "Linux Release"
+    - os: linux
       env: QT_PREFIX=""
-      os: linux
 before_script:
   - mkdir "build/"
   - cd "build/"
