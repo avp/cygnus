@@ -1,7 +1,4 @@
 language: cpp
-compiler:
-  - clang
-  - gcc
 addons:
   homebrew:
     packages:
@@ -15,12 +12,22 @@ addons:
       - ninja-build
 matrix:
   include:
-    - name: "OSX Release"
+    - name: "OSX Release (Clang)"
       os: osx
       env: QT_PREFIX=$(brew --prefix qt)
-    - name: "Linux Release"
+      compiler: clang
+    - name: "OSX Release (GCC)"
+      os: osx
+      env: QT_PREFIX=$(brew --prefix qt)
+      compiler: gcc
+    - name: "Linux Release (Clang)"
       os: linux
       env: QT_PREFIX=""
+      compiler: clang
+    - name: "Linux Release (GCC)"
+      os: linux
+      env: QT_PREFIX=""
+      compiler: gcc
 before_script:
   - mkdir "build/"
   - cd "build/"
