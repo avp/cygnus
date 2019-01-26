@@ -1,5 +1,6 @@
 os:
   - osx
+  - linux
 language: cpp
 compiler:
   - clang
@@ -9,10 +10,19 @@ addons:
       - cmake
       - qt
       - ninja
+  apt:
+    packages:
+      - cmake
+      - qt5-default
+      - ninja-build
 matrix:
   include:
     - name: "OSX Release"
       env: QT_PREFIX=$(brew --prefix qt)
+      os: osx
+    - name: "Linux Release"
+      env: QT_PREFIX=""
+      os: linux
 before_script:
   - mkdir "build/"
   - cd "build/"
@@ -20,4 +30,4 @@ before_script:
 script:
   - ninja
 after_script:
-  - $QT_PREFIX/macdeployqt Cygnus.app -dmg
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then $QT_PREFIX/bin/macdeployqt Cygnus.app -dmg; fi
