@@ -20,4 +20,4 @@ before_script:
 script:
   - ninja
 after_script:
-  - "$QT_PREFIX/macdeployqt" "Cygnus.app" -dmg
+  - $QT_PREFIX/macdeployqt Cygnus.app -dmg
