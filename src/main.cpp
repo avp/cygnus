@@ -63,7 +63,7 @@ protected:
 
 private:
   MainWindow *createWindow() {
-    windows_.emplace_back(std::make_unique<MainWindow>());
+    windows_.emplace_back(std::unique_ptr<MainWindow>(new MainWindow()));
     windows_.back()->showMaximized();
     QApplication::processEvents();
     return windows_.back().get();

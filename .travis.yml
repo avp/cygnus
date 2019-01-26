@@ -10,7 +10,6 @@ addons:
       - cmake
       - qt5-default
       - ninja-build
-      - libstdc++6
 matrix:
   include:
     - name: "OSX Release (Clang)"
