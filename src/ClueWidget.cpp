@@ -1,6 +1,7 @@
 #include "ClueWidget.h"
 
 #include "Colors.h"
+#include "Settings.h"
 
 #include <QDebug>
 
@@ -9,7 +10,7 @@ namespace cygnus {
 ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {
   setMinimumWidth(200);
   QSettings settings;
-  pointSize_ = settings.value("clues/fontSize").toInt();
+  pointSize_ = settings.value(Settings::clueSize).toInt();
 }
 
 void ClueWidget::modifySize(int delta) {
@@ -21,7 +22,7 @@ void ClueWidget::modifySize(int delta) {
     item(i)->setFont(font);
   }
   QSettings settings;
-  settings.setValue("clues/fontSize", pointSize_);
+  settings.setValue(Settings::clueSize, pointSize_);
 }
 
 void ClueWidget::addClue(const QString &text) {
@@ -29,7 +30,7 @@ void ClueWidget::addClue(const QString &text) {
   if (pointSize_ == 0) {
     pointSize_ = item(count() - 1)->font().pointSize();
     QSettings settings;
-    settings.setValue("clues/fontSize", pointSize_);
+    settings.setValue(Settings::clueSize, pointSize_);
   } else {
     QFont font = item(count() - 1)->font();
     font.setPointSize(pointSize_);
