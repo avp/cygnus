@@ -352,6 +352,9 @@ void MainWindow::createActions() {
 
   aboutAct_ = new QAction(tr("&About"), this);
   connect(aboutAct_, &QAction::triggered, this, &MainWindow::about);
+
+  shortcutsAct_ = new QAction(tr("View &Shortcuts"), this);
+  connect(shortcutsAct_, &QAction::triggered, this, &MainWindow::shortcuts);
 }
 
 void MainWindow::loadFile() {
@@ -624,6 +627,11 @@ void MainWindow::about() {
 #endif
 }
 
+void MainWindow::shortcuts() {
+  QDesktopServices::openUrl(
+      QStringLiteral("https://github.com/avp/cygnus/wiki/Keyboard-Shortcuts"));
+}
+
 void MainWindow::createMenus() {
   fileMenu_ = menuBar()->addMenu(tr("&File"));
   fileMenu_->addAction(openAct_);
@@ -659,6 +667,7 @@ void MainWindow::createMenus() {
 
   helpMenu_ = menuBar()->addMenu(tr("&Help"));
   helpMenu_->addAction(aboutAct_);
+  helpMenu_->addAction(shortcutsAct_);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {

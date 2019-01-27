@@ -51,6 +51,7 @@ private slots:
   void insertMultiple();
 
   void about();
+  void shortcuts();
 
   void increaseSize();
   void decreaseSize();
@@ -112,6 +113,7 @@ private:
 
   QMenu *helpMenu_;
   QAction *aboutAct_;
+  QAction *shortcutsAct_;
 
   FilledLabel *titleLabel_;
   TimerWidget *timerWidget_;
