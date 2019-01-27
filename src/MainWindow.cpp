@@ -127,7 +127,6 @@ void MainWindow::reloadPuzzle() {
 
   editMenu_->setEnabled(true);
   viewMenu_->setEnabled(true);
-  puzzleMenu_->setEnabled(true);
 
   undoStack_.clear();
 
@@ -645,25 +644,23 @@ void MainWindow::createMenus() {
   undoAct_->setEnabled(false);
   editMenu_->addAction(redoAct_);
   redoAct_->setEnabled(false);
+  editMenu_->addSeparator();
+  revealMenu_ = editMenu_->addMenu(tr("&Reveal..."));
+  revealMenu_->addAction(revealCurrentAct_);
+  revealMenu_->addAction(revealClueAct_);
+  revealMenu_->addAction(revealAllAct_);
+  checkMenu_ = editMenu_->addMenu(tr("&Check..."));
+  checkMenu_->addAction(checkCurrentAct_);
+  checkMenu_->addAction(checkClueAct_);
+  checkMenu_->addAction(checkAllAct_);
+  editMenu_->addSeparator();
+  editMenu_->addAction(insertMultipleAct_);
   editMenu_->setEnabled(false);
 
   viewMenu_ = menuBar()->addMenu(tr("&View"));
   viewMenu_->addAction(increaseSizeAct_);
   viewMenu_->addAction(decreaseSizeAct_);
   viewMenu_->setEnabled(false);
-
-  puzzleMenu_ = menuBar()->addMenu(tr("&Puzzle"));
-  puzzleMenu_->setEnabled(false);
-  revealMenu_ = puzzleMenu_->addMenu(tr("&Reveal..."));
-  revealMenu_->addAction(revealCurrentAct_);
-  revealMenu_->addAction(revealClueAct_);
-  revealMenu_->addAction(revealAllAct_);
-  checkMenu_ = puzzleMenu_->addMenu(tr("&Check..."));
-  checkMenu_->addAction(checkCurrentAct_);
-  checkMenu_->addAction(checkClueAct_);
-  checkMenu_->addAction(checkAllAct_);
-  puzzleMenu_->addSeparator();
-  puzzleMenu_->addAction(insertMultipleAct_);
 
   helpMenu_ = menuBar()->addMenu(tr("&Help"));
   helpMenu_->addAction(aboutAct_);

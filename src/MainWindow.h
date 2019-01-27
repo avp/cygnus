@@ -95,12 +95,6 @@ private:
   QMenu *editMenu_;
   QAction *undoAct_;
   QAction *redoAct_;
-
-  QMenu *viewMenu_;
-  QAction *increaseSizeAct_;
-  QAction *decreaseSizeAct_;
-
-  QMenu *puzzleMenu_;
   QMenu *revealMenu_;
   QAction *revealCurrentAct_;
   QAction *revealClueAct_;
@@ -110,6 +104,10 @@ private:
   QAction *checkClueAct_;
   QAction *checkAllAct_;
   QAction *insertMultipleAct_;
+
+  QMenu *viewMenu_;
+  QAction *increaseSizeAct_;
+  QAction *decreaseSizeAct_;
 
   QMenu *helpMenu_;
   QAction *aboutAct_;
