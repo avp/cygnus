@@ -48,6 +48,8 @@ private slots:
   void checkClue();
   void checkAll();
 
+  void insertMultiple();
+
   void about();
 
   void increaseSize();
@@ -106,6 +108,7 @@ private:
   QAction *checkCurrentAct_;
   QAction *checkClueAct_;
   QAction *checkAllAct_;
+  QAction *insertMultipleAct_;
 
   QMenu *helpMenu_;
   QAction *aboutAct_;

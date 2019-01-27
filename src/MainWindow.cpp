@@ -345,6 +345,11 @@ void MainWindow::createActions() {
   checkAllAct_->setStatusTip(tr("Check the whole puzzle"));
   connect(checkAllAct_, &QAction::triggered, this, &MainWindow::checkAll);
 
+  insertMultipleAct_ = new QAction(tr("Insert multiple letters..."), this);
+  insertMultipleAct_->setShortcuts(QKeySequence::InsertLineSeparator);
+  connect(insertMultipleAct_, &QAction::triggered, this,
+          &MainWindow::insertMultiple);
+
   aboutAct_ = new QAction(tr("&About"), this);
   connect(aboutAct_, &QAction::triggered, this, &MainWindow::about);
 }
@@ -574,6 +579,17 @@ void MainWindow::checkAll() {
   }
 }
 
+void MainWindow::insertMultiple() {
+  if (puzzle_) {
+    QString rebusInput = QInputDialog::getText(
+        this, tr("Enter multiple letters:"), tr("Letters"));
+    if (!rebusInput.isEmpty()) {
+      setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
+      checkSuccess();
+    }
+  }
+}
+
 void MainWindow::about() {
   static QString title(QStringLiteral("About"));
   static QString text(QStringLiteral(
@@ -638,6 +654,8 @@ void MainWindow::createMenus() {
   checkMenu_->addAction(checkCurrentAct_);
   checkMenu_->addAction(checkClueAct_);
   checkMenu_->addAction(checkAllAct_);
+  puzzleMenu_->addSeparator();
+  puzzleMenu_->addAction(insertMultipleAct_);
 
   helpMenu_ = menuBar()->addMenu(tr("&Help"));
   helpMenu_->addAction(aboutAct_);
@@ -685,17 +703,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Delete:
     clearLetter(cursor_.row, cursor_.col);
     break;
-  case Qt::Key_Insert: {
-    if (puzzle_) {
-      QString rebusInput =
-          QInputDialog::getText(this, tr("Enter rebus input:"), tr("Letters"));
-      if (!rebusInput.isEmpty()) {
-        setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
-        checkSuccess();
-      }
-      break;
-    }
-  }
+  case Qt::Key_Insert:
+    insertMultiple();
+    break;
 
   case Qt::Key_Home:
     if (puzzle_) {
