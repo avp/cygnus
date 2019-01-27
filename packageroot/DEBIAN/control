@@ -1,0 +1,6 @@
+Package: cygnus
+Version: 0.0.1
+Architecture: all
+Maintainer: AVP <aakpat6@gmail.com>
+Depends: qt5-default
+Description: Experimental crossword puzzle software.

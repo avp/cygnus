@@ -12,3 +12,6 @@ Makefile
 object_script.*
 compile_commands.json
 *.exe
+
+packageroot/usr/local/bin/cygnus
+*.deb
