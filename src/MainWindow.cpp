@@ -754,6 +754,20 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
   }
 
+  auto entryMovement = [&]() {
+    if (cursor_.dir == Direction::ACROSS) {
+      if (cursor_.col + 1 < puzzle_->getWidth() &&
+          puzzle_->getGrid()[cursor_.row][cursor_.col + 1] != BLACK) {
+        keyRight();
+      }
+    } else {
+      if (cursor_.row + 1 < puzzle_->getHeight() &&
+          puzzle_->getGrid()[cursor_.row + 1][cursor_.col] != BLACK) {
+        keyDown();
+      }
+    }
+  };
+
   if (puzzle_) {
     if (Qt::Key_A <= event->key() && event->key() <= Qt::Key_Z) {
       if (event->modifiers() == Qt::NoModifier ||
@@ -765,18 +779,17 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
                                       ? letter.toLower()
                                       : letter.toUpper()));
         checkSuccess();
+        entryMovement();
+      }
+    }
 
-        if (cursor_.dir == Direction::ACROSS) {
-          if (cursor_.col + 1 < puzzle_->getWidth() &&
-              puzzle_->getGrid()[cursor_.row][cursor_.col + 1] != BLACK) {
-            keyRight();
-          }
-        } else {
-          if (cursor_.row + 1 < puzzle_->getHeight() &&
-              puzzle_->getGrid()[cursor_.row + 1][cursor_.col] != BLACK) {
-            keyDown();
-          }
-        }
+    if (Qt::Key_0 <= event->key() && event->key() <= Qt::Key_9) {
+      if (event->modifiers() == Qt::NoModifier ||
+          event->modifiers() == Qt::ShiftModifier) {
+        // TODO: Allow penciling numbers.
+        QChar letter = event->key();
+        setCell(cursor_.row, cursor_.col, QString("%1").arg(letter));
+        entryMovement();
       }
     }
   }

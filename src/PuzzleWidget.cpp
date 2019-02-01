@@ -99,14 +99,14 @@ void CellWidget::setCell(const QString &text) {
   auto pal = palette();
   if (text == "-" || text.isEmpty()) {
     displayText_ = " ";
-  } else if (text.at(0).isUpper()) {
-    displayText_ = text;
-    pal.setColor(QPalette::Foreground, Qt::black);
-    isPencil_ = false;
-  } else {
+  } else if (text.at(0).isLower()) {
     displayText_ = QString("%1").arg(text.toUpper());
     pal.setColor(QPalette::Foreground, Colors::PENCIL);
     isPencil_ = true;
+  } else {
+    displayText_ = text;
+    pal.setColor(QPalette::Foreground, Qt::black);
+    isPencil_ = false;
   }
 
   if (markup_ & Puzzle::IncorrectTag) {
