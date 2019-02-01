@@ -128,14 +128,18 @@ public:
     hbox->addWidget(grid_, 0, Qt::AlignTop);
   }
 
+  /// Resize the inner grid to accomodate square cells.
   void resizeEvent(QResizeEvent *event) override {
     int h = event->size().height();
     int w = event->size().width();
     int rows = puzzle_->cells_.size();
     int cols = puzzle_->cells_[0].size();
     int minSize = CellWidget::kMinimumSize;
+    // Find the limiting dimension but clamp it to the minSize.
     int cellSize = std::max(minSize, std::min(h / rows, w / cols));
-    grid_->setFixedSize(rows * cellSize, cols * cellSize);
+    // (width, height)
+    QSize gridSize{cols * cellSize, rows * cellSize};
+    grid_->setFixedSize(gridSize);
     for (auto &row : puzzle_->cells_) {
       for (auto &cell : row) {
         cell->setFixedSize(cellSize, cellSize);
@@ -146,8 +150,8 @@ public:
   QSize minimumSizeHint() const override {
     int rows = puzzle_->cells_.size();
     int cols = puzzle_->cells_[0].size();
-    int cellSize = CellWidget::kMinimumSize;
-    return QSize(rows * 35, cols * 35);
+    int cellSize = CellWidget::kMinimumSize + 2;
+    return QSize(rows * cellSize, cols * cellSize);
   }
 
 private:
