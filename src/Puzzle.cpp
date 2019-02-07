@@ -334,11 +334,10 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
     data.push_back(dataRow);
   }
 
+  QString note{readString(it)};
+
   qDebug() << "Text end offset:" << (it - puzFile.begin());
   const auto textEnd = it;
-
-  // Null byte between clues and extensions.
-  ++it;
 
   Grid<Markup> markup{};
   markup.resize(height);
@@ -469,21 +468,23 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
 
   std::vector<Clue> clues[2]{across, down};
   QByteArray version = puzFile.mid(0x18, 4);
-  return std::unique_ptr<Puzzle>(new Puzzle(
-      version, height, width, puzzleType, solutionState, clues, solution, grid,
-      data, puzFile.mid(textStart - puzFile.begin(), textEnd - textStart),
-      markup, timer, rebusFill));
+  return std::unique_ptr<Puzzle>(
+      new Puzzle(version, height, width, puzzleType, solutionState, clues,
+                 std::move(note), solution, grid, data,
+                 puzFile.mid(textStart - puzFile.begin(), textEnd - textStart),
+                 markup, timer, rebusFill));
 }
 
 Puzzle::Puzzle(QByteArray version, uint8_t height, uint8_t width,
                PuzzleType puzzleType, SolutionState solutionState,
-               std::vector<Clue> clues[2], Grid<char> solution, Grid<char> grid,
-               Grid<CellData> data, QByteArray text, Grid<Markup> markup,
-               Timer timer, Grid<QString> rebusFill)
+               std::vector<Clue> clues[2], QString note, Grid<char> solution,
+               Grid<char> grid, Grid<CellData> data, QByteArray text,
+               Grid<Markup> markup, Timer timer, Grid<QString> rebusFill)
     : version_(version), height_(height), width_(width),
       puzzleType_(puzzleType), solutionState_(solutionState),
-      clues_{clues[0], clues[1]}, solution_(solution), grid_(grid), data_(data),
-      text_(text), markup_(markup), timer_(timer), rebusFill_(rebusFill) {
+      clues_{clues[0], clues[1]}, note_(note), solution_(solution), grid_(grid),
+      data_(data), text_(text), markup_(markup), timer_(timer),
+      rebusFill_(rebusFill) {
   QByteArray::const_iterator it = text.begin();
   title_ = readString(it);
   author_ = readString(it);

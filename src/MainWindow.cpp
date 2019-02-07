@@ -58,9 +58,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                "color: black;"
                                "}");
 
+  noteButton_ = new QPushButton{"Note"};
   titleLabel_ = new FilledLabel{};
   timerWidget_ = new TimerWidget{};
 
+  connect(noteButton_, &QPushButton::clicked, this, &MainWindow::showNote);
+
+  infoLayout->addWidget(noteButton_);
   infoLayout->addWidget(titleLabel_, 3);
   infoLayout->addWidget(timerWidget_, 1);
 
@@ -130,6 +134,11 @@ void MainWindow::reloadPuzzle() {
 
   undoStack_.clear();
 
+  if (puzzle_->getNote().isEmpty()) {
+    noteButton_->hide();
+  } else {
+    noteButton_->show();
+  }
   titleLabel_->setText(QString("<b>%1</b> &nbsp;&nbsp; %2")
                            .arg(puzzle_->getTitle())
                            .arg(puzzle_->getAuthor()));
@@ -590,6 +599,10 @@ void MainWindow::insertMultiple() {
       checkSuccess();
     }
   }
+}
+
+void MainWindow::showNote() {
+  QMessageBox::information(this, "Puzzle Note", puzzle_->getNote());
 }
 
 void MainWindow::about() {

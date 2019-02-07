@@ -50,6 +50,7 @@ private slots:
 
   void insertMultiple();
 
+  void showNote();
   void about();
   void shortcuts();
 
@@ -113,6 +114,7 @@ private:
   QAction *aboutAct_;
   QAction *shortcutsAct_;
 
+  QPushButton *noteButton_;
   FilledLabel *titleLabel_;
   TimerWidget *timerWidget_;
 
