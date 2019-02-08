@@ -58,7 +58,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                "color: black;"
                                "}");
 
-  noteButton_ = new QPushButton{"Note"};
+  noteButton_ = new QPushButton{};
+  noteButton_->setIcon(
+      QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
+  noteButton_->setToolTip("Puzzle note");
+
   titleLabel_ = new FilledLabel{};
   timerWidget_ = new TimerWidget{};
 
