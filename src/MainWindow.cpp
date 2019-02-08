@@ -596,8 +596,14 @@ void MainWindow::checkAll() {
 
 void MainWindow::insertMultiple() {
   if (puzzle_) {
+    bool ok;
+    auto windowHint = Qt::WindowSystemMenuHint | Qt::WindowTitleHint |
+                      Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint;
+    auto inputHint =
+        Qt::ImhPreferUppercase | Qt::ImhPreferLatin | Qt::ImhNoPredictiveText;
     QString rebusInput = QInputDialog::getText(
-        this, tr("Enter multiple letters:"), tr("Letters"));
+        this, tr("Enter multiple letters:"), tr("Letters"), QLineEdit::Normal,
+        "", &ok, windowHint, inputHint);
     rebusInput = rebusInput.trimmed();
     if (!rebusInput.isEmpty()) {
       setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
