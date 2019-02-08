@@ -598,6 +598,7 @@ void MainWindow::insertMultiple() {
   if (puzzle_) {
     QString rebusInput = QInputDialog::getText(
         this, tr("Enter multiple letters:"), tr("Letters"));
+    rebusInput = rebusInput.trimmed();
     if (!rebusInput.isEmpty()) {
       setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
       checkSuccess();
