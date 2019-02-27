@@ -405,6 +405,8 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
       qDebug() << "Read extension:    Timer";
       qDebug() << "Time:" << timer.current << "s";
       qDebug() << "Running:" << timer.running;
+      // Null terminator.
+      ++it;
     } else if (::strncmp(it, "RUSR", 4) == 0) {
       // User rebus fill
       qDebug() << "Reading extension: Rebus Fill";
@@ -421,6 +423,8 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
           rebusFill[r][c] = readString(it);
         }
       }
+      // Null terminator.
+      ++it;
       qDebug() << "Read extension:    Rebus Fill";
     } else {
       qDebug() << "Unable to read extension";
@@ -571,7 +575,6 @@ QByteArray Puzzle::serialize() const {
   writeGrid(result.begin() + 0x34 + (width_ * height_), grid_);
 
   result += text_;
-  result += '\0';
 
   auto serializeExtension = [](const QByteArray &extTag,
                                const QByteArray &data) {
