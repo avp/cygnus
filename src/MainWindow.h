@@ -59,8 +59,9 @@ private slots:
 
   /// Set the cursor to (row, col) and point the active squares in the direction
   /// of \param dir.
-  /// Does nothing if the row and column don't represent a valid clue in the
-  /// given dir.
+  /// Flips the direction if the row and column don't represent a valid clue in
+  /// the given dir, given that every white square must represent a valid clue
+  /// in one of the two directions.
   void setCursor(uint8_t row, uint8_t col, Direction dir);
 
   void puzzleClicked(uint8_t row, uint8_t col);

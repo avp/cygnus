@@ -187,7 +187,10 @@ void MainWindow::reloadPuzzle() {
 void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   const auto &grid = puzzle_->getGrid();
 
+  // Previous square in direction dir.
   char prev = BLACK;
+
+  // Next square in direction dir.
   char next = BLACK;
 
   if (dir == Direction::ACROSS) {
@@ -200,7 +203,7 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
 
   if (prev == BLACK && next == BLACK) {
     // Not a valid cursor position, make no changes.
-    return;
+    dir = flip(dir);
   }
 
   // Clear current selection.
