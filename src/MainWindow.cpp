@@ -187,6 +187,22 @@ void MainWindow::reloadPuzzle() {
 void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   const auto &grid = puzzle_->getGrid();
 
+  char prev = BLACK;
+  char next = BLACK;
+
+  if (dir == Direction::ACROSS) {
+    prev = col > 0 ? grid[row][col - 1] : BLACK;
+    next = col < puzzle_->getWidth() - 1 ? grid[row][col + 1] : BLACK;
+  } else {
+    prev = row > 0 ? grid[row - 1][col] : BLACK;
+    next = row < puzzle_->getHeight() - 1 ? grid[row + 1][col] : BLACK;
+  }
+
+  if (prev == BLACK && next == BLACK) {
+    // Not a valid cursor position, make no changes.
+    return;
+  }
+
   // Clear current selection.
   if (cursor_.dir == Direction::ACROSS) {
     for (uint8_t i = 0; cursor_.col + i < puzzle_->getWidth() &&

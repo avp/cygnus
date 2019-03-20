@@ -307,18 +307,22 @@ std::unique_ptr<Puzzle> Puzzle::loadFromFile(const QByteArray &puzFile) {
         dataRow.emplace_back();
         continue;
       }
-      bool a = c == 0 || grid[r][c - 1] == BLACK;
-      bool d = r == 0 || grid[r - 1][c] == BLACK;
-      if (a || d) {
+      // For a clue to begin, the preceding square must be either a boundary or
+      // black, and the next square must not be.
+      bool acrossStart = (c == 0 || grid[r][c - 1] == BLACK) &&
+                         (c < width - 1 && grid[r][c + 1] != BLACK);
+      bool downStart = (r == 0 || grid[r - 1][c] == BLACK) &&
+                       (r < height - 1 && grid[r + 1][c] != BLACK);
+      if (acrossStart || downStart) {
         CellData data{};
-        if (a) {
+        if (acrossStart) {
           Clue clue{readString(it), r, c, num, Direction::ACROSS};
           across.emplace_back(std::move(clue));
           data.acrossNum = num;
           data.acrossStart = true;
           data.acrossIdx = acrossIdx++;
         }
-        if (d) {
+        if (downStart) {
           Clue clue{readString(it), r, c, num, Direction::DOWN};
           down.push_back(std::move(clue));
           data.downNum = num;

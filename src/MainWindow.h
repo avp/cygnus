@@ -57,7 +57,12 @@ private slots:
   void increaseSize();
   void decreaseSize();
 
+  /// Set the cursor to (row, col) and point the active squares in the direction
+  /// of \param dir.
+  /// Does nothing if the row and column don't represent a valid clue in the
+  /// given dir.
   void setCursor(uint8_t row, uint8_t col, Direction dir);
+
   void puzzleClicked(uint8_t row, uint8_t col);
   void puzzleRightClicked();
 
