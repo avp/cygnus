@@ -180,6 +180,8 @@ void MainWindow::reloadPuzzle() {
           &MainWindow::puzzleClicked);
   connect(puzzleWidget_, &PuzzleWidget::rightClicked, this,
           &MainWindow::puzzleRightClicked);
+
+  puzzleWidget_->setFocus();
 }
 
 void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
