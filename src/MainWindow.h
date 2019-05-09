@@ -159,6 +159,10 @@ private:
   void checkSuccess();
 
   void setTimerStatus(bool running);
+
+  /// Prevent tab key from messing with focus in the main window.
+  /// It should simply move through crossword entries.
+  bool focusNextPrevChild(bool next) override { return false; }
 };
 
 } // namespace cygnus
