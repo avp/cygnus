@@ -127,9 +127,10 @@ private:
   ClueWidget *acrossWidget_;
   ClueWidget *downWidget_;
 
-  QFrame *puzzleContainer_;
+  QSplitter *puzzleContainer_;
   QVBoxLayout *puzzleContainerLayout_;
-  QLabel *curClueLabel_;
+  QScrollArea *curClueScroll_;
+  FilledLabel *curClueLabel_;
   PuzzleWidget *puzzleWidget_{nullptr};
 
   void createActions();
