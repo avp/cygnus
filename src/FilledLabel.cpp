@@ -13,8 +13,11 @@ void FilledLabel::resizeText() {
   qreal scaleH = (qreal)cRect.height() / (qreal)r.height();
 
   qreal scale = std::min(scaleW, scaleH);
-  font.setPointSize(std::max(1.0, font.pointSizeF() * scale));
-  setFont(font);
+  auto newSize = std::max(1.0, font.pointSizeF() * scale) * 0.9;
+  if (newSize > 0) {
+    font.setPointSizeF(newSize);
+    setFont(font);
+  }
 }
 
 } // namespace cygnus

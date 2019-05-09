@@ -35,28 +35,30 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   QWidget *downContainer = res.first;
   downWidget_ = res.second;
 
-  puzzleContainer_ = new QFrame{};
+  puzzleContainer_ = new QSplitter{Qt::Vertical};
   puzzleContainer_->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
   puzzleContainerLayout_ = new QVBoxLayout{};
+  puzzleContainer_->setChildrenCollapsible(false);
 
   auto puzzleContainerSize = puzzleContainer_->sizePolicy();
   puzzleContainerSize.setHorizontalStretch(2);
   puzzleContainerSize.setVerticalPolicy(QSizePolicy::Expanding);
+  puzzleContainerSize.setHorizontalPolicy(QSizePolicy::MinimumExpanding);
   puzzleContainer_->setSizePolicy(puzzleContainerSize);
 
-  curClueLabel_ = new QLabel{};
-  curClueLabel_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-  puzzleContainerLayout_->addWidget(curClueLabel_);
-  puzzleContainerLayout_->addStretch();
-  auto clueFont = curClueLabel_->font();
-  clueFont.setPointSize(clueFont.pointSize() * 2);
-  curClueLabel_->setFont(clueFont);
+  curClueLabel_ = new FilledLabel{};
+  curClueLabel_->setWordWrap(true);
+  curClueLabel_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  curClueLabel_->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+  curClueLabel_->setMinimumHeight(30);
+  curClueLabel_->setMaximumHeight(100);
   curClueLabel_->setStyleSheet("QLabel {"
                                "background: white;"
-                               "padding: 2px;"
                                "border: 1px solid black;"
                                "color: black;"
                                "}");
+
+  puzzleContainer_->addWidget(curClueLabel_);
 
   noteButton_ = new QPushButton{};
   noteButton_->setIcon(
@@ -163,8 +165,8 @@ void MainWindow::reloadPuzzle() {
     delete puzzleWidget_;
   }
   puzzleWidget_ = new PuzzleWidget{puzzle_, puzzleContainer_};
-  puzzleContainerLayout_->insertWidget(1, puzzleWidget_, 100);
-  puzzleContainer_->setLayout(puzzleContainerLayout_);
+  puzzleContainer_->insertWidget(1, puzzleWidget_);
+  puzzleContainer_->setStretchFactor(1, 0);
 
   // Set cursor_ to first non-blank square.
   const auto &across = puzzle_->getClues(Direction::ACROSS);
