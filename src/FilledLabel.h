@@ -13,6 +13,9 @@ public:
 
 public slots:
   void setText(const QString &text) {
+    if (text == this->text()) {
+      return;
+    }
     QLabel::setText(text);
     resizeText();
   }
