@@ -91,7 +91,7 @@ void CellWidget::deselect() {
   setPalette(pal);
 }
 
-void CellWidget::setCell(const QString &text) {
+void CellWidget::setCell(const QString &text, bool pencil) {
   // qDebug() << "Setting cell:" << text;
   if (isBlack_)
     return;
@@ -99,8 +99,8 @@ void CellWidget::setCell(const QString &text) {
   auto pal = palette();
   if (text == "-" || text.isEmpty()) {
     displayText_ = " ";
-  } else if (text.at(0).isLower()) {
-    displayText_ = QString("%1").arg(text.toUpper());
+  } else if (pencil) {
+    displayText_ = QString("%1").arg(text);
     pal.setColor(QPalette::Foreground, Colors::PENCIL);
     isPencil_ = true;
   } else {
@@ -122,7 +122,7 @@ void CellWidget::setCell(const QString &text) {
 void CellWidget::setMarkup(Puzzle::Markup markup) {
   markup_ = markup;
   if (!entryLabel_->text().isEmpty()) {
-    setCell(isPencil_ ? displayText_.toLower() : displayText_.toUpper());
+    setCell(displayText_, isPencil_);
   }
 }
 
@@ -203,9 +203,10 @@ PuzzleWidget::PuzzleWidget(const std::unique_ptr<Puzzle> &puzzle,
       auto cell = new CellWidget(grid[r][c] == BLACK, r, c, cellData[r][c],
                                  markup[r][c]);
       if (!rebusFill[r][c].isEmpty()) {
-        cell->setCell(rebusFill[r][c]);
+        cell->setCell(rebusFill[r][c], QChar(grid[r][c]).isLower());
       } else {
-        cell->setCell(QString("%1").arg(grid[r][c]));
+        cell->setCell(QString("%1").arg(grid[r][c]).toUpper(),
+                      QChar(grid[r][c]).isLower());
       }
       cell->setContentsMargins(0, 0, 0, 0);
       cellRow.push_back(cell);
@@ -236,8 +237,9 @@ void PuzzleWidget::deselectPosition(uint8_t row, uint8_t col) {
   cells_[row][col]->deselect();
 }
 
-void PuzzleWidget::setCell(uint8_t row, uint8_t col, const QString &text) {
-  cells_[row][col]->setCell(text);
+void PuzzleWidget::setCell(uint8_t row, uint8_t col, const QString &text,
+                           bool pencil) {
+  cells_[row][col]->setCell(text, pencil);
 }
 
 void PuzzleWidget::setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup) {

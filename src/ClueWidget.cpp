@@ -11,6 +11,9 @@ ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {
   setMinimumWidth(200);
   QSettings settings;
   pointSize_ = settings.value(Settings::clueSize).toInt();
+  setTextElideMode(Qt::ElideNone);
+  setResizeMode(QListView::Adjust);
+  setDragEnabled(false);
 }
 
 void ClueWidget::modifySize(int delta) {
@@ -23,6 +26,7 @@ void ClueWidget::modifySize(int delta) {
   }
   QSettings settings;
   settings.setValue(Settings::clueSize, pointSize_);
+  update();
 }
 
 void ClueWidget::addClue(const QString &text) {
@@ -61,13 +65,15 @@ void ClueWidget::mouseReleaseEvent(QMouseEvent *event) {
 
 void ClueWidget::setPrimary() {
   setStyleSheet(
-      QString("QListView::item:selected { background: %1; color: black }")
+      QString("QListView::item { border: 0px; padding: 0;}"
+              "QListView::item:selected { background: %1; color: black }")
           .arg(Colors::colorToString(Colors::PRIMARY_HIGHLIGHT)));
 }
 
 void ClueWidget::setSecondary() {
   setStyleSheet(
-      QString("QListView::item:selected { background: %1; color: black }")
+      QString("QListView::item { border: 0px; padding: 0;}"
+              "QListView::item:selected { background: %1; color: black }")
           .arg(Colors::colorToString(Colors::SECONDARY_HIGHLIGHT)));
 }
 

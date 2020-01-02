@@ -49,7 +49,7 @@ public slots:
 
   void deselect();
 
-  void setCell(const QString &text);
+  void setCell(const QString &text, bool pencil);
   void setMarkup(Puzzle::Markup markup);
 
 signals:
@@ -94,7 +94,7 @@ public slots:
     return rightClicked();
   }
 
-  void setCell(uint8_t row, uint8_t col, const QString &text);
+  void setCell(uint8_t row, uint8_t col, const QString &text, bool pencil);
   void setMarkup(uint8_t row, uint8_t col, Puzzle::Markup markup);
 
 signals:

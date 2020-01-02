@@ -455,7 +455,7 @@ void MainWindow::reveal(uint8_t row, uint8_t col, bool check) {
   }
   char solution = puzzle_->getSolution()[row][col];
   if (current == EMPTY || current != solution) {
-    setCell(row, col, QString("%1").arg(solution));
+    setCell(row, col, QString("%1").arg(solution), false);
     puzzle_->getMarkup()[row][col] |= Puzzle::RevealedTag;
     puzzleWidget_->setMarkup(row, col, puzzle_->getMarkup()[row][col]);
   }
@@ -516,12 +516,13 @@ void MainWindow::undo() {
       UndoEntry{row, col, puzzle_->getMarkup()[row][col],
                 puzzle_->getRebusFill()[row][col].isEmpty()
                     ? QString(QChar(puzzle_->getGrid()[row][col]))
-                    : puzzle_->getRebusFill()[row][col]});
+                    : puzzle_->getRebusFill()[row][col],
+                QChar(puzzle_->getGrid()[row][col]).isLower()});
 
   setWindowModified(true);
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
-  puzzleWidget_->setCell(row, col, entry.text);
+  puzzleWidget_->setCell(row, col, entry.text, entry.pencil);
   setCursor(row, col, cursor_.dir);
 
   puzzle_->getMarkup()[row][col] = entry.markup;
@@ -545,12 +546,13 @@ void MainWindow::redo() {
       UndoEntry{row, col, puzzle_->getMarkup()[row][col],
                 puzzle_->getRebusFill()[row][col].isEmpty()
                     ? QString(QChar(puzzle_->getGrid()[row][col]))
-                    : puzzle_->getRebusFill()[row][col]});
+                    : puzzle_->getRebusFill()[row][col],
+                QChar(puzzle_->getGrid()[row][col]).isLower()});
 
   setWindowModified(true);
   puzzle_->getGrid()[row][col] = entry.text.at(0).toLatin1();
   puzzle_->getRebusFill()[row][col] = entry.text;
-  puzzleWidget_->setCell(row, col, entry.text);
+  puzzleWidget_->setCell(row, col, entry.text, entry.pencil);
 
   puzzle_->getMarkup()[row][col] = entry.markup;
   puzzleWidget_->setMarkup(row, col, entry.markup);
@@ -629,7 +631,7 @@ void MainWindow::insertMultiple() {
         "", &ok, windowHint, inputHint);
     rebusInput = rebusInput.trimmed();
     if (!rebusInput.isEmpty()) {
-      setCell(cursor_.row, cursor_.col, rebusInput.toUpper());
+      setCell(cursor_.row, cursor_.col, rebusInput.toUpper(), false);
       checkSuccess();
     }
   }
@@ -821,10 +823,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
           event->modifiers() == Qt::ShiftModifier) {
         // Convert to lowercase if shift is being held.
         QChar letter = event->key();
-        setCell(cursor_.row, cursor_.col,
-                QString("%1").arg(event->modifiers() == Qt::ShiftModifier
-                                      ? letter.toLower()
-                                      : letter.toUpper()));
+        setCell(cursor_.row, cursor_.col, QString("%1").arg(letter.toUpper()),
+                event->modifiers() == Qt::ShiftModifier);
         checkSuccess();
         entryMovement();
       }
@@ -834,8 +834,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
       if (event->modifiers() == Qt::NoModifier ||
           event->modifiers() == Qt::ShiftModifier) {
         // TODO: Allow penciling numbers.
-        QChar letter = event->key();
-        setCell(cursor_.row, cursor_.col, QString("%1").arg(letter));
+        QChar number = event->key();
+        setCell(cursor_.row, cursor_.col, QString("%1").arg(number),
+                event->modifiers() == Qt::ShiftModifier);
+        checkSuccess();
         entryMovement();
       }
     }
@@ -937,7 +939,7 @@ void MainWindow::keyTab(bool reverse) {
   setCursor(newPos.first, newPos.second, dir);
 }
 
-void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
+void MainWindow::setCell(uint8_t row, uint8_t col, QString text, bool pencil) {
   if (puzzle_->getMarkup()[row][col] & Puzzle::RevealedTag) {
     // If the letter was revealed, don't allow editing it.
     return;
@@ -950,10 +952,19 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
                     : puzzle_->getRebusFill()[row][col]});
   redoStack_.clear();
 
+  const char digitLookup[] = "ZOTTFFSSEN";
+  QChar gridValue = text.at(0);
+  if (gridValue.isDigit()) {
+    gridValue = QChar(digitLookup[gridValue.digitValue()]);
+  }
+  if (pencil) {
+    gridValue = gridValue.toLower();
+  }
+
   setWindowModified(true);
-  puzzle_->getGrid()[row][col] = text.at(0).toLatin1();
+  puzzle_->getGrid()[row][col] = gridValue.toLatin1();
   puzzle_->getRebusFill()[row][col] = text;
-  puzzleWidget_->setCell(row, col, text);
+  puzzleWidget_->setCell(row, col, text, pencil);
   Puzzle::Markup &markup = puzzle_->getMarkup()[row][col];
   if (markup & Puzzle::IncorrectTag) {
     markup &= ~Puzzle::IncorrectTag;
@@ -966,7 +977,7 @@ void MainWindow::setCell(uint8_t row, uint8_t col, QString text) {
 }
 
 void MainWindow::clearLetter(uint8_t row, uint8_t col) {
-  setCell(row, col, QString(EMPTY));
+  setCell(row, col, QString(EMPTY), false);
 }
 
 void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
@@ -981,9 +992,9 @@ void MainWindow::puzzleClicked(uint8_t row, uint8_t col) {
 }
 
 void MainWindow::puzzleRightClicked() {
-  setCursor(cursor_.row, cursor_.col, cursor_.dir == Direction::ACROSS
-                                          ? Direction::DOWN
-                                          : Direction::ACROSS);
+  setCursor(cursor_.row, cursor_.col,
+            cursor_.dir == Direction::ACROSS ? Direction::DOWN
+                                             : Direction::ACROSS);
 }
 
 void MainWindow::acrossClueClicked(const QListWidgetItem *item) {

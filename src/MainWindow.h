@@ -88,6 +88,7 @@ private:
     uint32_t col;
     Puzzle::Markup markup;
     QString text;
+    bool pencil;
   };
   std::vector<UndoEntry> undoStack_{};
   std::vector<UndoEntry> redoStack_{};
@@ -145,7 +146,7 @@ private:
   void keyRight(bool shift = false);
   void keyTab(bool reverse);
 
-  void setCell(uint8_t row, uint8_t col, QString letter);
+  void setCell(uint8_t row, uint8_t col, QString text, bool pencil);
   void clearLetter(uint8_t row, uint8_t col);
 
   void reveal(uint8_t row, uint8_t col, bool check = true);
