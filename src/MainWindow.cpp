@@ -394,6 +394,7 @@ void MainWindow::createActions() {
   connect(decreaseSizeAct_, &QAction::triggered, this,
           &MainWindow::decreaseSize);
 
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
   toggleDarkModeAct_ = new QAction(tr("&Dark Mode"), this);
   toggleDarkModeAct_->setCheckable(true);
   QSettings settings;
@@ -402,6 +403,7 @@ void MainWindow::createActions() {
   connect(toggleDarkModeAct_, &QAction::triggered, this,
           &MainWindow::toggleDarkMode);
   toggleDarkMode();
+#endif
 
   revealCurrentAct_ = new QAction(tr("Current Letter"), this);
   revealCurrentAct_->setStatusTip(tr("Reveal the current letter"));
