@@ -18,14 +18,20 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   size.setHeightForWidth(true);
   setSizePolicy(size);
 
-  auto pal = palette();
-  pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
+  if (isBlack_) {
+    auto pal = palette();
+    pal.setColor(QPalette::Base, Qt::black);
+    pal.setColor(QPalette::AlternateBase, Qt::black);
+    pal.setColor(QPalette::Highlight, Qt::black);
+    setPalette(pal);
+  }
+  setBackgroundRole(QPalette::Base);
   setAutoFillBackground(true);
-  setPalette(pal);
 
   numLabel_ = new QLabel{this};
   numLabel_->move(0, 0);
-  numLabel_->setStyleSheet("QLabel { padding: 2px 0 0 1px; color: black; }");
+  numLabel_->setContentsMargins(2, 0, 0, 2);
+  numLabel_->setForegroundRole(QPalette::Text);
   numLabel_->show();
 
   if (cellData.acrossStart) {
@@ -41,7 +47,6 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   entryLabel_->setContentsMargins(0, 0, 0, 0);
   entryLabel_->setMargin(0);
   entryLabel_->setAlignment(Qt::AlignCenter);
-  entryLabel_->setStyleSheet("QLabel { padding: 0; }");
 
   layout->addWidget(entryLabel_, 1, 1, 4, 4);
   layout->setContentsMargins(7, 5, 1, 1);
@@ -71,52 +76,39 @@ void CellWidget::resizeEvent(QResizeEvent *event) {
   numLabel_->move(0, 0);
 }
 
-void CellWidget::selectCursor() {
-  auto pal = palette();
-  pal.setColor(QPalette::Background,
-               isBlack_ ? Qt::black : Colors::PRIMARY_HIGHLIGHT);
-  setPalette(pal);
-}
+void CellWidget::selectCursor() { setBackgroundRole(QPalette::Highlight); }
 
-void CellWidget::select() {
-  auto pal = palette();
-  pal.setColor(QPalette::Background,
-               isBlack_ ? Qt::black : Colors::SECONDARY_HIGHLIGHT);
-  setPalette(pal);
-}
+void CellWidget::select() { setBackgroundRole(QPalette::AlternateBase); }
 
-void CellWidget::deselect() {
-  auto pal = palette();
-  pal.setColor(QPalette::Background, isBlack_ ? Qt::black : Qt::white);
-  setPalette(pal);
-}
+void CellWidget::deselect() { setBackgroundRole(QPalette::Base); }
 
 void CellWidget::setCell(const QString &text, bool pencil) {
   // qDebug() << "Setting cell:" << text;
   if (isBlack_)
     return;
 
-  auto pal = palette();
   if (text == "-" || text.isEmpty()) {
     displayText_ = " ";
   } else if (pencil) {
     displayText_ = QString("%1").arg(text);
-    pal.setColor(QPalette::Foreground, Colors::PENCIL);
+    qDebug() << palette().buttonText();
+    entryLabel_->setForegroundRole(QPalette::ButtonText);
     isPencil_ = true;
   } else {
     displayText_ = text;
-    pal.setColor(QPalette::Foreground, Qt::black);
+    entryLabel_->setForegroundRole(QPalette::Text);
     isPencil_ = false;
   }
 
   if (markup_ & Puzzle::IncorrectTag) {
-    pal.setColor(QPalette::Foreground, Qt::red);
+    entryLabel_->setForegroundRole(QPalette::BrightText);
     isPencil_ = false;
   }
 
   entryLabel_->setText(displayText_.left(3) +
                        (displayText_.size() > 3 ? "…" : ""));
-  entryLabel_->setPalette(pal);
+  qDebug() << foregroundRole();
+  qDebug() << palette().buttonText() << palette().highlight();
 }
 
 void CellWidget::setMarkup(Puzzle::Markup markup) {
@@ -156,9 +148,7 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
   }
 
   if (markup_ & Puzzle::IncorrectTag) {
-    auto pal = palette();
-    pal.setColor(QPalette::Foreground, Qt::red);
-    setPalette(pal);
+    entryLabel_->setForegroundRole(QPalette::BrightText);
   }
 
   if (markup_ & Puzzle::RevealedTag) {
@@ -170,7 +160,7 @@ void CellWidget::paintEvent(QPaintEvent *pe) {
     center.setY(rect().bottom() - 8);
     painter.drawEllipse(center, radius, radius);
   } else if (markup_ & Puzzle::PreviousIncorrectTag) {
-    painter.setPen({Qt::black, 5});
+    painter.setPen({Qt::blue, 5});
     painter.setRenderHint(QPainter::Antialiasing);
     auto radius = 2;
     auto center = QPoint{};

@@ -56,6 +56,7 @@ private slots:
 
   void increaseSize();
   void decreaseSize();
+  void toggleDarkMode();
 
   /// Set the cursor to (row, col) and point the active squares in the direction
   /// of \param dir.
@@ -116,6 +117,7 @@ private:
   QMenu *viewMenu_;
   QAction *increaseSizeAct_;
   QAction *decreaseSizeAct_;
+  QAction *toggleDarkModeAct_;
 
   QMenu *helpMenu_;
   QAction *aboutAct_;
@@ -133,6 +135,9 @@ private:
   QScrollArea *curClueScroll_;
   FilledLabel *curClueLabel_;
   PuzzleWidget *puzzleWidget_{nullptr};
+
+  QPalette lightPalette_;
+  QPalette darkPalette_;
 
   void createActions();
   void createMenus();

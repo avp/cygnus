@@ -11,8 +11,8 @@ void FilledLabel::resizeText() {
 
   const auto &cRect = contentsRect();
 
-  qreal scaleW = (qreal)cRect.width() / (qreal)r.width();
-  qreal scaleH = (qreal)cRect.height() / (qreal)r.height();
+  qreal scaleW = ((qreal)cRect.width() - 2) / (qreal)r.width();
+  qreal scaleH = ((qreal)cRect.height() - 2) / (qreal)r.height();
 
   qreal scale = std::min(scaleW, scaleH);
   auto newSize = std::round(std::max(1.0, font.pointSizeF() * scale) * 0.9);

@@ -14,6 +14,13 @@ ClueWidget::ClueWidget(QWidget *parent) : QListWidget(parent) {
   setTextElideMode(Qt::ElideNone);
   setResizeMode(QListView::Adjust);
   setDragEnabled(false);
+
+  //  setStyleSheet(
+  //      QString("QListView::item { border: 0px; padding: 0; background: "
+  //              "palette(base); "
+  //              "color: palette(text)}"
+  //              "QListView::item:selected { background: palette(highlight); "
+  //              "color: black }"));
 }
 
 void ClueWidget::modifySize(int delta) {
@@ -64,17 +71,40 @@ void ClueWidget::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void ClueWidget::setPrimary() {
-  setStyleSheet(
-      QString("QListView::item { border: 0px; padding: 0;}"
-              "QListView::item:selected { background: %1; color: black }")
-          .arg(Colors::colorToString(Colors::PRIMARY_HIGHLIGHT)));
+  auto pal = palette();
+  pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
+  setPalette(pal);
+  //  setStyleSheet(
+  //      QString("QListView::item { border: 0px; padding: 0; background: "
+  //              "palette(base); "
+  //              "color: palette(text)}"
+  //              "QListView::item:selected { background: palette(highlight); "
+  //              "color: black }"));
+  //  qDebug() << palette().color(QPalette::Background);
+  //  setStyleSheet(
+  //      QString("QListView::item { border: 0px; padding: 0; background: "
+  //              "palette(base); "
+  //              "color: palette(text)}"
+  //              "QListView::item:selected { background: %3; color: black }")
+  //          .arg(Colors::colorToString(Colors::PRIMARY_HIGHLIGHT)));
 }
 
 void ClueWidget::setSecondary() {
-  setStyleSheet(
-      QString("QListView::item { border: 0px; padding: 0;}"
-              "QListView::item:selected { background: %1; color: black }")
-          .arg(Colors::colorToString(Colors::SECONDARY_HIGHLIGHT)));
+  auto pal = palette();
+  pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
+  setPalette(pal);
+  //  setStyleSheet(
+  //      QString("QListView::item { border: 0px; padding: 0; background: "
+  //              "palette(base); "
+  //              "color: palette(text)}"
+  //              "QListView::item:selected { background: palette(highlight); "
+  //              "color: black }"));
+  //  setStyleSheet(
+  //      QString("QListView::item { border: 0px; padding: 0; background: "
+  //              "palette(base); "
+  //              "color: palette(text)}"
+  //              "QListView::item:selected { background: %3; color: black }")
+  //          .arg(Colors::colorToString(Colors::PRIMARY_HIGHLIGHT)));
 }
 
 } // namespace cygnus

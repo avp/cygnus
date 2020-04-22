@@ -1,4 +1,6 @@
 #include "MainWindow.h"
+#include "Settings.h"
+
 #include <QApplication>
 
 #include <memory>
@@ -15,6 +17,8 @@ class MainApp : public QApplication {
 
 public:
   MainApp(int argc, char *argv[]) : QApplication(argc, argv) {
+    setStyle(QStyleFactory::create("Fusion"));
+
 #ifdef Q_OS_MACOS
     firstWindow_ = createWindow();
 #else

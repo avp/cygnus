@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 
 #include "Colors.h"
+#include "Settings.h"
 #include "Version.h"
 
 #include <QDebug>
@@ -14,6 +15,40 @@ namespace cygnus {
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   this->setWindowTitle(tr("Cygnus Crosswords"));
+
+  // Set up light and dark palettes.
+  lightPalette_ = palette();
+  lightPalette_.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
+  lightPalette_.setColor(QPalette::HighlightedText, Qt::black);
+  lightPalette_.setColor(QPalette::AlternateBase, Colors::SECONDARY_HIGHLIGHT);
+  lightPalette_.setColor(QPalette::ButtonText, Colors::PENCIL);
+
+  darkPalette_.setColor(QPalette::Window, QColor(53, 53, 53));
+  darkPalette_.setColor(QPalette::WindowText, Qt::white);
+  darkPalette_.setColor(QPalette::Disabled, QPalette::WindowText,
+                        QColor(127, 127, 127));
+  darkPalette_.setColor(QPalette::Base, QColor(42, 42, 42));
+  darkPalette_.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+  darkPalette_.setColor(QPalette::ToolTipBase, Qt::white);
+  darkPalette_.setColor(QPalette::ToolTipText, Qt::white);
+  darkPalette_.setColor(QPalette::Text, Qt::white);
+  darkPalette_.setColor(QPalette::Disabled, QPalette::Text,
+                        QColor(127, 127, 127));
+  darkPalette_.setColor(QPalette::Dark, QColor(35, 35, 35));
+  darkPalette_.setColor(QPalette::Shadow, QColor(20, 20, 20));
+  darkPalette_.setColor(QPalette::Button, QColor(53, 53, 53));
+  darkPalette_.setColor(QPalette::ButtonText, Qt::white);
+  darkPalette_.setColor(QPalette::ButtonText, Colors::PENCIL);
+  darkPalette_.setColor(QPalette::Disabled, QPalette::ButtonText,
+                        QColor(127, 127, 127));
+  darkPalette_.setColor(QPalette::BrightText, Qt::red);
+  darkPalette_.setColor(QPalette::Link, QColor(42, 130, 218));
+  darkPalette_.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
+  darkPalette_.setColor(QPalette::Disabled, QPalette::Highlight,
+                        QColor(80, 80, 80));
+  darkPalette_.setColor(QPalette::HighlightedText, Qt::white);
+  darkPalette_.setColor(QPalette::Disabled, QPalette::HighlightedText,
+                        QColor(127, 127, 127));
 
   auto *vLayout = new QVBoxLayout{};
 
@@ -52,11 +87,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   curClueLabel_->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
   curClueLabel_->setMinimumHeight(30);
   curClueLabel_->setMaximumHeight(100);
-  curClueLabel_->setStyleSheet("QLabel {"
-                               "background: white;"
-                               "border: 1px solid black;"
-                               "color: black;"
-                               "}");
+  curClueLabel_->setBackgroundRole(QPalette::Base);
+  curClueLabel_->setForegroundRole(QPalette::Text);
+  curClueLabel_->setAutoFillBackground(true);
+  curClueLabel_->setContentsMargins(4, 4, 4, 4);
+  //  auto curCluePal = curClueLabel_->palette();
+  //  curClueLabel_->setStyleSheet("QLabel {"
+  //                               "background: white;"
+  //                               "border: 1px solid black;"
+  //                               "color: black;"
+  //                               "}");
 
   puzzleContainer_->addWidget(curClueLabel_);
 
@@ -354,6 +394,15 @@ void MainWindow::createActions() {
   connect(decreaseSizeAct_, &QAction::triggered, this,
           &MainWindow::decreaseSize);
 
+  toggleDarkModeAct_ = new QAction(tr("&Dark Mode"), this);
+  toggleDarkModeAct_->setCheckable(true);
+  QSettings settings;
+  bool dark = settings.value(Settings::darkMode).toBool();
+  toggleDarkModeAct_->setChecked(dark);
+  connect(toggleDarkModeAct_, &QAction::triggered, this,
+          &MainWindow::toggleDarkMode);
+  toggleDarkMode();
+
   revealCurrentAct_ = new QAction(tr("Current Letter"), this);
   revealCurrentAct_->setStatusTip(tr("Reveal the current letter"));
   connect(revealCurrentAct_, &QAction::triggered, this,
@@ -577,6 +626,19 @@ void MainWindow::decreaseSize() {
   }
 }
 
+void MainWindow::toggleDarkMode() {
+  QSettings settings;
+  bool dark = toggleDarkModeAct_->isChecked();
+  settings.setValue(Settings::darkMode, dark);
+  QPalette &pal = dark ? darkPalette_ : lightPalette_;
+  setPalette(pal);
+  for (QWidget *child : findChildren<QWidget *>()) {
+    child->setPalette(child->palette().resolve(pal));
+    child->style()->unpolish(child);
+    child->style()->polish(child);
+  }
+}
+
 void MainWindow::checkSuccess() {
   // See if the puzzle's complete.
   if (!puzzle_->allCorrect()) {
@@ -709,6 +771,10 @@ void MainWindow::createMenus() {
   viewMenu_ = menuBar()->addMenu(tr("&View"));
   viewMenu_->addAction(increaseSizeAct_);
   viewMenu_->addAction(decreaseSizeAct_);
+  viewMenu_->addSeparator();
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+  viewMenu_->addAction(toggleDarkModeAct_);
+#endif
   viewMenu_->setEnabled(false);
 
   helpMenu_ = menuBar()->addMenu(tr("&Help"));
@@ -848,7 +914,8 @@ void MainWindow::keyUp(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::ACROSS) {
     setCursor(cursor_.row, cursor_.col, Direction::DOWN);
-    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+    if (cursor_.dir == Direction::DOWN &&
+        grid[cursor_.row][cursor_.col] != EMPTY) {
       keyUp();
     }
     return;
@@ -868,7 +935,8 @@ void MainWindow::keyDown(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::ACROSS) {
     setCursor(cursor_.row, cursor_.col, Direction::DOWN);
-    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+    if (cursor_.dir == Direction::DOWN &&
+        grid[cursor_.row][cursor_.col] != EMPTY) {
       keyDown();
     }
     return;
@@ -888,7 +956,8 @@ void MainWindow::keyLeft(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::DOWN) {
     setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
-    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+    if (cursor_.dir == Direction::ACROSS &&
+        grid[cursor_.row][cursor_.col] != EMPTY) {
       keyLeft();
     }
     return;
@@ -908,7 +977,8 @@ void MainWindow::keyRight(bool shift) {
   const auto &grid = puzzle_->getGrid();
   if (!shift && cursor_.dir == Direction::DOWN) {
     setCursor(cursor_.row, cursor_.col, Direction::ACROSS);
-    if (grid[cursor_.row][cursor_.col] != EMPTY) {
+    if (cursor_.dir == Direction::ACROSS &&
+        grid[cursor_.row][cursor_.col] != EMPTY) {
       keyRight();
     }
     return;
