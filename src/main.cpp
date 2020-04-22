@@ -20,6 +20,7 @@ public:
     setStyle(QStyleFactory::create("Fusion"));
 
 #ifdef Q_OS_MACOS
+    setAttribute(Qt::AA_UseHighDpiPixmaps);
     firstWindow_ = createWindow();
 #else
     auto *window = createWindow();
