@@ -5,6 +5,7 @@ addons:
       - cmake
       - qt
       - ninja
+    update: true
   apt:
     packages:
       - cmake
