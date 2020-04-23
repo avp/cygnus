@@ -72,7 +72,10 @@ void ClueWidget::mouseReleaseEvent(QMouseEvent *event) {
 
 void ClueWidget::setPrimary() {
   auto pal = palette();
-  pal.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
+  pal.setColor(QPalette::Highlight,
+               parentWidget()->palette().highlight().color());
+  pal.setColor(QPalette::HighlightedText,
+               parentWidget()->palette().highlightedText().color());
   setPalette(pal);
   //  setStyleSheet(
   //      QString("QListView::item { border: 0px; padding: 0; background: "
@@ -91,7 +94,10 @@ void ClueWidget::setPrimary() {
 
 void ClueWidget::setSecondary() {
   auto pal = palette();
-  pal.setColor(QPalette::Highlight, Colors::SECONDARY_HIGHLIGHT);
+  pal.setColor(QPalette::Highlight,
+               parentWidget()->palette().alternateBase().color());
+  pal.setColor(QPalette::HighlightedText,
+               parentWidget()->palette().text().color());
   setPalette(pal);
   //  setStyleSheet(
   //      QString("QListView::item { border: 0px; padding: 0; background: "

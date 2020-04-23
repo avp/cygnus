@@ -38,12 +38,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   darkPalette_.setColor(QPalette::Shadow, QColor(20, 20, 20));
   darkPalette_.setColor(QPalette::Button, QColor(53, 53, 53));
   darkPalette_.setColor(QPalette::ButtonText, Qt::white);
-  darkPalette_.setColor(QPalette::ButtonText, Colors::PENCIL);
+  darkPalette_.setColor(QPalette::ButtonText, Colors::PENCIL_DARK);
   darkPalette_.setColor(QPalette::Disabled, QPalette::ButtonText,
                         QColor(127, 127, 127));
   darkPalette_.setColor(QPalette::BrightText, Qt::red);
   darkPalette_.setColor(QPalette::Link, QColor(42, 130, 218));
-  darkPalette_.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT);
+  darkPalette_.setColor(QPalette::Highlight, Colors::PRIMARY_HIGHLIGHT_DARK);
   darkPalette_.setColor(QPalette::Disabled, QPalette::Highlight,
                         QColor(80, 80, 80));
   darkPalette_.setColor(QPalette::HighlightedText, Qt::white);
