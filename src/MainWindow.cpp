@@ -328,6 +328,8 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   uint32_t num = curNum;
   const Clue &clue = puzzle_->getClues(dir)[puzzle_->getClueIdxByNum(dir, num)];
   curClueLabel_->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
+
+  toggleDarkMode();
 }
 
 std::pair<QWidget *, ClueWidget *>
@@ -394,7 +396,6 @@ void MainWindow::createActions() {
   connect(decreaseSizeAct_, &QAction::triggered, this,
           &MainWindow::decreaseSize);
 
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
   toggleDarkModeAct_ = new QAction(tr("&Dark Mode"), this);
   toggleDarkModeAct_->setCheckable(true);
   QSettings settings;
@@ -403,7 +404,6 @@ void MainWindow::createActions() {
   connect(toggleDarkModeAct_, &QAction::triggered, this,
           &MainWindow::toggleDarkMode);
   toggleDarkMode();
-#endif
 
   revealCurrentAct_ = new QAction(tr("Current Letter"), this);
   revealCurrentAct_->setStatusTip(tr("Reveal the current letter"));
@@ -633,11 +633,15 @@ void MainWindow::toggleDarkMode() {
   bool dark = toggleDarkModeAct_->isChecked();
   settings.setValue(Settings::darkMode, dark);
   QPalette &pal = dark ? darkPalette_ : lightPalette_;
+  setPalette(lightPalette_);
   setPalette(pal);
   for (QWidget *child : findChildren<QWidget *>()) {
     child->setPalette(child->palette().resolve(pal));
     child->style()->unpolish(child);
     child->style()->polish(child);
+    if (child == acrossWidget_) {
+      qDebug() << "CHILD:" << child->palette().base();
+    }
   }
 }
 
@@ -774,9 +778,7 @@ void MainWindow::createMenus() {
   viewMenu_->addAction(increaseSizeAct_);
   viewMenu_->addAction(decreaseSizeAct_);
   viewMenu_->addSeparator();
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
   viewMenu_->addAction(toggleDarkModeAct_);
-#endif
   viewMenu_->setEnabled(false);
 
   helpMenu_ = menuBar()->addMenu(tr("&Help"));

@@ -17,12 +17,12 @@ class MainApp : public QApplication {
 
 public:
   MainApp(int argc, char *argv[]) : QApplication(argc, argv) {
-    setStyle(QStyleFactory::create("Fusion"));
 
 #ifdef Q_OS_MACOS
     setAttribute(Qt::AA_UseHighDpiPixmaps);
     firstWindow_ = createWindow();
 #else
+    setStyle(QStyleFactory::create("Fusion"));
     auto *window = createWindow();
     QApplication::processEvents();
 
