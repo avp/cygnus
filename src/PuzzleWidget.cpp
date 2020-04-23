@@ -18,13 +18,14 @@ CellWidget::CellWidget(bool isBlack, uint8_t row, uint8_t col,
   size.setHeightForWidth(true);
   setSizePolicy(size);
 
+  auto pal = palette();
+  pal.setColor(QPalette::ButtonText, Colors::PENCIL);
   if (isBlack_) {
-    auto pal = palette();
     pal.setColor(QPalette::Base, Qt::black);
     pal.setColor(QPalette::AlternateBase, Qt::black);
     pal.setColor(QPalette::Highlight, Qt::black);
-    setPalette(pal);
   }
+  setPalette(pal);
   setBackgroundRole(QPalette::Base);
   setAutoFillBackground(true);
 
@@ -83,7 +84,7 @@ void CellWidget::select() { setBackgroundRole(QPalette::AlternateBase); }
 void CellWidget::deselect() { setBackgroundRole(QPalette::Base); }
 
 void CellWidget::setCell(const QString &text, bool pencil) {
-  // qDebug() << "Setting cell:" << text;
+  qDebug() << "Setting cell:" << text << pencil;
   if (isBlack_)
     return;
 
@@ -91,24 +92,28 @@ void CellWidget::setCell(const QString &text, bool pencil) {
     displayText_ = " ";
   } else if (pencil) {
     displayText_ = QString("%1").arg(text);
-    qDebug() << palette().buttonText();
+    qDebug() << entryLabel_->palette().buttonText();
     entryLabel_->setForegroundRole(QPalette::ButtonText);
+    setForegroundRole(QPalette::ButtonText);
     isPencil_ = true;
   } else {
     displayText_ = text;
     entryLabel_->setForegroundRole(QPalette::Text);
+    setForegroundRole(QPalette::Text);
     isPencil_ = false;
   }
 
   if (markup_ & Puzzle::IncorrectTag) {
     entryLabel_->setForegroundRole(QPalette::BrightText);
+    setForegroundRole(QPalette::BrightText);
     isPencil_ = false;
   }
 
   entryLabel_->setText(displayText_.left(3) +
                        (displayText_.size() > 3 ? "…" : ""));
-  qDebug() << foregroundRole();
-  qDebug() << palette().buttonText() << palette().highlight();
+  qDebug() << entryLabel_->foregroundRole();
+  qDebug() << entryLabel_->palette().buttonText()
+           << entryLabel_->palette().highlight();
 }
 
 void CellWidget::setMarkup(Puzzle::Markup markup) {

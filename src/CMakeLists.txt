@@ -55,9 +55,9 @@ else()
 endif()
 
 if (APPLE)
-  set_target_properties(
-    ${PROJECT_NAME} PROPERTIES
-    MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/Info.plist.in
+  set_property(
+    TARGET ${PROJECT_NAME}
+    PROPERTY MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/Info.plist.in"
   )
 
   add_custom_target(run
