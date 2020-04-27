@@ -328,8 +328,6 @@ void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
   uint32_t num = curNum;
   const Clue &clue = puzzle_->getClues(dir)[puzzle_->getClueIdxByNum(dir, num)];
   curClueLabel_->setText(QString{"%1. %2"}.arg(clue.num).arg(clue.clue));
-
-  toggleDarkMode();
 }
 
 std::pair<QWidget *, ClueWidget *>
