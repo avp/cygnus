@@ -22,7 +22,7 @@ jobs:
       run: |
         cd ${{ runner.workspace }}\build
     - name: QT Deploy
-      run: Move-Item ${{ runner.workspace }\buil\cygnus.exe ${{ runner.workspace }}\deploy
+      run: Move-Item ${{ runner.workspace }}\build\cygnus.exe ${{ runner.workspace }}\deploy
     - name: makensis
       uses: joncloud/makensis-action@v1
     - name: Upload Artifact
