@@ -18,6 +18,9 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Build CMake
       uses: ashutoshvarma/action-cmake-build@v1
+      with:
+        configure-options: ./src
+        build-type: Release
     - name: QT Deploy
       run: mv ${{ runner.workspace }}/build/cygnus.exe ${{ runner.workspace }}/deploy
     - name: QT Deploy
