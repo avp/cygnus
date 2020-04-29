@@ -1,0 +1,31 @@
+name: Cygus CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+defaults:
+ run:
+  shell: bash
+  
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+    - name: Build CMake
+      uses: ashutoshvarma/action-cmake-build@v1
+    - name: QT Deploy
+      run: mv ${{ runner.workspace }}/build/cygnus.exe ${{ runner.workspace }}/deploy
+    - name: QT Deploy
+      run: mv ${{ runner.workspace }}/build/cygnus.exe ${{ runner.workspace }}/deploy
+    - name: makensis
+      uses: joncloud/makensis-action@v1
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: CygnusCrosswordsSetup.exe
+        path: ${{ runner.workspace }}/CygnusCrosswordsSetup.exe
