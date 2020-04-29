@@ -19,7 +19,7 @@ jobs:
       run: |
         mkdir -p ${{ runner.workspace }}\build
         cd ${{ runner.workspace }}\build
-        cmake.exe -GNinja ${{ github.workspace }}\src
+        cmake.exe -DCMAKE_BUILD_TYPE=Release -GNinja ${{ github.workspace }}\src
     - name: Build
       run: |
         cd ${{ runner.workspace }}\build
