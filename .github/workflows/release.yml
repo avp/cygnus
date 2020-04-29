@@ -16,13 +16,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-    - name: Build CMake
-      uses: ashutoshvarma/action-cmake-build@v1
-      with:
-        source-dir: ${{ github.workspace }}/src
-        build-type: Release
-    - name: QT Deploy
-      run: mv ${{ runner.workspace }}/build/cygnus.exe ${{ runner.workspace }}/deploy
+    - name: Configure CMake
+      run: |
+        mkdir ${{ runner.workspace }}/build/ 
+        cd ${{ runner.workspace }}/build/ 
+        cmake ${{ github.workspace }}/src
     - name: QT Deploy
       run: mv ${{ runner.workspace }}/build/cygnus.exe ${{ runner.workspace }}/deploy
     - name: makensis
