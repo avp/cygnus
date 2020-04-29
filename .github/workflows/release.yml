@@ -5,9 +5,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-defaults:
- run:
-  shell: bash
   
 jobs:
   windows:
@@ -18,15 +15,18 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Configure CMake
       run: |
-        mkdir ${{ runner.workspace }}/build/ 
-        cd ${{ runner.workspace }}/build/ 
-        cmake ${{ github.workspace }}/src
+        mkdir -p ${{ runner.workspace }}\build
+        cd ${{ runner.workspace }}\build
+        cmake.exe ${{ github.workspace }}\src
+    - name: Build
+      run: |
+        cd ${{ runner.workspace }}\build
     - name: QT Deploy
-      run: mv ${{ runner.workspace }}/build/cygnus.exe ${{ runner.workspace }}/deploy
+      run: Move-Item ${{ runner.workspace }\buil\cygnus.exe ${{ runner.workspace }}\deploy
     - name: makensis
       uses: joncloud/makensis-action@v1
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
         name: CygnusCrosswordsSetup.exe
-        path: ${{ runner.workspace }}/CygnusCrosswordsSetup.exe
+        path: ${{ runner.workspace }}\CygnusCrosswordsSetup.exe
