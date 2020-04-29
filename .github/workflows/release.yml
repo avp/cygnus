@@ -33,4 +33,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: CygnusCrosswordsSetup.exe
-        path: ${{ runner.workspace }}\CygnusCrosswordsSetup.exe
+        path: ${{ github.workspace }}\CygnusCrosswordsSetup.exe
