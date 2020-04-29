@@ -21,9 +21,9 @@ jobs:
     - name: Build
       run: |
         cd ${{ runner.workspace }}\build
-        cmake.exe --build .
+        cmake.exe --build . --config Release
     - name: QT Deploy
-      run: Move-Item ${{ runner.workspace }}\build\cygnus.exe ${{ runner.workspace }}\deploy
+      run: Move-Item ${{ runner.workspace }}\build\Release\cygnus.exe ${{ runner.workspace }}\deploy
     - name: makensis
       uses: joncloud/makensis-action@v1
     - name: Upload Artifact
