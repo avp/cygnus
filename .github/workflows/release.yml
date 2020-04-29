@@ -1,4 +1,4 @@
-name: Cygus CI
+name: Create Releases
 
 on:
   push:
