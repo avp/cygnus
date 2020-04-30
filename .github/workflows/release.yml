@@ -18,14 +18,14 @@ jobs:
           - os: windows-latest
             deploy: |
               mkdir ${{ github.workspace }}/deploy
-              Move-Item ${{ runner.workspace }}/build/Release/cygnus.exe ${{ github.workspace }}/deploy
+              mv ${{ github.workspace }}/build/Release/cygnus.exe ${{ github.workspace }}/deploy
               ${{ github.workspace }}/deploy.ps1
             artifactName: CygnusCrosswordsSetup.exe
             artifactPath: ${{ github.workspace }}/CygnusCrosswordsSetup.exe
           - os: macos-latest
-            deploy: macdeployqt ${{ runner.workspace }}/build/Cygnus.app --release --no-translations
+            deploy: macdeployqt ${{ github.workspace }}/build/Cygnus.app --release --no-translations
             artifactName: Cygnus.app
-            artifactPath: ${{ runner.workspace }}/build/Cygnus.app/
+            artifactPath: ${{ github.workspace }}/build/Cygnus.app/
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -33,12 +33,12 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Configure CMake
       run: |
-        mkdir -p ${{ runner.workspace }}/build
-        cd ${{ runner.workspace }}/build
+        mkdir -p ${{ github.workspace }}/build
+        cd ${{ github.workspace }}/build
         cmake -DCMAKE_BUILD_TYPE=Release ${{ github.workspace }}/src
     - name: Build
       run: |
-        cd ${{ runner.workspace }}/build
+        cd ${{ github.workspace }}/build
         cmake --build . --config Release
     - name: Deploy QT
       run: ${{ matrix.deploy }}
