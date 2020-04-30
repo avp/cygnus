@@ -16,7 +16,7 @@ jobs:
             artifactName: CygnusCrosswordsSetup.exe
             artifactPath: CygnusCrosswordsSetup.exe
           - os: macos-latest
-            artifactName: Cygnus.dmg
+            artifactName: CygnusCrosswordsSetup.dmg
             artifactPath: build/Cygnus.dmg
     runs-on: ${{ matrix.os }}
     steps:
