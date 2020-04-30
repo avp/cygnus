@@ -8,9 +8,6 @@ on:
   
 jobs:
   build:
-    defaults:
-      run:
-        shell: bash
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
