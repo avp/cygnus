@@ -48,7 +48,7 @@ jobs:
     - name: Build
       run: |
         cd ${{ runner.workspace }}/build
-        cmake.exe --build . --config Release
+        cmake --build . --config Release
     - name: QT Deploy
       run: |
         macdeployqt ${{ runner.workspace }}/build/Cygnus.app
