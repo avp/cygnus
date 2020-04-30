@@ -16,8 +16,8 @@ jobs:
             artifactName: CygnusCrosswordsSetup.exe
             artifactPath: CygnusCrosswordsSetup.exe
           - os: macos-latest
-            artifactName: Cygnus.app
-            artifactPath: build/Cygnus.app/
+            artifactName: Cygnus.dmg
+            artifactPath: build/Cygnus.dmg
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repository
@@ -44,7 +44,7 @@ jobs:
       uses: joncloud/makensis-action@v1
     - name: Deploy Qt (Mac)
       if: matrix.os == 'macos-latest'
-      run: macdeployqt "${{ github.workspace }}/build/Cygnus.app" --no-translations
+      run: macdeployqt "${{ github.workspace }}/build/Cygnus.app" -dmg
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
