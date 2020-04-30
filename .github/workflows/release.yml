@@ -26,12 +26,12 @@ jobs:
       uses: jurplel/install-qt-action@v2
     - name: Configure CMake
       run: |
-        mkdir -p "$GITHUB_WORKSPACE/build"
-        cd "$GITHUB_WORKSPACE/build"
-        cmake -DCMAKE_BUILD_TYPE=Release "$GITHUB_WORKSPACE/src"
+        mkdir -p "${{ github.workspace }}/build"
+        cd "${{ github.workspace }}/build"
+        cmake -DCMAKE_BUILD_TYPE=Release "${{ github.workspace }}/src"
     - name: Build
       run: |
-        cd "$GITHUB_WORKSPACE/build"
+        cd "${{ github.workspace }}/build"
         cmake --build . --config Release
     - name: Deploy Qt (Windows)
       if: matrix.os == 'windows-latest'
@@ -44,7 +44,7 @@ jobs:
       uses: joncloud/makensis-action@v1
     - name: Deploy Qt (Mac)
       if: matrix.os == 'macos-latest'
-      run: macdeployqt "$GITHUB_WORKSPACE/build/Cygnus.app" --release --no-translations
+      run: macdeployqt "${{ github.workspace }}/build/Cygnus.app" --release --no-translations
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
