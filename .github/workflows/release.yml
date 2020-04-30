@@ -44,7 +44,7 @@ jobs:
       run: |
         mkdir -p ${{ runner.workspace }}/build
         cd ${{ runner.workspace }}/build
-        cmake.exe -DCMAKE_BUILD_TYPE=Release ${{ github.workspace }}/src
+        cmake -DCMAKE_BUILD_TYPE=Release ${{ github.workspace }}/src
     - name: Build
       run: |
         cd ${{ runner.workspace }}/build
