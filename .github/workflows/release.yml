@@ -43,7 +43,7 @@ jobs:
     - name: Deploy QT
       run: ${{ matrix.deploy }}
     - name: Make NSIS Installer
-      if: ${{ matrix.os == "windows-latest" }}
+      if: matrix.os == 'windows-latest'
       uses: joncloud/makensis-action@v1
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
