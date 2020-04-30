@@ -34,3 +34,26 @@ jobs:
       with:
         name: CygnusCrosswordsSetup.exe
         path: ${{ github.workspace }}\CygnusCrosswordsSetup.exe
+  macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+    - name: Configure CMake
+      run: |
+        mkdir -p ${{ runner.workspace }}/build
+        cd ${{ runner.workspace }}/build
+        cmake.exe -DCMAKE_BUILD_TYPE=Release ${{ github.workspace }}/src
+    - name: Build
+      run: |
+        cd ${{ runner.workspace }}/build
+        cmake.exe --build . --config Release
+    - name: QT Deploy
+      run: |
+        macdeployqt ${{ runner.workspace }}/build/Cygnus.app
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Cygnus.app
+        path: ${{ runner.workspace }}/build/Cygnus.app/
