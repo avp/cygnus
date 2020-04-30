@@ -7,35 +7,26 @@ on:
     branches: [ master ]
   
 jobs:
-  windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-    - name: Configure CMake
-      run: |
-        mkdir -p ${{ runner.workspace }}\build
-        cd ${{ runner.workspace }}\build
-        cmake.exe -DCMAKE_BUILD_TYPE=Release ${{ github.workspace }}\src
-    - name: Build
-      run: |
-        cd ${{ runner.workspace }}\build
-        cmake.exe --build . --config Release
-    - name: QT Deploy
-      run: |
-        mkdir ${{ github.workspace }}\deploy
-        Move-Item ${{ runner.workspace }}\build\Release\cygnus.exe ${{ github.workspace }}\deploy
-        ${{ github.workspace }}\deploy.ps1
-    - name: makensis
-      uses: joncloud/makensis-action@v1
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v1
-      with:
-        name: CygnusCrosswordsSetup.exe
-        path: ${{ github.workspace }}\CygnusCrosswordsSetup.exe
-  macos:
-    runs-on: macos-latest
+  build:
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            deploy: |
+              mkdir ${{ github.workspace }}/deploy
+              Move-Item ${{ runner.workspace }}/build/Release/cygnus.exe ${{ github.workspace }}/deploy
+              ${{ github.workspace }}/deploy.ps1
+            artifactName: CygnusCrosswordsSetup.exe
+            artifactPath: ${{ github.workspace }}/CygnusCrosswordsSetup.exe
+          - os: macos-latest
+            deploy: macdeployqt ${{ runner.workspace }}/build/Cygnus.app --release --no-translations
+            artifactName: Cygnus.app
+            artifactPath: ${{ runner.workspace }}/build/Cygnus.app/
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
     - name: Install Qt
@@ -49,11 +40,13 @@ jobs:
       run: |
         cd ${{ runner.workspace }}/build
         cmake --build . --config Release
-    - name: QT Deploy
-      run: |
-        macdeployqt ${{ runner.workspace }}/build/Cygnus.app
+    - name: Deploy QT
+      run: ${{ matrix.deploy }}
+    - name: Make NSIS Installer
+      if: ${{ matrix.os == "windows-latest" }}
+      uses: joncloud/makensis-action@v1
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
-        name: Cygnus.app
-        path: ${{ runner.workspace }}/build/Cygnus.app/
+        name: ${{ matrix.artifactName }}
+        path: ${{ matrix.artifactPath }}
