@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
         include:
           - os: windows-latest
             artifactName: CygnusCrosswordsSetup.exe
@@ -18,6 +18,9 @@ jobs:
           - os: macos-latest
             artifactName: CygnusCrosswordsSetup.dmg
             artifactPath: Cygnus*.dmg
+          - os: ubuntu-latest
+            artifactName: Cygnus.tar
+            artifactPath: Cygnus.tar
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repository
@@ -51,6 +54,13 @@ jobs:
         npm install --global create-dmg
         macdeployqt "${{ github.workspace }}/build/Cygnus.app"
         create-dmg "${{ github.workspace }}/build/Cygnus.app" || true
+    - name: Deploy Qt (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        mkdir "${{ github.workspace }}/deploy/cygnus"
+        mv "${{ github.workspace }}/build/cygnus" "${{ github.workspace }}/deploy/cygnus"
+        linuxdeployqt "${{ github.workspace }}/deploy/cygnus/cygnus"
+        tar cvzf "${{ github.workspace }}/Cygnus.tar" "${{ github.workspace }}/deploy/cygnus/"
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
