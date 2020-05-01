@@ -17,13 +17,15 @@ jobs:
             artifactPath: CygnusCrosswordsSetup.exe
           - os: macos-latest
             artifactName: CygnusCrosswordsSetup.dmg
-            artifactPath: build/Cygnus.dmg
+            artifactPath: Cygnus*.dmg
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      with:
+        version: 5.12.8
     - name: Configure CMake
       run: |
         mkdir -p "${{ github.workspace }}/build"
@@ -38,15 +40,19 @@ jobs:
       run: |
         mkdir "${{ github.workspace }}/deploy"
         mv "${{ github.workspace }}/build/Release/cygnus.exe" "${{ github.workspace }}/deploy"
-        "${{ github.workspace }}/deploy.ps1"
+        windeployqt "${{ github.workspace }}/deploy/cygnus.exe" --release --no-translations
     - name: Make NSIS Installer (Windows)
       if: matrix.os == 'windows-latest'
       uses: joncloud/makensis-action@v1
     - name: Deploy Qt (Mac)
       if: matrix.os == 'macos-latest'
-      run: macdeployqt "${{ github.workspace }}/build/Cygnus.app" -dmg
+      run: |
+        brew install graphicsmagick imagemagick
+        npm install --global create-dmg
+        macdeployqt "${{ github.workspace }}/build/Cygnus.app"
+        create-dmg "${{ github.workspace }}/build/Cygnus.app" || true
     - name: Upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.artifactName }}
         path: ${{ github.workspace }}/${{ matrix.artifactPath }}
