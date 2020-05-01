@@ -45,9 +45,10 @@ jobs:
     - name: Deploy Qt (Mac)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install graphicsmagick imagemagick 
+        brew install graphicsmagick imagemagick tree
         npm install --global create-dmg
         macdeployqt "${{ github.workspace }}/build/Cygnus.app"
+        tree "${{ github.workspace }}/build/Cygnus.app"
         create-dmg "${{ github.workspace }}/build/Cygnus.app" || true
     - name: Upload artifact
       uses: actions/upload-artifact@v2
