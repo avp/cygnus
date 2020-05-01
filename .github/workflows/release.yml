@@ -57,7 +57,7 @@ jobs:
     - name: Deploy Qt (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        mkdir "${{ github.workspace }}/deploy/cygnus"
+        mkdir -p "${{ github.workspace }}/deploy/cygnus"
         mv "${{ github.workspace }}/build/cygnus" "${{ github.workspace }}/deploy/cygnus"
         linuxdeployqt "${{ github.workspace }}/deploy/cygnus/cygnus"
         tar cvzf "${{ github.workspace }}/Cygnus.tar" "${{ github.workspace }}/deploy/cygnus/"
