@@ -24,6 +24,8 @@ jobs:
       uses: actions/checkout@v2
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      with:
+        version: 5.12.8
     - name: Configure CMake
       run: |
         mkdir -p "${{ github.workspace }}/build"
