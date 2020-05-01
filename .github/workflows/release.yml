@@ -17,7 +17,7 @@ jobs:
             artifactPath: CygnusCrosswordsSetup.exe
           - os: macos-latest
             artifactName: CygnusCrosswordsSetup.dmg
-            artifactPath: build/Cygnus.dmg
+            artifactPath: Cygnus*.dmg
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repository
@@ -46,12 +46,11 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install graphicsmagick imagemagick 
-        npm install -g create-dmg
+        npm install --global create-dmg
         macdeployqt "${{ github.workspace }}/build/Cygnus.app"
         create-dmg "${{ github.workspace }}/build/Cygnus.app" || true
-        cp "Cygnus*.dmg" "${{ github.workspace }}/build/Cygnus.dmg"
     - name: Upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.artifactName }}
         path: ${{ github.workspace }}/${{ matrix.artifactPath }}
