@@ -49,7 +49,7 @@ jobs:
         npm install -g create-dmg
         macdeployqt "${{ github.workspace }}/build/Cygnus.app"
         create-dmg "${{ github.workspace }}/build/Cygnus.app" || true
-        cp "${{ github.workspace }}/build/Cygnus*.dmg" "${{ github.workspace }}/build/Cygnus.dmg"
+        cp "Cygnus*.dmg" "${{ github.workspace }}/build/Cygnus.dmg"
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
