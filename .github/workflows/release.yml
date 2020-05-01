@@ -46,9 +46,10 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install graphicsmagick imagemagick 
-        npm install -g appdmg
+        npm install -g create-dmg
         macdeployqt "${{ github.workspace }}/build/Cygnus.app"
-        appdmg "${{ github.workspace }}/build/Cygnus.app" "${{ github.workspace }}/build/Cygnus.dmg"
+        create-dmg "${{ github.workspace }}/build/Cygnus.app" || true
+        cp "${{ github.workspace }}/build/Cygnus*.dmg" "${{ github.workspace }}/build/Cygnus.dmg"
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
