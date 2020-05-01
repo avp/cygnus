@@ -44,7 +44,12 @@ jobs:
       uses: joncloud/makensis-action@v1
     - name: Deploy Qt (Mac)
       if: matrix.os == 'macos-latest'
-      run: macdeployqt "${{ github.workspace }}/build/Cygnus.app" -dmg
+      run: |
+        brew install graphicsmagick imagemagick
+        npm install -g create-dmg
+        macdeployqt "${{ github.workspace }}/build/Cygnus.app"
+        create-dmg "${{ github.workspace }}/build/Cygnus.app"
+        mv "Cygnus*.dmg" "Cygnus.dmg"
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
