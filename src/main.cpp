@@ -22,7 +22,9 @@ public:
     setAttribute(Qt::AA_UseHighDpiPixmaps);
     firstWindow_ = createWindow();
     QApplication::processEvents();
-    firstWindow_->open();
+    if (!firstWindow_->isLoaded()) {
+      firstWindow_->open();
+    }
 #else
     setStyle(QStyleFactory::create("Fusion"));
     auto *window = createWindow();
