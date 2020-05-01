@@ -224,6 +224,7 @@ void MainWindow::reloadPuzzle() {
           &MainWindow::puzzleRightClicked);
 
   puzzleWidget_->setFocus();
+  toggleDarkMode();
 }
 
 void MainWindow::setCursor(uint8_t row, uint8_t col, Direction dir) {
