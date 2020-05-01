@@ -47,7 +47,7 @@ jobs:
     - name: Deploy Qt (Mac)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install tree
+        brew install graphicsmagick imagemagick
         npm install --global create-dmg
         macdeployqt "${{ github.workspace }}/build/Cygnus.app"
         tree "${{ github.workspace }}/build/Cygnus.app"
