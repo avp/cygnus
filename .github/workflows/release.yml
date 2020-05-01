@@ -38,7 +38,7 @@ jobs:
       run: |
         mkdir "${{ github.workspace }}/deploy"
         mv "${{ github.workspace }}/build/Release/cygnus.exe" "${{ github.workspace }}/deploy"
-        "${{ github.workspace }}/deploy.ps1"
+        windeployqt "${{ github.workspace }}/deploy/cygnus.exe" --release --no-translations
     - name: Make NSIS Installer (Windows)
       if: matrix.os == 'windows-latest'
       uses: joncloud/makensis-action@v1
