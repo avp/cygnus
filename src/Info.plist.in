@@ -32,6 +32,8 @@
     <true/>
     <key>LSRequiresCarbon</key>
     <true/>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.12</string>
     <key>CFBundleDocumentTypes</key>
     <array>
       <dict>
