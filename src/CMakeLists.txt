@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(cygnus)
+project(cygnus
+  VERSION 0.0.1
+)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -26,12 +28,26 @@ set(SOURCES
 )
 
 if (APPLE)
-  set(BUNDLE_TYPE MACOSX_BUNDLE)
-endif()
+  set_source_files_properties(
+    resources/icon.icns
+    PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
+  )
 
-add_executable(${PROJECT_NAME} WIN32
-${BUNDLE_TYPE} ${SOURCES}
-resources.rc)
+  add_executable(${PROJECT_NAME} MACOSX_BUNDLE
+    ${BUNDLE_TYPE} ${SOURCES}
+    resources.rc
+    resources/icon.icns
+  )
+
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/Info.plist.in"
+  )
+else()
+  add_executable(${PROJECT_NAME} WIN32
+    ${BUNDLE_TYPE} ${SOURCES}
+    resources.rc
+  )
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   Qt5::Core
@@ -55,11 +71,6 @@ else()
 endif()
 
 if (APPLE)
-  set_property(
-    TARGET ${PROJECT_NAME}
-    PROPERTY MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/Info.plist.in"
-  )
-
   add_custom_target(run
     COMMAND ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}
     DEPENDS ${PROJECT_NAME}
