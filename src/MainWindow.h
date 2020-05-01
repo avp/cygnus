@@ -123,9 +123,14 @@ private:
   QAction *aboutAct_;
   QAction *shortcutsAct_;
 
+  QWidget *centralWidget_;
+
   QPushButton *noteButton_;
   FilledLabel *titleLabel_;
   TimerWidget *timerWidget_;
+
+  QWidget *acrossContainer_;
+  QWidget *downContainer_;
 
   ClueWidget *acrossWidget_;
   ClueWidget *downWidget_;

@@ -59,8 +59,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   createMenus();
 
   // Set layout in QWidget
-  QWidget *window = new QWidget(this);
-  setCentralWidget(window);
+  centralWidget_ = new QWidget(this);
+  setCentralWidget(centralWidget_);
 
   auto res = createClueWidget("ACROSS");
   QWidget *acrossContainer = res.first;
@@ -86,17 +86,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   curClueLabel_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   curClueLabel_->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
   curClueLabel_->setMinimumHeight(30);
-  curClueLabel_->setMaximumHeight(100);
+  curClueLabel_->setMaximumHeight(80);
   curClueLabel_->setBackgroundRole(QPalette::Base);
   curClueLabel_->setForegroundRole(QPalette::Text);
   curClueLabel_->setAutoFillBackground(true);
   curClueLabel_->setContentsMargins(4, 4, 4, 4);
-  //  auto curCluePal = curClueLabel_->palette();
-  //  curClueLabel_->setStyleSheet("QLabel {"
-  //                               "background: white;"
-  //                               "border: 1px solid black;"
-  //                               "color: black;"
-  //                               "}");
 
   puzzleContainer_->addWidget(curClueLabel_);
 
@@ -121,7 +115,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   vLayout->addLayout(infoLayout);
   vLayout->addLayout(hLayout);
 
-  window->setLayout(vLayout);
+  centralWidget_->setLayout(vLayout);
 
   cursor_.row = 0;
   cursor_.col = 0;
@@ -136,6 +130,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   timer->start(1000);
   connect(timer, &QTimer::timeout, this, &MainWindow::tickTimer);
   connect(timerWidget_, &TimerWidget::clicked, this, &MainWindow::toggleTimer);
+
+  centralWidget_->hide();
 }
 
 void MainWindow::showMaximized() { QMainWindow::showMaximized(); }
@@ -222,6 +218,8 @@ void MainWindow::reloadPuzzle() {
           &MainWindow::puzzleClicked);
   connect(puzzleWidget_, &PuzzleWidget::rightClicked, this,
           &MainWindow::puzzleRightClicked);
+
+  centralWidget_->show();
 
   puzzleWidget_->setFocus();
   toggleDarkMode();
