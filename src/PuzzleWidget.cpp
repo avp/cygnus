@@ -65,8 +65,8 @@ void CellWidget::enterEvent(QEvent *event) {
 void CellWidget::leaveEvent(QEvent *event) { QToolTip::hideText(); }
 
 void CellWidget::resizeEvent(QResizeEvent *event) {
-  constexpr int kMaxNumSize = 15;
-  constexpr int kMinNumSize = 10;
+  constexpr int kMaxNumSize = 20;
+  constexpr int kMinNumSize = 15;
   int h = height();
 
   auto f = numLabel_->font();
